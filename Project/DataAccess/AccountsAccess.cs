@@ -7,7 +7,7 @@ public class AccountsAccess
 {
     private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
 
-    private string Table = "Accounts";
+    private string Table = "User";
 
     public void Write(AccountModel account)
     {
