@@ -9,10 +9,10 @@ static class Menu
         Console.WriteLine("Enter 1 to login");
         Console.WriteLine("Enter 2 to do something else in the future");
 
-        string input = Console.ReadLine();
+        string input = Console.ReadLine() ?? string.Empty;
         if (input == "1")
         {
-            UserLogin.Start();
+            Login.Start();
         }
         else if (input == "2")
         {

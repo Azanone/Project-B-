@@ -3,12 +3,16 @@
 
     public Int64 Id { get; set; }
 
-    public String Role { get; set; }
-    public string EmailAddress { get; set; }
+    public String Role { get; set; } = string.Empty;
+    public string EmailAddress { get; set; } = string.Empty;
 
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 
-    public string FullName { get; set; }
+    public string FullName { get; set; } = string.Empty;
+
+    public AccountModel()
+    {
+    }
 
     public AccountModel(Int64 id, string email, string password, string fullname)
     {
