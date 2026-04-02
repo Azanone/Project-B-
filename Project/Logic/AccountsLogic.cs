@@ -16,11 +16,11 @@ public class AccountsLogic
 
     }
 
-    public AccountModel? CheckLogin(string email, string password)
+    public AccountModel? CheckLogin(string identifier, string password)
     {
 
 
-        AccountModel? acc = _access.GetByEmail(email);
+        AccountModel? acc = _access.GetByIdentifier(identifier);
         if (acc != null && acc.Password == password)
         {
             CurrentAccount = acc;
@@ -29,9 +29,9 @@ public class AccountsLogic
         return null;
     }
 
-    public bool EmailExists(string email)
+    public bool IdentifierExists(string identifier)
     {
-        return _access.GetByEmail(email) != null;
+        return _access.GetByIdentifier(identifier) != null;
     }
 
     public void Logout()

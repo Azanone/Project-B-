@@ -16,7 +16,8 @@ static class Dashboard
         string input = Console.ReadLine() ?? string.Empty;
         if (input == "1")
         {
-            new AccountsLogic().Logout();
+            AccountsLogic accountsLogic = new AccountsLogic();
+            accountsLogic.Logout();
             Menu.Start();
         }
         else
