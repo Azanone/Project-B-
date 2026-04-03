@@ -7,7 +7,7 @@ static class Menu
     static public void Start()
     {
         Console.WriteLine("Enter 1 to login");
-        Console.WriteLine("Enter 2 to take a look at our products");
+        Console.WriteLine("Enter 2 to register");
         Console.WriteLine("Enter 3 to take a look at our products");
 
 
