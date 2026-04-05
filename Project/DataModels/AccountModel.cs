@@ -2,6 +2,8 @@
 {
 
     public Int64 Id { get; set; }
+
+    public String Role { get; set; }
     public string EmailAddress { get; set; }
 
     public string Password { get; set; }
@@ -14,6 +16,7 @@
         EmailAddress = email;
         Password = password;
         FullName = fullname;
+        Role = "User";
     }
 
 
