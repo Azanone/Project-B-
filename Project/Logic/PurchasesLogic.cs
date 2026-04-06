@@ -1,6 +1,6 @@
 public class PurchaseLogic
 {
-    private readonly PurchaseAcces _dataAccess = new();
+    private readonly PurchaseAccess _dataAccess = new();
     public List<PurchaseModel> GetPurchases()
     {
         var allPurchases = _dataAccess.GetAll();
