@@ -12,7 +12,7 @@ static class AdminMenu
         string input = Console.ReadLine();
         if (input == "1")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            PastTransactions.Start();
         }
         else if (input == "2")
         {
