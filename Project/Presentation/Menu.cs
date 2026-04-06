@@ -8,7 +8,7 @@ static class Menu
     {
         Console.WriteLine("Enter 1 to login");
         Console.WriteLine("Enter 2 to register");
-        Console.WriteLine("Enter 3 to take a look at our products");
+        Console.WriteLine("Enter 3 to continue as Guest");
 
 
         string input = Console.ReadLine();
