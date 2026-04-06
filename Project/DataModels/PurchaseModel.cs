@@ -5,6 +5,7 @@ public class PurchaseModel
     public DateTime PurchaseDate { get; set; }
     public Decimal TotalAmount {get; set;}
     public Decimal VAT {get; set;}
+    public string UserName {get; set;}
 
     public PurchaseModel(Int64 purchaseid, Int64 userid, DateTime purchasedate, Decimal totalamount, Decimal vat)
     {

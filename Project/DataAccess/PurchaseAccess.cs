@@ -8,7 +8,7 @@ public class PurchaseAccess
     private string Table = "Purchase";
     public List<PurchaseModel> GetAll()
     {
-        string sql = $"SELECT * FROM {Table}";
+        string sql = $"SELECT PURCHASE.*, USER.Name AS UserName FROM PURCHASE JOIN USER ON PURCHASE.UserID = USER.UserID";
         return _connection.Query<PurchaseModel>(sql).ToList();
     }
 
