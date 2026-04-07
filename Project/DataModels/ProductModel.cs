@@ -16,4 +16,6 @@ public class ProductModel
         Ingredients = ingredients;
         CategoryID = categoryid;
     }
+
+    public ProductModel() { }
 }

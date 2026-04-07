@@ -1,5 +1,6 @@
 public static class ShowProducts
 {
+    static private ProductLogic productLogic = new();
     static public void Start()
     {
         ShowAll();
@@ -18,11 +19,11 @@ public static class ShowProducts
 
     public static void ShowAll()
     {
-        var list = ProductLogic.GetProducts();
+        var list = productLogic.GetProducts();
         Console.WriteLine("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            Console.WriteLine($"ID: {item.PurchaseID}| Name: {item.UserName}| Date:-{item.PurchaseDate}| Amount:{item.TotalAmount}");
+            Console.WriteLine($"ID: {item.ProductID}| Name: {item.Name}| Category:-{item.CategoryID}| Price:{item.Price}");
         }
     }
 }
