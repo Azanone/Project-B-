@@ -1,27 +1,21 @@
-﻿namespace Project.Logic;
+﻿namespace Project.DataModels;
 
-public class ShoppingListLogic
+public class ShoppingListModel
 {
-    public string Name { get; set; }
-    public string Category { get; set; }
+    private readonly List<ShoppingListModel> _items = new();
 
-    public decimal Price { get; set; } = 0.01M;
-
-    public decimal MinPrice
+    public void AddItem(ShoppingListModel item)
     {
-        get => Price <= 0 ? 0.01M : Price;
-        set { if (value > 0) Price = value; }
+        _items.Add(item);
     }
 
-    public string Brand { get; set; }
-    public string Ingredients { get; set; }
-
-    public ShoppingListLogic(string name, string category, decimal price, string brand, string ingredients)
+    public void RemoveItem(ShoppingListModel item)
     {
-        Name = name;
-        Category = category;
-        Price = price;
-        Brand = brand;
-        Ingredients = ingredients;
+        _items.Remove(item);
+    }
+
+    public List<ShoppingListModel> GetAllItems()
+    {
+        return _items;
     }
 }
