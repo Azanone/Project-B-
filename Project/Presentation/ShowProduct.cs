@@ -2,6 +2,7 @@ public static class ShowProducts
 {
     static public void Start()
     {
+        ShowAll();
         Console.WriteLine("Enter 1 to return to Admin Menu");
         string input = Console.ReadLine();
         if (input == "1")
