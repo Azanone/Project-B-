@@ -7,7 +7,7 @@ public class ProductAccess
     private string Table = "User";
     public List<ProductModel> GetAll()
     {
-        string sql = $"SELECT * FROM Product";
+        string sql = $"SELECT PRODUCT.*, CATEGORY.Name as Category FROM Product JOIN Category ON CATEGORY.CategoryID = PRODUCT.CategoryID";
         return _connection.Query<ProductModel>(sql).ToList();
     }
 }
