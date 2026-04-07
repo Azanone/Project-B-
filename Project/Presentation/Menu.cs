@@ -11,10 +11,10 @@ static class Menu
         Console.WriteLine("Enter 3 to continue as Guest");
 
 
-        string input = Console.ReadLine();
+        string input = Console.ReadLine() ?? string.Empty;
         if (input == "1")
         {
-            UserLogin.Start();
+            Login.Start();
         }
         else if (input == "2")
         {
