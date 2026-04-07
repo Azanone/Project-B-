@@ -9,6 +9,7 @@ public sealed class Test1
 
     [DataTestMethod]
     [DataRow("kevin@kevin.nl", "kevin")]
+    [DataRow("kevin", "kevin")]
     public void LoginValidCredentials(string m, string p)
     {
         // arrange
@@ -20,7 +21,9 @@ public sealed class Test1
 
         // assert
         Assert.IsNotNull(result);
-        Assert.AreEqual(m, result.EmailAddress);
+        Assert.AreEqual("User", result.Role);
+        Assert.AreEqual("kevin", result.Username);
+        Assert.AreEqual("kevin@kevin.nl", result.EmailAddress);
         Assert.AreEqual(p, result.Password);
     }
 
