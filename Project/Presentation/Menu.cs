@@ -7,7 +7,9 @@ static class Menu
     static public void Start()
     {
         Console.WriteLine("Enter 1 to login");
-        Console.WriteLine("Enter 2 to do something else in the future");
+        Console.WriteLine("Enter 2 to register");
+        Console.WriteLine("Enter 3 to continue as Guest");
+
 
         string input = Console.ReadLine();
         if (input == "1")
@@ -15,6 +17,10 @@ static class Menu
             UserLogin.Start();
         }
         else if (input == "2")
+        {
+            Console.WriteLine("This feature is not yet implemented");
+        }
+        else if (input == "3")
         {
             Console.WriteLine("This feature is not yet implemented");
         }
