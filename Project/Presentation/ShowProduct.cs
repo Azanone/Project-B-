@@ -18,7 +18,7 @@ public static class ShowProducts
 
     public static void ShowAll()
     {
-        var list = accountsLogic.GetPurchases();
+        var list = ProductLogic.GetProducts();
         Console.WriteLine("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
