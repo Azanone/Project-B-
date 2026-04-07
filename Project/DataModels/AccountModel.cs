@@ -3,7 +3,7 @@
 
     public Int64 Id { get; set; }
 
-    public String Role { get; set; } = string.Empty;
+    public String Role { get; set; } = "User";
 
     public string Username { get; set; } = string.Empty;
 

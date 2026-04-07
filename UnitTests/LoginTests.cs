@@ -21,6 +21,7 @@ public sealed class Test1
 
         // assert
         Assert.IsNotNull(result);
+        Assert.AreEqual("User", result.Role);
         Assert.AreEqual("kevin", result.Username);
         Assert.AreEqual("kevin@kevin.nl", result.EmailAddress);
         Assert.AreEqual(p, result.Password);

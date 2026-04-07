@@ -13,7 +13,14 @@ static class Login
         AccountModel? account = accountsLogic.CheckLogin(identifier, password);
         if (account != null)
         {
-            Dashboard.Start();
+            if (string.Equals(account.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                AdminMenu.Start();
+            }
+            else
+            {
+                Dashboard.Start(); //Normal user dashboard
+            }
         }
         else
         {

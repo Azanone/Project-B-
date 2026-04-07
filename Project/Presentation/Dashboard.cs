@@ -6,11 +6,13 @@ static class Dashboard
 
         if (account == null)
         {
-            Menu.Start();
-            return;
+            Console.WriteLine("Welcome guest");
+        }
+        else
+        {
+            Console.WriteLine("Welcome back " + account.FullName);
         }
 
-        Console.WriteLine("Welcome back " + account.FullName);
         Console.WriteLine("Enter 1 to logout");
 
         string input = Console.ReadLine() ?? string.Empty;

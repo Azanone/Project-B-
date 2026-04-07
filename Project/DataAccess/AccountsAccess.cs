@@ -17,7 +17,7 @@ public class AccountsAccess
 
     public AccountModel? GetByIdentifier(string identifier)
     {
-        string sql = $"SELECT UserID AS Id, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
+        string sql = $"SELECT UserID AS Id, CASE WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
         return _connection.QueryFirstOrDefault<AccountModel>(sql, new { Identifier = identifier });
     }
 
