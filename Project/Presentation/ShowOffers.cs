@@ -1,5 +1,6 @@
 public static class ShowOffers
 {
+    static private OfferLogic offerLogic = new();
     static public void Start()
     {
         ShowAll();
@@ -18,6 +19,11 @@ public static class ShowOffers
 
     static public void ShowAll()
     {
-        
+        var list = offerLogic.GetOffers();
+        Console.WriteLine("--- ALL OFFERS ---");
+        foreach (var item in list)
+        {
+            Console.WriteLine($"ID: {item.OfferID}| Description: {item.Description}| Begin-Date: {item.StartDate}| End-Date: {item.EndDate}| Price: {item.RegularPrice} EUR |Discount: {item.DiscountPercentage}%| Discount-price: {item.DiscountPrice} EUR ");
+        }
     }
 }

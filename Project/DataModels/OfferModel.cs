@@ -6,7 +6,7 @@ public class OfferModel
     public DateTime StartDate {get; set;}
     public DateTime EndDate {get; set;}
     public Decimal RegularPrice {get; set;}
-    public Decimal DiscountPrice {get {return RegularPrice - (RegularPrice * (decimal)DiscountPercentage / 100);}}
+    public Decimal DiscountPrice {get {return RegularPrice - Math.Round(RegularPrice * (decimal)DiscountPercentage / 100, 2);}}
     public Decimal TotalRevenue {get; set;}
     public OfferModel() { }
     public OfferModel(int offerid, string description, float discountpercentage, DateTime startdate, DateTime enddate)
