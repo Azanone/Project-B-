@@ -23,7 +23,7 @@ public static class ShowProducts
         Console.WriteLine("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            Console.WriteLine($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price}EUR");
+            Console.WriteLine($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR");
         }
     }
 }
