@@ -24,4 +24,9 @@ public class ShoppingListModel
         Brand = brand;
         Ingredients = ingredients;
     }
+
+    public override string ToString()
+    {
+        return $"{Name} - {Category} - {Brand} - {Ingredients} - {Price}";
+    }
 }
