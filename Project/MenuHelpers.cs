@@ -24,17 +24,16 @@ public static class MenuHelpers
         Console.WriteLine(input);
         Console.ResetColor();
     }
-    public static string Prompt(string input)
+    public static string? Prompt(string input)
     {
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine(input);
         Console.ResetColor();
-        string userInput = Console.ReadLine();
-        return userInput;
-    }
+        return Console.ReadLine();
+     }
     public static string PromptUntilValid(string prompt, Func<string, bool> validate)
 {
-    string input;
+    string? input;
     bool error;
     do
     {
@@ -43,6 +42,7 @@ public static class MenuHelpers
         if (!error) Warn($"Invalid input: {error}");
     }
     while (!error);
+    Console.Clear();
 
     return input;
 }

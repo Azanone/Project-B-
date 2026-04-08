@@ -2,6 +2,7 @@
 
 //This class is not static so later on we can use inheritance and interfaces
 using System.Security.Cryptography.X509Certificates;
+using System.Net.Mail;
 
 public class AccountsLogic
 {
@@ -10,7 +11,7 @@ public class AccountsLogic
     //This can be used to get the current logged in account from anywhere in the program
     //public set, so this can only be set by the class itself
     public static AccountModel? CurrentAccount { get; private set; }
-    public AccountsAccess _access = new();
+    public AccountAccess _access = new();
 
     public AccountsLogic()
     {
@@ -18,11 +19,11 @@ public class AccountsLogic
 
     }
 
-    public AccountModel CheckLogin(string email, string password)
+    public AccountModel? CheckLogin(string? email, string? password)
     {
 
 
-        AccountModel acc = _access.GetByEmail(email);
+        AccountModel? acc = _access.GetByEmail(email);
         if (acc != null && acc.Password == password)
         {
             CurrentAccount = acc;
@@ -34,49 +35,67 @@ public class AccountsLogic
 
     public bool ValidatePassword(string field)
     {
-        return field.Length > 7;
+        return field.Length >= 7;
     }
     public bool ValidateEmail(string field)
     {
         try
         {
-            
-            int AtPosition = 0;
-            int DotPosition = 0;
-            bool containsDigitsAfterAt = false;
-            
-            for (int i = 0; i <= field.Length; i++)
+            // int AtPosition = 0;
+            // int DotPosition = 0;
+            // bool containsDigitsAfterAt = false;
+
+            // for (int i = 0; i <= field.Length - 1; i++)
+            // {
+            //     if (field[i] == '@')
+            //     {
+            //         AtPosition = i;
+            //     }
+            //     else if (field[i] == '.')
+            //     {
+            //         DotPosition = i;
+            //     }
+            //     else if ( i > AtPosition &&  AtPosition < DotPosition && Char.IsDigit(field[i]))
+            //     {
+            //         containsDigitsAfterAt = true;
+            //     }
+            // }
+            // return AtPosition < DotPosition && !containsDigitsAfterAt;
+            AccountAccess AA = new();
+            MailAddress address = new MailAddress(field);
+            if (AA.GetByEmail(field) != null)
             {
-                if (field[i] == '@')
-                {
-                    AtPosition = i;
-                }
-                else if (field[i] == '.')
-                {
-                    DotPosition = i;
-                }
-                else if ( i > AtPosition &&  AtPosition < DotPosition && Char.IsDigit(field[i]))
-                {
-                    containsDigitsAfterAt = true;
-                }
+                MenuHelpers.Error($"An account already exists with this email: {field}");
+                return false;
             }
-            return AtPosition < DotPosition && !containsDigitsAfterAt;
+            return address.Address == field;
         }
         catch (Exception e)
         {
-            MenuHelpers.Error("Wrong email format");
+            MenuHelpers.Error($"Exception caught at ValidateEmail: {e.ToString()}");
             return false;
         }
     }
     public bool ValidatePhonenumber(string field)
     {
+        if (string.IsNullOrWhiteSpace(field)) return false;
+
         try
         {
-            return (field.Substring(0, 2) == "06" && field.Substring(2, 10).All(x => Char.IsDigit(x)) && field.Length == 11) || ( field.Length == 13 && field.Substring(0, 4) == "+316" && field.Substring(4, 12).All(x => Char.IsDigit(x)) );        
+            if (field.Length == 10 && field.StartsWith("06"))
+            {
+                return field.All(char.IsDigit);
+            }
+
+            if (field.Length == 12 && field.StartsWith("+316"))
+            {
+                return field.Substring(1).All(char.IsDigit);
+            }
+            return false;
         }
         catch (Exception e)
         {
-            MenuHelpers.Error("Wrong phone format");
+            MenuHelpers.Error($"Validation error: {e.Message}");
             return false;
         }
     }
@@ -90,11 +109,19 @@ public class AccountsLogic
     }
     public bool ValidateUsername(string field)
     {
+        AccountAccess AA = new();
+        if (AA.GetByUsername(field) != null)
+        {
+            MenuHelpers.Error($"An account already exists with this Username: {field}");
+            return false;
+        }
         return !field.Any(x => Char.IsDigit(x));
     }
     public void Register(string un, string em, string pass, string phone)
     {
-        return;
+        AccountModel account = new(em.ToLower(), pass.ToLower(), un.ToLower(), phone);
+        AccountAccess AA = new();
+        AA.Write(account);
     }
 }
 
