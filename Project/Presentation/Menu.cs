@@ -18,8 +18,7 @@ static class Menu
         }
         else if (input == "2")
         {
-            Console.WriteLine("Registration is not yet implemented");
-            Start();
+            UserRegister.Start();
         }
         else if (input == "3")
         {

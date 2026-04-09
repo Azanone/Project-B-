@@ -1,7 +1,7 @@
 
-class UserRegister
+static class UserRegister
 {
-    public void Register()
+    public static void Start()
     {
         AccountsLogic AL = new();
         MenuHelpers.Announce("Register your account");
