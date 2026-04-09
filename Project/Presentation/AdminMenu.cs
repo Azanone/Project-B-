@@ -34,7 +34,7 @@ static class AdminMenu
         }
         else if (input == "5")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            ShowStock.Start();
         }
         else if (input == "6")
         {
