@@ -2,6 +2,12 @@ static class AdminMenu
 {
     static public void Start()
     {
+        AccountModel? account = AccountsLogic.CurrentAccount;
+        if (account != null)
+        {
+            Console.WriteLine("Welcome back " + account.FullName);
+        }
+
         Console.WriteLine("Enter 1 to see all past transactions");
         Console.WriteLine("Enter 2 to see a list of all the products");
         Console.WriteLine("Enter 3 to see the store layout");
@@ -12,7 +18,7 @@ static class AdminMenu
         string input = Console.ReadLine();
         if (input == "1")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            PastTransactions.Start();
         }
         else if (input == "2")
         {

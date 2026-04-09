@@ -8,21 +8,22 @@ static class Menu
     {
         Console.WriteLine("Enter 1 to login");
         Console.WriteLine("Enter 2 to register");
-        Console.WriteLine("Enter 3 to continue as Guest");
+        Console.WriteLine("Enter 3 to continue as guest");
 
 
-        string input = Console.ReadLine();
+        string input = Console.ReadLine() ?? string.Empty;
         if (input == "1")
         {
-            UserLogin.Start();
+            Login.Start();
         }
         else if (input == "2")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            Console.WriteLine("Registration is not yet implemented");
+            Start();
         }
         else if (input == "3")
         {
-            Console.WriteLine("This feature is not yet implemented");
+            Dashboard.Start();
         }
         else
         {
