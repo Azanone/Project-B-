@@ -8,9 +8,10 @@
 
     public string Password { get; set; }
 
-    public string FullName { get; set; }
+    public string Username { get; set; }
+    public string Phonenumber { get; set; }
 
-    public AccountModel(Int64 id, string email, string password, string fullname)
+    public AccountModel(Int64 id, string email, string password, string username, string phonenumber)
     {
         Id = id;
         EmailAddress = email;
