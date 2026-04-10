@@ -1,11 +1,12 @@
 using Project.Logic;
+using Project.Models;
 
 static class Dashboard
 {
     private static readonly ProductLogic ProductLogic = new();
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
-    private static readonly List<ShoppingListLogic> ShoppingList = new();
+    private static readonly ShoppingListLogic ShoppingCart = new();
 
     public static void Start()
     {
@@ -54,7 +55,7 @@ static class Dashboard
             }
             else if (input == "6")
             {
-                ShoppingList.Clear();
+                ShoppingCart.GetAllItems().Clear();
                 MenuHelpers.Confirm("Shopping list cleared");
                 WaitForContinue();
             }
@@ -129,13 +130,16 @@ static class Dashboard
             return;
         }
 
-        ShoppingList.Add(new ShoppingListLogic(
+        var shoppingItem = new ShoppingListModel(
             selectedProduct.Name,
             selectedProduct.Category,
             selectedProduct.Price,
             selectedProduct.Brand,
             selectedProduct.Ingredients
-        ));
+        );
+
+        var cartItem = new ShoppingCartItem(shoppingItem, 1, (double)selectedProduct.Price);
+        ShoppingCart.AddItem(cartItem);
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
         WaitForContinue();
@@ -146,7 +150,8 @@ static class Dashboard
         Console.Clear();
         MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
 
-        if (ShoppingList.Count == 0)
+        var items = ShoppingCart.GetAllItems();
+        if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
             WaitForContinue();
@@ -154,11 +159,11 @@ static class Dashboard
         }
 
         decimal total = 0;
-        for (int i = 0; i < ShoppingList.Count; i++)
+        for (int i = 0; i < items.Count; i++)
         {
-            var item = ShoppingList[i];
-            total += item.MinPrice;
-            MenuHelpers.Confirm($"{i + 1}. {item.Name} | Category: {item.Category} | Brand: {item.Brand} | Price: {item.MinPrice} EUR");
+            var item = items[i];
+            total += (decimal)item.Price * item.Quantity;
+            MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Price} EUR");
         }
 
         MenuHelpers.Announce($"Total (preview): {total} EUR");
