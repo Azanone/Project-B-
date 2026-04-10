@@ -21,6 +21,11 @@ public class AccountsLogic
     public AccountModel? CheckLogin(string identifier, string password)
     {
 
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
+
 
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
         if (acc != null && acc.Password == password)

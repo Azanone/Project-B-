@@ -33,6 +33,4 @@ public class AccountsAccess
         _connection.Execute(sql, new { Id = account.Id });
     }
 
-
-
 }
