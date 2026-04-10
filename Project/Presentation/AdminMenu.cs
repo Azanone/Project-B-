@@ -5,17 +5,17 @@ static class AdminMenu
         AccountModel? account = AccountsLogic.CurrentAccount;
         if (account != null)
         {
-            Console.WriteLine("Welcome back " + account.FullName);
+            MenuHelpers.Announce("Welcome back " + account.FullName);
         }
 
-        Console.WriteLine("Enter 1 to see all past transactions");
-        Console.WriteLine("Enter 2 to see a list of all the products");
-        Console.WriteLine("Enter 3 to see the store layout");
-        Console.WriteLine("Enter 4 to see all the offers");
-        Console.WriteLine("Enter 5 to see the stock of the products");
-        Console.WriteLine("Enter 6 to log-out");
+        MenuHelpers.Confirm("Enter 1 to see all past transactions");
+        MenuHelpers.Confirm("Enter 2 to see a list of all the products");
+        MenuHelpers.Confirm("Enter 3 to see the store layout");
+        MenuHelpers.Confirm("Enter 4 to see all the offers");
+        MenuHelpers.Confirm("Enter 5 to see the stock of the products");
+        MenuHelpers.Confirm("Enter 6 to log-out");
 
-        string input = Console.ReadLine();
+        string? input = MenuHelpers.Prompt("");
         if (input == "1")
         {
             PastTransactions.Start();
@@ -42,7 +42,7 @@ static class AdminMenu
         }
         else
         {
-            Console.WriteLine("Invalid input");
+            MenuHelpers.Warn("Invalid input");
             Start();
         }
     }

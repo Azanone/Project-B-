@@ -4,6 +4,7 @@ static class UserRegister
     public static void Start()
     {
         AccountsLogic AL = new();
+        Console.Clear();
         MenuHelpers.Announce("Register your account");
 
         string username = MenuHelpers.PromptUntilValid("What's your username", AL.ValidateUsername);
@@ -13,6 +14,8 @@ static class UserRegister
         MenuHelpers.Confirm($"Successfully registered as {username}");
 
         AL.Register(username, email, password, phoneNumber);
+        System.Threading.Thread.Sleep(1000);
+        Menu.Start();
     }
 
 }

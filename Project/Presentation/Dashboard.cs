@@ -2,20 +2,19 @@ static class Dashboard
 {
     public static void Start()
     {
+        Console.Clear();
         AccountModel? account = AccountsLogic.CurrentAccount;
 
         if (account == null)
         {
-            Console.WriteLine("Welcome guest");
+            MenuHelpers.Announce("Welcome guest");
         }
         else
         {
-            Console.WriteLine("Welcome back " + account.FullName);
+            MenuHelpers.Announce("Welcome back " + account.FullName);
         }
 
-        Console.WriteLine("Enter 1 to logout");
-
-        string input = Console.ReadLine() ?? string.Empty;
+        string input = MenuHelpers.Prompt("Enter 1 to logout") ?? string.Empty;
         if (input == "1")
         {
             AccountsLogic accountsLogic = new AccountsLogic();
