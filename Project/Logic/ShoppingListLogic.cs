@@ -3,7 +3,7 @@
 public class ShoppingListLogic
 {
     private readonly List<Models.ShoppingCartItem> _items = new();
-    private readonly List<Models.ShoppingListModel> _FullShop = new();
+    private readonly List<Models.ShoppingCartModel> _FullShop = new();
 
     public void AddItem(Models.ShoppingCartItem item)
     {
@@ -41,7 +41,7 @@ public class ShoppingListLogic
         return _items;
     }
 
-    public List<Models.ShoppingListModel> GetAllShopItems()
+    public List<Models.ShoppingCartModel> GetAllShopItems()
     {
         return _FullShop;
     }

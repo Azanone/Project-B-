@@ -1,6 +1,6 @@
 ﻿namespace Project.Models;
 
-public class ShoppingListModel
+public class ShoppingCartModel
 {
     public string Name { get; set; }
     public string Category { get; set; }
@@ -16,7 +16,7 @@ public class ShoppingListModel
     public string Brand { get; set; }
     public string Ingredients { get; set; }
 
-    public ShoppingListModel(string name, string category, decimal price, string brand, string ingredients)
+    public ShoppingCartModel(string name, string category, decimal price, string brand, string ingredients)
     {
         Name = name;
         Category = category;
