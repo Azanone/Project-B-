@@ -18,28 +18,40 @@ public static class ShowReceipt
 
     public static void ShowAll()
     {
-        Console.WriteLine("--- ALL RECEIPTS ---");
-            Console.WriteLine("********************************");
-            Console.WriteLine("* STORE NAME          *");
-            Console.WriteLine("* OFFICIAL RECEIPT    *");   
-            Console.WriteLine("********************************");
-            Console.WriteLine(" Date: 2026-04-15  Time: 14:15");
-            Console.WriteLine(" Receipt No: #88291");
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine(" ITEM              PRICE");
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine(" Product A         € 10.00");
-            Console.WriteLine(" Product B         € 05.50");
-            Console.WriteLine(" Product C         € 12.00");
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine(" SUBTOTAL:         € 27.50");
-            Console.WriteLine(" TAX (21%):        € 05.78");
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine(" TOTAL:            € 33.28");
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine("     THANK YOU FOR VISITING!");
-            Console.WriteLine("********************************");
-            Console.WriteLine();
+        ReceiptLogic logic = new();
+        List<ReceiptModel> receipts = logic.GetPurchases();
 
+        var grouped = from r in receipts group r by r.ReceiptID;
+
+        Console.WriteLine("--- ALL RECEIPTS ---\n");
+
+        foreach (var group in grouped)
+        {
+            ReceiptModel first = group.First();
+
+            Console.WriteLine("********************************");
+            Console.WriteLine("*        STORE NAME           *");
+            Console.WriteLine("*      OFFICIAL RECEIPT       *");
+            Console.WriteLine("********************************");
+            Console.WriteLine($" Date: {first.CreatedAt:yyyy-MM-dd}");
+            Console.WriteLine($" Receipt No: #{first.ReceiptID}");
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine($" {"ITEM",-33}{"PRICE"}");
+            Console.WriteLine("----------------------------------------");
+
+            foreach (ReceiptModel item in group)
+            {
+                Console.WriteLine($" {item.ProductName,-33}{item.ProductPrice}");
+            }
+
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine($" {"SUBTOTAL:",-33}{first.TotalPrice}");
+            Console.WriteLine($" {"TAX (VAT):",-33}{first.VAT}");
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine($" {"TOTAL:",-33}{first.TotalPrice + first.VAT}");
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine("     THANK YOU FOR VISITING!");
+            Console.WriteLine("****************************************\n");
+        }
     }
 }
