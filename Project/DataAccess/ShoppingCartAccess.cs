@@ -1,33 +1,39 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
-using Microsoft.VisualBasic;
 using Project.Models;
 
 public class ShoppingCartAccess
 {
+    private string Table = "\"CART\"";
+
     private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
 
-    public List<ShoppingCartModel> GetAll()
+    public List<ShoppingCartItem> GetAll(ShoppingCartModel cart)
     {
-        string sql = $"SELECT P.Name, P.Price, P.Category, P.Brand, P.Ingredients FROM ShoppingCart SC JOIN Product P ON SC.ProductID = P.ProductID WHERE SC.UserID = @UserId";
-        return _connection.Query<ShoppingCartModel>(sql).ToList();
+        string sql = $"SELECT CI.CartItemId AS CartItemId, CI.Quantity AS Quantity, P.Name AS Name, P.Price AS Price, P.Brand AS Brand, P.Category AS Category, P.Ingredients AS Ingredients FROM CART C JOIN CART_ITEM CI ON CI.CartId = C.CartId JOIN PRODUCT P ON P.ProductId = CI.ProductId WHERE C.UserId = @UserId";
+
+        return _connection.Query<ShoppingCartItem>(sql, new { UserId = cart.UserId }).ToList();
     }
 
-    public void AddItemsToCart()
+    public void AddItemsToCart(ShoppingCartModel cart)
     {
-        string sql = $"INSERT INTO ShoppingCart SC (UserID, ProductID) VALUES (@UserID, @ProductID)";
-        _connection.Query<ShoppingCartModel>(sql).ToList();
+        string sql = $"INSERT INTO CART (UserID, ProductID) VALUES (@UserId, @CartId)";
+
+        _connection.Execute(sql, cart);
     }
 
-    public void UpdateCart()
+    public void UpdateCart(ShoppingCartModel cart)
     {
-        string sql = $"UPDATE {Table} SET Name = P.Name, Price = P.Price, Category = P.Category, Brand = P.Brand, Ingredients = P.Ingredients WHERE UserID = @UserId";
-        _connection.Query<ShoppingCartModel>(sql).ToList();
+        string sql = $"UPDATE {Table} SET Name=@Name, Category=@Category, Price=@Price, Brand=@Brand, Ingredients=@Ingredients WHERE UserID=@UserId";
+
+        _connection.Execute(sql, cart);
     }
-    
-    public void RemoveItemsFromCart()
+
+    public void RemoveItemsFromCart(ShoppingCartModel cart)
     {
-        string sql = $"DELETE FROM {Table} WHERE UserID = @UserID AND ProductID = @ProductID";
-        _connection.Query<ShoppingCartModel>(sql).ToList();
+        string sql =
+            $"DELETE FROM {Table} WHERE UserID=@UserId AND ProductID=@CartId";
+
+        _connection.Execute(sql, cart);
     }
 }

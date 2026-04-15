@@ -1,20 +1,23 @@
 ﻿namespace Project.Models;
 
-public class ShoppingCartItem
+public class ShoppingCartItem : ProductModel
 {
+    public int CartItemId { get; set; }
     public ShoppingCartModel Product { get; }
     public int Quantity { get; set; }
     public double Price { get; set; }
+    
+    public ShoppingCartItem() { }
 
-    public ShoppingCartItem(ShoppingCartModel product, int quantity, double price)
+    public ShoppingCartItem(int cartItemId, ShoppingCartModel product, int quantity, double price)
     {
+        CartItemId = cartItemId;
         Product = product;
         Quantity = quantity;
         Price = price;
-    }
-
-    public override string ToString()
-    {
-        return $"{Product.Name} - {Quantity}";
+        Name = product.Name;
+        Brand = product.Brand;
+        Ingredients = product.Ingredients;
+        CategoryID = product.CategoryID;
     }
 }

@@ -1,32 +1,17 @@
 ﻿namespace Project.Models;
 
-public class ShoppingCartModel
+public class ShoppingCartModel : ShoppingCartItem
 {
-    public string Name { get; set; }
-    public string Category { get; set; }
+    public int CartId { get; }
+    public int UserId { get; }
+    public string CreatedAt { get; }
 
-    public decimal Price { get; set; } = 0.01M;
+    public ShoppingCartModel() : base() { }
 
-    public decimal MinPrice
+    public ShoppingCartModel(int cartId, int userId, string createdAt)
     {
-        get => Price <= 0 ? 0.01M : Price;
-        set { if (value > 0) Price = value; }
-    }
-
-    public string Brand { get; set; }
-    public string Ingredients { get; set; }
-
-    public ShoppingCartModel(string name, string category, decimal price, string brand, string ingredients)
-    {
-        Name = name;
-        Category = category;
-        Price = price;
-        Brand = brand;
-        Ingredients = ingredients;
-    }
-
-    public override string ToString()
-    {
-        return $"{Name} - {Category} - {Brand} - {Ingredients} - {Price}";
+        CartId = cartId;
+        UserId = userId;
+        CreatedAt = createdAt;
     }
 }
