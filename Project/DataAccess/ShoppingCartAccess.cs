@@ -17,14 +17,14 @@ public class ShoppingCartAccess
 
     public void AddItemsToCart(ShoppingCartModel cart)
     {
-        string sql = $"INSERT INTO CART (UserID, ProductID) VALUES (@UserId, @CartId)";
+        string sql = $"INSERT INTO {Table} (UserID, ProductID) VALUES (@UserId, @CartId)";
 
         _connection.Execute(sql, cart);
     }
 
     public void UpdateCart(ShoppingCartModel cart)
     {
-        string sql = $"UPDATE {Table} SET Name=@Name, Category=@Category, Price=@Price, Brand=@Brand, Ingredients=@Ingredients WHERE UserID=@UserId";
+        string sql = $"UPDATE CART_ITEM SET Quantity=@Quantity WHERE CartItemID=@CartItemId";
 
         _connection.Execute(sql, cart);
     }
