@@ -29,29 +29,33 @@ public static class ShowReceipt
         {
             ReceiptModel first = group.First();
 
-            Console.WriteLine("********************************");
-            Console.WriteLine("*        STORE NAME           *");
-            Console.WriteLine("*      OFFICIAL RECEIPT       *");
-            Console.WriteLine("********************************");
-            Console.WriteLine($" Date: {first.CreatedAt:yyyy-MM-dd}");
-            Console.WriteLine($" Receipt No: #{first.ReceiptID}");
-            Console.WriteLine("-------------------------------------------");
-            Console.WriteLine($" {"ITEM",-33}{"PRICE"}");
-            Console.WriteLine("-------------------------------------------");
-
+            Console.WriteLine(@"  ___________________________________________");
+            Console.WriteLine(@" /                                           \");
+            Console.WriteLine(@"|   *************************************** |");
+            Console.WriteLine(@"\_  * BabylonMarkt                        * |");
+            Console.WriteLine(@"  | *************************************** |");
+            Console.WriteLine($"  |  Date: {first.CreatedAt:dd-MM-yyyy}                       |");
+            Console.WriteLine($"  |  Receipt No: #{first.ReceiptID,-23}   |");
+            Console.WriteLine(@"  | --------------------------------------- |");
+            Console.WriteLine($"  |  {"ITEM",-27}{"PRICE",-11} |");
+            Console.WriteLine(@"  | ---------------------------------------  |");
+            
             foreach (ReceiptModel item in group)
             {
-                Console.WriteLine($" {item.ProductName,-33}{item.ProductPrice} EUR");
+                string name = item.ProductName.Length > 25 ? item.ProductName.Substring(0, 25) : item.ProductName;
+                Console.WriteLine($"  |  {name,-27}{item.ProductPrice + " EUR",-11}  |");
             }
-
-            Console.WriteLine("-------------------------------------------");
-            Console.WriteLine($" {"SUBTOTAL:",-33}{first.TotalPrice} EUR");
-            Console.WriteLine($" {"TAX (VAT):",-33}{first.VAT} EUR");
-            Console.WriteLine("-------------------------------------------");
-            Console.WriteLine($" {"TOTAL:",-33}{first.TotalPrice + first.VAT} EUR");
-            Console.WriteLine("-------------------------------------------");
-            Console.WriteLine("     THANK YOU FOR VISITING!");
-            Console.WriteLine("****************************************\n");
+            
+            Console.WriteLine(@"  | ---------------------------------------  |");
+            Console.WriteLine($"  |  {"SUBTOTAL:",-27}{first.TotalPrice + " EUR",-11}  |");
+            Console.WriteLine($"  |  {"TAX (VAT):",-27}{first.VAT + " EUR",-11}  |");
+            Console.WriteLine(@"  | ---------------------------------------  |");
+            Console.WriteLine($"  |  {"TOTAL:",-27}{first.TotalPrice + first.VAT + " EUR",-11}  |");
+            Console.WriteLine(@"  | ---------------------------------------  |");
+            Console.WriteLine(@"  |         THANK YOU FOR VISITING!           |");
+            Console.WriteLine(@"  | __________________________________________|___");
+            Console.WriteLine(@"  | /                                            /");
+            Console.WriteLine(@"  \_/___________________________________________/");
         }
     }
 }
