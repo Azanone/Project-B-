@@ -2,7 +2,7 @@ public static class ShowLayout
 {
     static public void Start()
     {
-        Console.WriteLine(@"╔══════════════╦══════════════════╦═══════════════════╗
+        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
 ║              ║                  ║                   ║
 ║   BAKERY     ║     DAIRY        ║     FROZEN        ║
 ║              ║                  ║                   ║
@@ -20,15 +20,14 @@ public static class ShowLayout
 ║                    ║                                ║
 ╚════════════════════╝        ↑           ╚═══════════╝
                         ENTRANCE / EXIT");
-        Console.WriteLine("Enter 1 to return to Admin Menu");
-        string input = Console.ReadLine();
+        string? input = MenuHelpers.Prompt("Enter 1 to return to Admin Menu");
         if (input == "1")
         {
             AdminMenu.Start();
         }
         else
         {
-            Console.WriteLine("Invalid input");
+            MenuHelpers.Warn("Invalid input");
             Start();
         }
     }

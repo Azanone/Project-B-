@@ -4,11 +4,10 @@ static class Login
 
     public static void Start()
     {
-        Console.WriteLine("Welcome to the login page");
-        Console.WriteLine("Please enter your email address or username");
-        string identifier = Console.ReadLine() ?? string.Empty;
-        Console.WriteLine("Please enter your password");
-        string password = Console.ReadLine() ?? string.Empty;
+        Console.Clear();
+        MenuHelpers.Announce("Welcome to the login page");
+        string identifier = MenuHelpers.Prompt("Please enter your email address or username") ?? string.Empty;
+        string password = MenuHelpers.Prompt("Please enter your password") ?? string.Empty;
 
         AccountModel? account = accountsLogic.CheckLogin(identifier, password);
         if (account != null)
@@ -19,21 +18,21 @@ static class Login
             }
             else
             {
-                Dashboard.Start(); //Normal user dashboard
+                Dashboard.Start();
             }
         }
         else
         {
             if (accountsLogic.IdentifierExists(identifier))
             {
-                Console.WriteLine("Wrong password");
+                MenuHelpers.Warn("Wrong password");
             }
             else
             {
-                Console.WriteLine("Wrong email address or username");
+                MenuHelpers.Warn("Wrong email address or username");
             }
 
-            Menu.Start();
+            // Menu.Start();
         }
     }
 }

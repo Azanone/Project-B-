@@ -4,7 +4,7 @@ using Dapper;
 
 public class OfferAccess
 {
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private SqliteConnection _connection = DBconnection._c;
     
     public List<OfferModel> GetAll()
     {

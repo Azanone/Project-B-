@@ -5,13 +5,13 @@ using Dapper;
 
 public class AccountsAccess
 {
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private SqliteConnection _connection = DBconnection._c;
 
     private string Table = "\"USER\"";
 
     public void Write(AccountModel account)
     {
-        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber) VALUES (@FullName, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber)";
+        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, Role) VALUES (@Username, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber, @Role)";
         _connection.Execute(sql, account);
     }
 
@@ -32,7 +32,5 @@ public class AccountsAccess
         string sql = $"DELETE FROM {Table} WHERE UserID = @Id";
         _connection.Execute(sql, new { Id = account.Id });
     }
-
-
 
 }
