@@ -9,7 +9,7 @@ public class AccountsAccess
 
     public void Write(AccountModel account)
     {
-        string sql = $"INSERT INTO {Table} (email, password, fullname) VALUES (@EmailAddress, @Password, @FullName)";
+        string sql = $"INSERT INTO {Table} (EmailAddress, Password, Name) VALUES (@EmailAddress, @Password, @FullName)";
         _connection.Execute(sql, account);
     }
 

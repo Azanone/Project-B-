@@ -31,8 +31,7 @@ public class ShoppingCartAccess
 
     public void RemoveItemsFromCart(ShoppingCartModel cart)
     {
-        string sql =
-            $"DELETE FROM {Table} WHERE UserID=@UserId AND ProductID=@CartId";
+        string sql = $"DELETE FROM {Table} WHERE UserID=@UserId AND ProductID=@CartId";
 
         _connection.Execute(sql, cart);
     }
