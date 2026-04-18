@@ -3,45 +3,69 @@
 
 
 [TestClass]
-public sealed class Test1
+public sealed class LoginTests
 {
+    private readonly AccountsLogic _logic = new();
+    private readonly AccountsAccess _access = new();
+    private string _username = string.Empty;
+    private string _email = string.Empty;
+    private const string Password = "testpass123";
+
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _username = $"login_test_{Guid.NewGuid():N}";
+        _email = $"{_username}@example.com";
+        _logic.Register(_username, _email, Password, "0612345678");
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        AccountModel? account = _access.GetByIdentifier(_username);
+        if (account != null)
+        {
+            _access.Delete(account);
+        }
+    }
 
 
     [DataTestMethod]
-    [DataRow("kevin@kevin.nl", "kevin")]
-    [DataRow("kevin", "kevin")]
-    public void LoginValidCredentials(string m, string p)
+    [DataRow("username")]
+    [DataRow("email")]
+    public void LoginValidCredentials(string mode)
     {
-        // arrange
-        AccountsLogic l = new();
-        AccountsAccess access = new();
+        string identifier = mode == "email" ? _email : _username;
 
-        // act 
-        AccountModel result = l.CheckLogin(m, p);
+        AccountModel? result = _logic.CheckLogin(identifier, Password);
 
-        // assert
         Assert.IsNotNull(result);
         Assert.AreEqual("User", result.Role);
-        Assert.AreEqual("kevin", result.Username);
-        Assert.AreEqual("kevin@kevin.nl", result.EmailAddress);
-        Assert.AreEqual(p, result.Password);
+        Assert.AreEqual(_username, result.Username);
+        Assert.AreEqual(_email, result.EmailAddress);
+        Assert.AreEqual(Password, result.Password);
     }
 
     [DataTestMethod]
-    [DataRow("kevin@kevin.nl", "wrong")] // wrong password
-    [DataRow("wrong1", "kevin")] // wrong email
-    [DataRow("wrong2", "wrong")] // everything wrong
-    [DataRow("", "")]
-    [DataRow(null, null)]
-    public void LoginInvalidCredentials(string m, string p)
+    [DataRow("wrong_identifier", Password)]
+    [DataRow("", Password)]
+    [DataRow(null, Password)]
+    [DataRow("username", "wrong_password")]
+    [DataRow("email", "wrong_password")]
+    [DataRow("username", "")]
+    [DataRow("username", null)]
+    public void LoginInvalidCredentials(string? identifierInput, string? passwordInput)
     {
-        // arrange
-        AccountsLogic l = new();
+        string? identifier = identifierInput switch
+        {
+            "username" => _username,
+            "email" => _email,
+            _ => identifierInput
+        };
+        string? password = passwordInput == Password ? Password : passwordInput;
 
-        // act 
-        AccountModel result = l.CheckLogin(m, p);
+        AccountModel? result = _logic.CheckLogin(identifier!, password!);
 
-        // assert
         Assert.IsNull(result);
     }
 }
