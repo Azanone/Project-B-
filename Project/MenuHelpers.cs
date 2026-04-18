@@ -40,9 +40,11 @@ public static class MenuHelpers
         input = Prompt(prompt);
         error = validate(input);
         if (!error) Warn($"Invalid input: {error}");
+        System.Threading.Thread.Sleep(1000);
+        Console.Clear();
+
     }
     while (!error);
-    Console.Clear();
 
     return input;
 }

@@ -6,9 +6,10 @@ static class Menu
     //You could edit this to show different menus depending on the user's role
     static public void Start()
     {
-        Console.WriteLine("Enter 1 to login");
-        Console.WriteLine("Enter 2 to register");
-        Console.WriteLine("Enter 3 to continue as guest");
+        Console.Clear();
+        MenuHelpers.Announce("Enter 1 to login");
+        MenuHelpers.Announce("Enter 2 to register");
+        MenuHelpers.Announce("Enter 3 to continue as guest");
 
 
         string input = Console.ReadLine() ?? string.Empty;
@@ -26,9 +27,8 @@ static class Menu
         }
         else
         {
-            Console.WriteLine("Invalid input");
+            MenuHelpers.Warn("Invalid input");
             Start();
         }
-
     }
 }

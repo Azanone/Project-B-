@@ -21,8 +21,13 @@ public class AccountsLogic
     public AccountModel? CheckLogin(string identifier, string password)
     {
 
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
 
-        AccountModel? acc = _access.GetByIdentifier(identifier);
+
+        AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
         if (acc != null && acc.Password == password)
         {
             CurrentAccount = acc;
@@ -48,7 +53,7 @@ public class AccountsLogic
             MenuHelpers.Error("Username must be at least 3 characters long");
             return false;
         }
-        if (IdentifierExists(username))
+        if (IdentifierExists(username.ToLower()))
         {
             MenuHelpers.Error($"Username {username} already exists");
             return false;
@@ -61,9 +66,14 @@ public class AccountsLogic
         try
         {
             MailAddress address = new MailAddress(email);
-            if (IdentifierExists(email))
+            if (IdentifierExists(email.ToLower()))
             {
                 MenuHelpers.Error($"Email {email} already exists");
+                return false;
+            }
+            if (!address.Host.Contains(".") || address.Host.Split('.').Last().Length < 2)
+            {
+                MenuHelpers.Error($"Email {email} uses invalid format");
                 return false;
             }
             return address.Address == email;
@@ -85,19 +95,33 @@ public class AccountsLogic
         return true;
     }
 
-    public bool ValidatePhonenumber(string phoneNumber)
+    public bool ValidatePhonenumber(string field)
     {
-        if (string.IsNullOrWhiteSpace(phoneNumber))
+        if (string.IsNullOrWhiteSpace(field)) return false;
+
+        try
         {
-            MenuHelpers.Error("Phone number cannot be empty");
+            if (field.Length == 10 && field.StartsWith("06"))
+            {
+                return field.All(char.IsDigit);
+            }
+
+            if (field.Length == 12 && field.StartsWith("+316"))
+            {
+                return field.Substring(1).All(char.IsDigit);
+            }
             return false;
         }
-        return true;
+        catch (Exception e)
+        {
+            MenuHelpers.Error($"Validation error: {e.Message}");
+            return false;
+        }
     }
 
     public void Register(string username, string email, string password, string phoneNumber)
     {
-        AccountModel newAccount = new AccountModel(0, username, email, password, username, string.Empty, 0, phoneNumber);
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, "0", phoneNumber);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }
