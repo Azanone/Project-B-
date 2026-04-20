@@ -6,6 +6,7 @@ static class Dashboard
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
     private static readonly List<ShoppingListLogic> ShoppingList = new();
+    private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
     {
@@ -197,5 +198,47 @@ static class Dashboard
     private static void WaitForContinue()
     {
         MenuHelpers.Prompt("Press Enter to continue");
+    }
+    
+    private static void ShowPurchaseHistory()
+    {
+        Console.Clear();
+        AccountModel? account = AccountsLogic.CurrentAccount;
+        if (account == null)
+        {
+            MenuHelpers.Warn("You must be logged in to view purchase history");
+            WaitForContinue();
+            return;
+        }
+
+        var receipts = ReceiptLogic.GetPurchasesByAccountID((int)account.Id);
+        MenuHelpers.Announce("--- YOUR PURCHASE HISTORY ---");
+
+        if (receipts.Count == 0)
+        {
+            MenuHelpers.Warn("No purchases found");
+            WaitForContinue();
+            return;
+        }
+
+        var grouped = receipts.GroupBy(r => r.PurchaseID);
+        foreach (var group in grouped)
+        {
+            var first = group.First();
+            MenuHelpers.Confirm("----------------------------------------");
+            MenuHelpers.Announce($"  Purchase #{group.Key}  |  {first.CreatedAt:dd-MM-yyyy}");
+            MenuHelpers.Confirm("----------------------------------------");
+            foreach (var item in group)
+            {
+                string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
+                decimal lineTotal = item.ProductPrice * item.Quantity;
+                MenuHelpers.Confirm($"  {item.ProductName,-22} {qtyLabel}{lineTotal:F2}");
+            }
+            MenuHelpers.Confirm("----------------------------------------");
+            MenuHelpers.Confirm($"  Total:                    {first.TotalPrice:F2}");
+            Console.WriteLine();
+        }
+
+        WaitForContinue();
     }
 }
