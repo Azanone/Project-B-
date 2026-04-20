@@ -6,4 +6,10 @@ public class ReceiptLogic
         var allPurchases = _dataAccess.GetAll();
         return allPurchases;
     }
+
+    public List<ReceiptModel> GetPurchasesByAccountID(int accountID)
+    {
+        var Purchases = _dataAccess.GetPurchasesByAccountID(accountID);
+        return Purchases;
+    }
 }
