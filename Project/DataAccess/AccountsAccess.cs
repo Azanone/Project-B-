@@ -30,7 +30,7 @@ public class AccountsAccess
     public void Delete(AccountModel account)
     {
         string sql = $"DELETE FROM {Table} WHERE UserID = @Id";
-        _connection.Execute(sql, new { Id = account.Id });
+        _connection.Execute(sql, new { Id = account.UserId });
     }
 
 }

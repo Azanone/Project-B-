@@ -1,11 +1,12 @@
 using Project.Logic;
+using Project.Models;
 
 static class Dashboard
 {
     private static readonly ProductLogic ProductLogic = new();
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
-    private static readonly List<ShoppingListLogic> ShoppingList = new();
+    private static readonly ShoppingCartLogic ShoppingCart = new();
 
     public static void Start()
     {
@@ -46,15 +47,15 @@ static class Dashboard
             }
             else if (input == "4")
             {
-                AddProductToShoppingList();
+                AddProductToShoppingCart();
             }
             else if (input == "5")
             {
-                ShowShoppingList();
+                ShowShoppingCart();
             }
             else if (input == "6")
             {
-                ShoppingList.Clear();
+                RemoveItemFromCart();
                 MenuHelpers.Confirm("Shopping list cleared");
                 WaitForContinue();
             }
@@ -96,7 +97,7 @@ static class Dashboard
         WaitForContinue();
     }
 
-    private static void AddProductToShoppingList()
+    private static void AddProductToShoppingCart()
     {
         Console.Clear();
         var products = ProductLogic.GetProducts();
@@ -129,24 +130,82 @@ static class Dashboard
             return;
         }
 
-        ShoppingList.Add(new ShoppingListLogic(
-            selectedProduct.Name,
-            selectedProduct.Category,
-            selectedProduct.Price,
-            selectedProduct.Brand,
-            selectedProduct.Ingredients
-        ));
+        var account = AccountsLogic.CurrentAccount;
+
+        ShoppingCart.AddItem(
+            new ShoppingCartItem(selectedProduct, 1),
+            account.UserId
+        );
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
         WaitForContinue();
     }
+    
+    private static void RemoveItemFromCart()
+    {
+        Console.Clear();
 
-    private static void ShowShoppingList()
+        var account = AccountsLogic.CurrentAccount;
+        var products = ProductLogic.GetProducts();
+
+        if (account == null)
+        {
+            MenuHelpers.Warn("Account not found");
+            WaitForContinue();
+            return;
+        }
+
+        MenuHelpers.Announce("--- REMOVE PRODUCT FROM SHOPPING LIST ---");
+
+        foreach (var item in products)
+        {
+            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Price: {item.Price} EUR");
+        }
+
+        string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
+
+        if (!long.TryParse(rawId, out long productId))
+        {
+            MenuHelpers.Warn("Invalid product ID");
+            WaitForContinue();
+            return;
+        }
+
+        ProductModel? selectedProduct = products.FirstOrDefault(p => p.ProductID == productId);
+
+        if (selectedProduct == null)
+        {
+            MenuHelpers.Warn("Product not found");
+            WaitForContinue();
+            return;
+        }
+
+        ShoppingCart.RemoveItem(
+            new ShoppingCartItem(selectedProduct, 1),
+            account.UserId
+        );
+
+        MenuHelpers.Confirm($"Removed {selectedProduct.Name} from cart");
+        WaitForContinue();
+    }
+
+    private static void ShowShoppingCart()
     {
         Console.Clear();
         MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
 
-        if (ShoppingList.Count == 0)
+        var account = AccountsLogic.CurrentAccount;
+
+        if (account == null)
+        {
+            MenuHelpers.Warn("You must be logged in.");
+            WaitForContinue();
+            return;
+        }
+
+        var items = ShoppingCart.GetAllItems(account.UserId);
+
+        if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
             WaitForContinue();
@@ -154,14 +213,23 @@ static class Dashboard
         }
 
         decimal total = 0;
-        for (int i = 0; i < ShoppingList.Count; i++)
+
+        for (int i = 0; i < items.Count; i++)
         {
-            var item = ShoppingList[i];
-            total += item.MinPrice;
-            MenuHelpers.Confirm($"{i + 1}. {item.Name} | Category: {item.Category} | Brand: {item.Brand} | Price: {item.MinPrice} EUR");
+            var item = items[i];
+
+            total += item.Product.Price;
+
+            MenuHelpers.Confirm(
+                $"{i + 1}. {item.Product.Name} | " +
+                $"Category: {item.Product.Category} | " +
+                $"Brand: {item.Product.Brand} | " +
+                $"Price: {item.Product.Price} EUR | " +
+                $"Qty: {item.Quantity}"
+            );
         }
 
-        MenuHelpers.Announce($"Total (preview): {total} EUR");
+        MenuHelpers.Announce($"Total: {total} EUR");
         WaitForContinue();
     }
 

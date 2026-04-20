@@ -1,43 +1,39 @@
 ﻿using Project.Models;
-
 namespace Project.Logic;
 
 public class ShoppingCartLogic
 {
-    private ShoppingCartAccess _cartAccess = new();
-    private ShoppingCartModel _cartModel = new();
+    private readonly ShoppingCartAccess _cartAccess = new();
 
-    public void AddItem(Models.ShoppingCartItem item)
+    public void AddItem(ShoppingCartModel item, int userId)
     {
         if (item == null)
             throw new ArgumentException("Item doesn't exist");
-
-        _cartAccess.AddItemsToCart(item.Product);
+        
+        _cartAccess.AddItemsToCart(item, userId);
     }
 
-    public void RemoveItem(Models.ShoppingCartItem item)
+    public void RemoveItem(ShoppingCartItem item, int userId)
     {
         if (item == null)
-            throw new ArgumentException("Item doesn't exist in current shopping cart");
-        
-        _cartAccess.RemoveItemsFromCart(item.Product);
+            throw new ArgumentException("Item doesn't exist in cart");
+
+        _cartAccess.RemoveItemsFromCart(item, userId);
     }
 
-    public void ChangeCount(Models.ShoppingCartItem item, int newQuantity)
+    public void ChangeCount(ShoppingCartModel item, int newQuantity)
     {
         if (newQuantity <= 0)
-            throw new ArgumentException("Quantity cannot be negative");
-        
-        
-        item.Quantity = newQuantity;
+            throw new ArgumentException("Quantity must be > 0");
 
-        item.Product.Quantity = newQuantity;
+        ShoppingCartItem q = new();
+        q.Quantity = newQuantity;
 
-        _cartAccess.UpdateCart(item.Product);
+        _cartAccess.UpdateCart(item);
     }
 
     public List<ShoppingCartItem> GetAllItems(int userId)
     {
-        return _cartAccess.GetAll(new ShoppingCartModel(0, userId, ""));
+        return _cartAccess.GetAll(userId);
     }
 }

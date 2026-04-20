@@ -1,12 +1,12 @@
 ﻿namespace Project.Models;
 
-public class ShoppingCartModel : ShoppingCartItem
+public class ShoppingCartModel
 {
-    public int CartId { get; }
-    public int UserId { get; }
-    public string CreatedAt { get; }
-
-    public ShoppingCartModel() : base() { }
+    public int CartId { get; set; }
+    public int UserId { get; set; }
+    public string CreatedAt { get; set; }
+    
+    public ShoppingCartModel() { }
 
     public ShoppingCartModel(int cartId, int userId, string createdAt)
     {

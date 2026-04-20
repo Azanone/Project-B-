@@ -1,7 +1,7 @@
 ﻿public class AccountModel
 {
 
-    public Int64 Id { get; set; }
+    public int UserId { get; set; }
 
     public String Role { get; set; } = "User";
 
@@ -24,14 +24,14 @@
     {
     }
 
-    public AccountModel(Int64 id, string email, string password, string fullname)
-        : this(id, string.Empty, email, password, fullname, string.Empty, "0", string.Empty)
+    public AccountModel(int UserId, string email, string password, string fullname)
+        : this(UserId, string.Empty, email, password, fullname, string.Empty, "0", string.Empty)
     {
     }
 
-    public AccountModel(Int64 id, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
+    public AccountModel(int userId, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
     {
-        Id = id;
+        UserId = userId;
         Username = username;
         EmailAddress = email;
         Password = password;

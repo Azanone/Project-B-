@@ -1,23 +1,22 @@
 ﻿namespace Project.Models;
 
-public class ShoppingCartItem : ProductModel
+public class ShoppingCartItem : ShoppingCartModel
 {
     public int CartItemId { get; set; }
-    public ShoppingCartModel Product { get; }
-    public int Quantity { get; set; }
-    public double Price { get; set; }
-    
-    public ShoppingCartItem() { }
 
-    public ShoppingCartItem(int cartItemId, ShoppingCartModel product, int quantity, double price)
+    public int CartId { get; set; }
+    public int? ProductId { get; set; }
+
+    public ProductModel Product { get; set; }
+
+    public int Quantity { get; set; }
+
+    public ShoppingCartItem() {}
+
+    public ShoppingCartItem(ProductModel product, int quantity)
     {
-        CartItemId = cartItemId;
         Product = product;
+        ProductId = product.ProductID;
         Quantity = quantity;
-        Price = price;
-        Name = product.Name;
-        Brand = product.Brand;
-        Ingredients = product.Ingredients;
-        CategoryID = product.CategoryID;
     }
 }
