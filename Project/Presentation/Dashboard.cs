@@ -29,7 +29,8 @@ static class Dashboard
             MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
             MenuHelpers.Confirm("Enter 5 to view shopping list and total");
             MenuHelpers.Confirm("Enter 6 to clear shopping list");
-            MenuHelpers.Confirm("Enter 7 to logout");
+            MenuHelpers.Confirm("Enter 7 to show purchase history");
+            MenuHelpers.Confirm("Enter 8 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
             if (input == "1")
@@ -59,6 +60,10 @@ static class Dashboard
                 WaitForContinue();
             }
             else if (input == "7")
+            {
+                ShowPurchaseHistory();
+            }
+            else if (input == "8")
             {
                 AccountsLogic.Logout();
                 Menu.Start();
