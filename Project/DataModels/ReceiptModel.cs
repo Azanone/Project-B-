@@ -9,5 +9,16 @@ public class ReceiptModel
     public Decimal VAT {get; set;}
     public Decimal TotalPrice {get; set;}
     
+    public ReceiptModel(int receiptID, int purchaseID, DateTime createdAt, string productName, Decimal productPrice, Decimal vat, Decimal totalPrice)
+    {
+        ReceiptID = receiptID;
+        PurchaseID = purchaseID;
+        CreatedAt = createdAt;
+        ProductName = productName;
+        ProductPrice = productPrice;
+        VAT = vat;
+        TotalPrice = totalPrice;
+    }
 
+    public ReceiptModel() { }
 }
