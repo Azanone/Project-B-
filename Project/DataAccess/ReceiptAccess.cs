@@ -3,7 +3,7 @@ using Dapper;
 
 public class ReceiptAccess
 {
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private SqliteConnection _connection = DBconnection._c;
     public List<ReceiptModel> GetAll()
     {
         string sql = @"SELECT RECEIPT.ReceiptID,
