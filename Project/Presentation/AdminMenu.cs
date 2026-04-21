@@ -20,7 +20,8 @@ static class AdminMenu
             MenuHelpers.Confirm("Enter 5 to see all the offers");
             MenuHelpers.Confirm("Enter 6 to see the stock of the products");
             MenuHelpers.Confirm("Enter 7 to see the receipts");
-            MenuHelpers.Confirm("Enter 8 to log-out");
+            MenuHelpers.Confirm("Enter 8 to manage users");
+            MenuHelpers.Confirm("Enter 9 to log-out");
 
             string? input = MenuHelpers.Prompt("");
             if (input == "1")
@@ -59,6 +60,11 @@ static class AdminMenu
                 return;
             }
             else if (input == "8")
+            {
+                AdminUserManagement.Start();
+                return;
+            }
+            else if (input == "9")
             {
                 accountsLogic.Logout();
                 Menu.Start();

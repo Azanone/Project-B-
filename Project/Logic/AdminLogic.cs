@@ -3,6 +3,12 @@ using System.Globalization;
 public class AdminLogic
 {
     private readonly ProductAccess _productAccess = new();
+    private readonly AccountsAccess _accountsAccess = new();
+    private static readonly HashSet<string> ValidRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Admin",
+        "User"
+    };
 
     public List<ProductModel> GetProducts()
     {
@@ -12,6 +18,86 @@ public class AdminLogic
     public ProductModel? GetProductById(long productId)
     {
         return _productAccess.GetById(productId);
+    }
+
+    public List<AccountModel> GetUsers()
+    {
+        return _accountsAccess.GetAllUsers();
+    }
+
+    public AccountModel? GetUserById(long userId)
+    {
+        return _accountsAccess.GetById(userId);
+    }
+
+    public (bool Success, string Message) UpdateUserRole(string userIdInput, string roleInput)
+    {
+        if (!long.TryParse(userIdInput, out long userId) || userId <= 0)
+        {
+            return (false, "User ID must be a positive number.");
+        }
+
+        string normalizedRole = (roleInput ?? string.Empty).Trim();
+        if (!ValidRoles.Contains(normalizedRole))
+        {
+            return (false, "Role must be either 'Admin' or 'User'.");
+        }
+
+        try
+        {
+            AccountModel? existingUser = _accountsAccess.GetById(userId);
+            if (existingUser == null)
+            {
+                return (false, $"No user found with ID {userId}.");
+            }
+
+            AccountModel? currentAccount = AccountsLogic.CurrentAccount;
+            if (currentAccount != null && currentAccount.Id == userId && normalizedRole.Equals("User", StringComparison.OrdinalIgnoreCase))
+            {
+                return (false, "You cannot remove your own Admin role.");
+            }
+
+            bool updated = _accountsAccess.UpdateRole(userId, NormalizeRole(normalizedRole));
+            return updated
+                ? (true, "User role updated successfully.")
+                : (false, "User role update failed.");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Failed to update user role: {ex.Message}");
+        }
+    }
+
+    public (bool Success, string Message) RemoveUser(string userIdInput)
+    {
+        if (!long.TryParse(userIdInput, out long userId) || userId <= 0)
+        {
+            return (false, "User ID must be a positive number.");
+        }
+
+        try
+        {
+            AccountModel? existingUser = _accountsAccess.GetById(userId);
+            if (existingUser == null)
+            {
+                return (false, $"No user found with ID {userId}.");
+            }
+
+            AccountModel? currentAccount = AccountsLogic.CurrentAccount;
+            if (currentAccount != null && currentAccount.Id == userId)
+            {
+                return (false, "You cannot remove your own account.");
+            }
+
+            bool deleted = _accountsAccess.DeleteById(userId);
+            return deleted
+                ? (true, "User removed successfully.")
+                : (false, "User removal failed.");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Failed to remove user: {ex.Message}");
+        }
     }
 
     public List<CategoryModel> GetCategories()
@@ -163,5 +249,10 @@ public class AdminLogic
         }
 
         return decimal.TryParse(input, NumberStyles.Number, CultureInfo.CurrentCulture, out price);
+    }
+
+    private static string NormalizeRole(string role)
+    {
+        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "User";
     }
 }
