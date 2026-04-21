@@ -27,9 +27,9 @@ static class Dashboard
             MenuHelpers.Confirm("Enter 1 to see all products");
             MenuHelpers.Confirm("Enter 2 to see all offers");
             MenuHelpers.Confirm("Enter 3 to see store layout");
-            MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
-            MenuHelpers.Confirm("Enter 5 to view shopping list and total");
-            MenuHelpers.Confirm("Enter 6 to clear shopping list");
+            MenuHelpers.Confirm("Enter 4 to add a product to shopping cart");
+            MenuHelpers.Confirm("Enter 5 to view shopping cart and total");
+            MenuHelpers.Confirm("Enter 6 to clear shopping cart");
             MenuHelpers.Confirm("Enter 7 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
@@ -100,22 +100,39 @@ static class Dashboard
     private static void AddProductToShoppingCart()
     {
         Console.Clear();
+
+        var account = AccountsLogic.CurrentAccount;
+
+        if (account == null)
+        {
+            MenuHelpers.Warn("You must be logged in.");
+            WaitForContinue();
+            return;
+        }
+
         var products = ProductLogic.GetProducts();
+
         MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
+
         foreach (var item in products)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+            MenuHelpers.Confirm(
+                $"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR"
+            );
         }
 
         string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
-        if (!long.TryParse(rawId, out long productId))
+
+        if (!int.TryParse(rawId, out int productId))
         {
             MenuHelpers.Warn("Invalid product ID");
             WaitForContinue();
             return;
         }
 
-        ProductModel? selectedProduct = products.FirstOrDefault(p => p.ProductID == productId);
+        ProductModel? selectedProduct =
+            products.FirstOrDefault(p => p.ProductID == productId);
+
         if (selectedProduct == null)
         {
             MenuHelpers.Warn("Product not found");
@@ -129,15 +146,11 @@ static class Dashboard
             WaitForContinue();
             return;
         }
+        
+        ShoppingCart.AddItem(account.UserId, selectedProduct.ProductID, 1);
 
-        var account = AccountsLogic.CurrentAccount;
+        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
 
-        ShoppingCart.AddItem(
-            new ShoppingCartItem(selectedProduct, 1),
-            account.UserId
-        );
-
-        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
         WaitForContinue();
     }
     

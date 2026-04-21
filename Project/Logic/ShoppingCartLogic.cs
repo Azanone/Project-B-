@@ -5,14 +5,11 @@ public class ShoppingCartLogic
 {
     private readonly ShoppingCartAccess _cartAccess = new();
 
-    public void AddItem(ShoppingCartModel item, int userId)
+    public void AddItem(int userId, int productId, int quantity)
     {
-        if (item == null)
-            throw new ArgumentException("Item doesn't exist");
-        
-        _cartAccess.AddItemsToCart(item, userId);
+        _cartAccess.AddItemsToCart(userId, productId, quantity);
     }
-
+    
     public void RemoveItem(ShoppingCartItem item, int userId)
     {
         if (item == null)

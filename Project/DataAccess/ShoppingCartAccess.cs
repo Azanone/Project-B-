@@ -7,7 +7,7 @@ public class ShoppingCartAccess
     private string Table = "\"CART\"";
 
     private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
-
+    
     public List<ShoppingCartItem> GetAll(int userId)
     {
         {
@@ -40,12 +40,27 @@ public class ShoppingCartAccess
             ).ToList();
         }
     }
-
-    public void AddItemsToCart(ShoppingCartModel cart, int userId)
+    
+    public void AddItemsToCart(int userId, int productId, int quantity)
     {
-        string sql = $"INSERT INTO {Table} (UserID, ProductID) VALUES (@UserId, @CartId)";
+        // Haal cartId op, maak aan als die niet bestaat
+        string selectSql = "SELECT CartId FROM CART WHERE UserId = @UserId";
+        var cartId = _connection.QueryFirstOrDefault<int?>(selectSql, new { UserId = userId });
 
-        _connection.Execute(sql, cart);
+        if (!cartId.HasValue)
+        {
+            string insertCartSql = @"
+            INSERT INTO CART (UserId, CreatedAt) 
+            VALUES (@UserId, @CreatedAt);
+            SELECT last_insert_rowid();";
+            cartId = _connection.QuerySingle<int>(insertCartSql, new { UserId = userId, CreatedAt = DateTime.Now });
+        }
+
+        string insertItemSql = @"
+        INSERT INTO CART_ITEM (CartId, ProductId, Quantity)
+        VALUES (@CartId, @ProductId, @Quantity);";
+
+        _connection.Execute(insertItemSql, new { CartId = cartId.Value, ProductId = productId, Quantity = quantity });
     }
 
     public void UpdateCart(ShoppingCartModel cart)
