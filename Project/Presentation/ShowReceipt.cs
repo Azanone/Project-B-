@@ -1,5 +1,6 @@
 public static class ShowReceipt
 {
+    private static readonly ReceiptLogic ReceiptLogic = new();
     static public void Start()
     {
         ShowAll();

@@ -77,4 +77,72 @@ public class ShoppingCartLogic
             _cartAccess.RemoveItemsFromCart(item.CartItemId);
         }
     }
+
+    
+    public void PurchaseShoppingCart()
+    {
+        List<ShoppingCartItem> currentShoppingCart = _cartAccess.GetAll(GetCurrentUserId());
+        //create Receipt
+    }
+
+
+    public decimal GetTotal(int userId)
+    {
+        _cartAccess.Connection.Open();
+        var cartItems = _cartAccess.GetAll(userId);
+        decimal totalAmount = 0;
+        foreach (var item in cartItems)
+        {
+            totalAmount += item.Product.Price * item.Quantity;
+        }
+        return totalAmount;
+    }
+
+
+    public bool CompletePurchase(int userId)
+    {
+        _cartAccess.Connection.Open();
+        using var transaction = _cartAccess.Connection.BeginTransaction();
+
+        try
+        {            
+            decimal totalAmount = GetTotal(userId);
+            if(totalAmount != 0)
+            {
+                decimal vat = totalAmount * 0.21m;
+                var cartItems = _cartAccess.GetAll(userId);
+
+
+                int purchaseId = _cartAccess.CreatePurchase(userId,totalAmount,vat,transaction);
+
+                foreach (var item in cartItems)//loop maakt PurchaseItems
+                {
+                    if (item.ProductId.HasValue)
+                    {
+                    _cartAccess.CreatePurchaseItem(purchaseId,item.ProductId.Value,item.Quantity,item.Product.Price,transaction);
+                    }
+                }
+
+                _cartAccess.CreateReceipt(purchaseId,transaction);
+
+                // Clear cart
+                _cartAccess.ClearCart(userId,transaction);
+                transaction.Commit();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+        finally
+        {
+        _cartAccess.Connection.Close();
+        }
+    }
 }

@@ -34,7 +34,8 @@ static class Dashboard
             MenuHelpers.Confirm("Enter 6 to clear shopping cart");
             MenuHelpers.Confirm("Enter 7 to Wishlist");
             MenuHelpers.Confirm("Enter 8 to show purchase history");
-            MenuHelpers.Confirm("Enter 9 to logout");
+            MenuHelpers.Confirm("Enter 9 to complete puchase");
+            MenuHelpers.Confirm("Enter 10 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
             if (input == "1")
@@ -56,6 +57,7 @@ static class Dashboard
             else if (input == "5")
             {
                 ShowShoppingCart();
+                WaitForContinue();
             }
             else if (input == "6")
             {
@@ -79,6 +81,11 @@ static class Dashboard
                 ShowPurchaseHistory();
             }
             else if (input == "9")
+            {
+                PurchaseShoppingCart.PurchaseChoice();
+                WaitForContinue();
+            }
+            else if (input == "10")
             {
                 AccountsLogic.Logout();
                 Menu.Start();
@@ -251,7 +258,7 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in.");
-            WaitForContinue();
+            //WaitForContinue();
             return;
         }
 
@@ -262,7 +269,7 @@ static class Dashboard
         if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
-            WaitForContinue();
+           // WaitForContinue();
             return;
         }
 
@@ -282,8 +289,42 @@ static class Dashboard
         }
 
         MenuHelpers.Announce($"Total: {total} EUR");
-        WaitForContinue();
+        //WaitForContinue();
     }
+
+    static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
+    // private static void PurchaseChoice()
+    // {
+
+    //     bool validinput = false;
+    //     while (!validinput)
+    //     {
+    //         ShowShoppingCart();
+    //         MenuHelpers.Confirm($"\nEnter 1 to return\nEnter 2 to continue to checkout");
+    //         string userChoice = Console.ReadLine();
+    //         if(userChoice  == "1")
+    //         {
+    //             validinput = true;
+    //         }
+    //         else if(userChoice == "2")
+    //         {
+    //             validinput = true;
+    //             bool purchaseSucces = shoppingCartLogic.CompletePurchase(ReceiptLogic.GetCurrentUserId());//Belasting word nog niet gerekend bij de transactie, het is niet te zien op de bon
+    //             if (purchaseSucces)
+    //             {
+    //                 MenuHelpers.Announce("Thank you for your purchase!");
+    //             }
+    //             else
+    //             {
+    //                 MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
+    //             }
+    //         }
+    //         else
+    //         {
+    //             MenuHelpers.Warn("Invalid Input");
+    //         }
+    //     }
+    // }
 
     private static void ShowLayout()
     {
@@ -309,7 +350,7 @@ static class Dashboard
         WaitForContinue();
     }
 
-    private static void WaitForContinue()
+    public static void WaitForContinue()
     {
         MenuHelpers.Prompt("Press Enter to continue");
     }

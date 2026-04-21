@@ -5,6 +5,8 @@ using Project.Models;
 public class ShoppingCartAccess
 {
     private readonly SqliteConnection _connection = DBconnection._c;
+
+    public SqliteConnection Connection => _connection;
     
     public List<ShoppingCartItem> GetAll(int userId)
     {
@@ -72,5 +74,63 @@ public class ShoppingCartAccess
             "DELETE FROM CART_ITEM WHERE CartItemId=@CartItemId";
 
         _connection.Execute(sql, new { CartItemId = cartItemId });
+    }
+    public int CreatePurchase(int userId,decimal totalAmount,decimal vat,SqliteTransaction transaction)//Returns PurchaseID
+    {
+        string sql = @"
+        INSERT INTO PURCHASE
+        (UserID, PurchaseDate, TotalAmount, Vat)
+        VALUES
+        (@UserID, @PurchaseDate, @TotalAmount, @Vat);
+
+        SELECT last_insert_rowid();";
+
+        return _connection.QuerySingle<int>(sql,new
+        {
+                UserID = userId,
+                PurchaseDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                TotalAmount = totalAmount,
+                Vat = vat
+            },transaction);
+    }
+
+    public void CreatePurchaseItem(int purchaseId,int productId,int quantity,decimal priceAtPurchase,SqliteTransaction transaction)
+    {
+        string sql = @"
+        INSERT INTO PURCHASE_ITEM
+        (PurchaseID, ProductID, Quantity, PriceAtPurchase)
+        VALUES
+        (@PurchaseID, @ProductID, @Quantity, @PriceAtPurchase)";
+
+        _connection.Execute(sql,new
+        {
+                PurchaseID = purchaseId,
+                ProductID = productId,
+                Quantity = quantity,
+                PriceAtPurchase = priceAtPurchase
+            },transaction);
+    }
+    
+    public void CreateReceipt(int purchaseId,SqliteTransaction transaction)
+    {
+        string sql = @"
+        INSERT INTO RECEIPT
+        (PurchaseID, CreatedAt)
+        VALUES
+        (@PurchaseID, @CreatedAt)";
+
+        _connection.Execute(sql,new{PurchaseID = purchaseId,CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")},transaction);
+    }
+    public void ClearCart(int userId,SqliteTransaction transaction)
+    {
+        string sql = @"
+        DELETE FROM CART_ITEM
+        WHERE CartId IN
+        (
+            SELECT CartId
+            FROM CART
+            WHERE UserId = @UserId
+        )";
+        _connection.Execute(sql, new { UserId = userId },transaction);
     }
 }
