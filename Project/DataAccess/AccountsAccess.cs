@@ -1,23 +1,23 @@
-using Microsoft.Data.Sqlite;
+    using Microsoft.Data.Sqlite;
 
 using Dapper;
 
 
 public class AccountsAccess
 {
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private SqliteConnection _connection = DBconnection._c;
 
     private string Table = "\"USER\"";
 
     public void Write(AccountModel account)
     {
-        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber) VALUES (@FullName, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber)";
+        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, Role) VALUES (@Username, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber, @Role)";
         _connection.Execute(sql, account);
     }
 
     public AccountModel? GetByIdentifier(string identifier)
     {
-        string sql = $"SELECT UserID AS Id, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
+        string sql = $"SELECT UserID AS Id, CASE WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
         return _connection.QueryFirstOrDefault<AccountModel>(sql, new { Identifier = identifier });
     }
 
@@ -32,7 +32,5 @@ public class AccountsAccess
         string sql = $"DELETE FROM {Table} WHERE UserID = @Id";
         _connection.Execute(sql, new { Id = account.Id });
     }
-
-
 
 }
