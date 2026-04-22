@@ -18,6 +18,20 @@
     public string HouseNumber { get; set; }
 
     public string phoneNumber { get; set; } = string.Empty;
+    public DateTime? BirthDate { get; set; } = null;
+    public int Age {
+        get
+        {
+            if (BirthDate == null)
+            {
+                return 0;
+            }
+            DateTime today = DateTime.Today;
+            int age = today.Year - BirthDate.Value.Year;
+            if (BirthDate.Value.Date > today.AddYears(-age)) age--;
+            return age;
+        }
+    }
 
 
     public AccountModel()
@@ -29,7 +43,7 @@
     {
     }
 
-    public AccountModel(Int64 id, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
+    public AccountModel(Int64 id, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, DateTime? birthDate = null)
     {
         Id = id;
         Username = username;
@@ -39,9 +53,10 @@
         Postcode = postcode;
         HouseNumber = houseNumber;
         this.phoneNumber = phoneNumber;
+        BirthDate = birthDate;
         Role = "User";
     }
-    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
+    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, DateTime? birthDate = null)
     {
         Username = username;
         EmailAddress = email;
@@ -50,6 +65,7 @@
         Postcode = postcode;
         HouseNumber = houseNumber;
         this.phoneNumber = phoneNumber;
+        BirthDate = birthDate;
         Role = "User";
     }
 
