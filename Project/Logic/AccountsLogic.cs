@@ -1,7 +1,10 @@
 ﻿
 
 //This class is not static so later on we can use inheritance and interfaces
+
+using System.ComponentModel;
 using System.Net.Mail;
+using Project.Presentation;
 
 public class AccountsLogic
 {
@@ -45,20 +48,64 @@ public class AccountsLogic
     {
         CurrentAccount = null;
     }
-
-    public bool ValidateUsername(string username)
+    
+    public bool ValidateFirstName(string firstname)
     {
-        if (string.IsNullOrWhiteSpace(username) || username.Length < 3)
+        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length < 3)
         {
-            MenuHelpers.Error("Username must be at least 3 characters long");
+            MenuHelpers.Error("First name must be at least 3 characters long");
             return false;
         }
-        if (IdentifierExists(username.ToLower()))
+
+        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length > 32)
+        {
+            MenuHelpers.Error("First name can't be longer than 32 characters");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public bool ValidateLastName(string lastname)
+    {
+        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length < 3)
+        {
+            MenuHelpers.Error("Last name must be at least 3 characters long");
+            return false;
+        }
+        
+        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length > 32)
+        {
+            MenuHelpers.Error("Last name can't be longer than 32 characters");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public string CreateUsername(string firstname, string lastname)
+    {
+        if (firstname.Contains(" "))
+        {
+            firstname = firstname.Replace(" ", "");
+        }
+        
+        if (lastname.Contains(" "))
+        {
+            lastname = lastname.Replace(" ", "");
+        }
+        
+        firstname = char.ToUpper(firstname[0]) + firstname.Substring(1).ToLower();
+        lastname = char.ToUpper(lastname[0]) + lastname.Substring(1).ToLower();
+        
+        string username =  $"{firstname} {lastname}";
+        
+        if (IdentifierExists(username.ToLower())) 
         {
             MenuHelpers.Error($"Username {username} already exists");
-            return false;
         }
-        return true;
+        
+        return username;
     }
 
     public bool ValidateEmail(string email)

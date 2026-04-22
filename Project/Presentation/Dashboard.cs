@@ -23,7 +23,7 @@ static class Dashboard
             {
                 MenuHelpers.Announce("Welcome back " + account.FullName);
             }
-
+            
             MenuHelpers.Confirm("Enter 1 to see all products");
             MenuHelpers.Confirm("Enter 2 to see all offers");
             MenuHelpers.Confirm("Enter 3 to see store layout");
