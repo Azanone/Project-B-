@@ -4,7 +4,18 @@ public class ProductLogic
 
     public List<ProductModel> GetProducts()
     {
+        return _dataAccess.GetAll();
+    }
+
+    public List<ProductModel> GetProductsForAge(int userAge)
+    {
         var allProducts = _dataAccess.GetAll();
-        return allProducts;
+        List<ProductModel> filteredProducts = [];
+        foreach (var product in allProducts)
+        {
+            if (product.MinAge <= userAge)
+                filteredProducts.Add(product);
+        }
+        return filteredProducts;
     }
 }

@@ -106,7 +106,9 @@ static class Dashboard
     private static void AddProductToShoppingList()
     {
         Console.Clear();
-        var products = ProductLogic.GetProducts();
+        var products = AccountsLogic.CurrentAccount == null
+            ? ProductLogic.GetProducts()
+            : ProductLogic.GetProductsForAge(AccountsLogic.CurrentAccount.Age);
         MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
         foreach (var item in products)
         {
