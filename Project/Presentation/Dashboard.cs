@@ -83,10 +83,16 @@ static class Dashboard
     {
         Console.Clear();
         var list = ProductLogic.GetProducts();
+        AccountModel? account = AccountsLogic.CurrentAccount;
         MenuHelpers.Announce("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}");
+            if (item.MinAge > 0 && account != null && account.Age < item.MinAge)
+            {
+                MenuHelpers.Warn($"  ^ You must be {item.MinAge}+ to purchase this product");
+            }
         }
         WaitForContinue();
     }
@@ -106,13 +112,13 @@ static class Dashboard
     private static void AddProductToShoppingList()
     {
         Console.Clear();
-        var products = AccountsLogic.CurrentAccount == null
-            ? ProductLogic.GetProducts()
-            : ProductLogic.GetProductsForAge(AccountsLogic.CurrentAccount.Age);
+        var products = ProductLogic.GetProducts();
+        AccountModel? account = AccountsLogic.CurrentAccount;
         MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
         foreach (var item in products)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}");
         }
 
         string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
@@ -127,6 +133,13 @@ static class Dashboard
         if (selectedProduct == null)
         {
             MenuHelpers.Warn("Product not found");
+            WaitForContinue();
+            return;
+        }
+
+        if (selectedProduct.MinAge > 0 && account != null && !ProductLogic.IsOldEnoughForProduct(selectedProduct, account.Age))
+        {
+            MenuHelpers.Warn($"You must be {selectedProduct.MinAge}+ to purchase {selectedProduct.Name}");
             WaitForContinue();
             return;
         }

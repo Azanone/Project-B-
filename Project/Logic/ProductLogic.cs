@@ -7,15 +7,8 @@ public class ProductLogic
         return _dataAccess.GetAll();
     }
 
-    public List<ProductModel> GetProductsForAge(int userAge)
+    public static bool IsOldEnoughForProduct(ProductModel product, int userAge)
     {
-        var allProducts = _dataAccess.GetAll();
-        List<ProductModel> filteredProducts = [];
-        foreach (var product in allProducts)
-        {
-            if (product.MinAge <= userAge)
-                filteredProducts.Add(product);
-        }
-        return filteredProducts;
+        return userAge >= product.MinAge;
     }
 }
