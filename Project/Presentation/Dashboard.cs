@@ -29,7 +29,7 @@ static class Dashboard
             MenuHelpers.Confirm("Enter 3 to see store layout");
             MenuHelpers.Confirm("Enter 4 to add a product to shopping cart");
             MenuHelpers.Confirm("Enter 5 to view shopping cart and total");
-            MenuHelpers.Confirm("Enter 6 to clear shopping cart");
+            MenuHelpers.Confirm("Enter 6 to remove an item from shopping cart");
             MenuHelpers.Confirm("Enter 7 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
@@ -56,7 +56,6 @@ static class Dashboard
             else if (input == "6")
             {
                 RemoveItemFromCart();
-                MenuHelpers.Confirm("Shopping list cleared");
                 WaitForContinue();
             }
             else if (input == "7")
@@ -159,7 +158,6 @@ static class Dashboard
         Console.Clear();
 
         var account = AccountsLogic.CurrentAccount;
-        var products = ProductLogic.GetProducts();
 
         if (account == null)
         {
@@ -168,37 +166,36 @@ static class Dashboard
             return;
         }
 
+        var cartItems = ShoppingCart.GetAllItems(account.UserId);
+
+        if (!cartItems.Any())
+        {
+            MenuHelpers.Warn("Cart is empty");
+            WaitForContinue();
+            return;
+        }
+
         MenuHelpers.Announce("--- REMOVE PRODUCT FROM SHOPPING LIST ---");
 
-        foreach (var item in products)
+        foreach (var item in cartItems)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Price: {item.Price} EUR");
+            MenuHelpers.Confirm(
+                $"ID: {item.CartItemId} | {item.Product.Name} | Qty: {item.Quantity}"
+            );
         }
 
-        string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
+        string rawId = MenuHelpers.Prompt("Enter item ID") ?? "";
 
-        if (!long.TryParse(rawId, out long productId))
+        if (!int.TryParse(rawId, out int cartItemId))
         {
-            MenuHelpers.Warn("Invalid product ID");
+            MenuHelpers.Warn("Invalid ID");
             WaitForContinue();
             return;
         }
 
-        ProductModel? selectedProduct = products.FirstOrDefault(p => p.ProductID == productId);
+        ShoppingCart.RemoveItem(cartItemId);
 
-        if (selectedProduct == null)
-        {
-            MenuHelpers.Warn("Product not found");
-            WaitForContinue();
-            return;
-        }
-
-        ShoppingCart.RemoveItem(
-            new ShoppingCartItem(selectedProduct, 1),
-            account.UserId
-        );
-
-        MenuHelpers.Confirm($"Removed {selectedProduct.Name} from cart");
+        MenuHelpers.Confirm("Item removed");
         WaitForContinue();
     }
 

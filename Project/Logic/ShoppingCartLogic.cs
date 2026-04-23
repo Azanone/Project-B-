@@ -10,12 +10,9 @@ public class ShoppingCartLogic
         _cartAccess.AddItemsToCart(userId, productId, quantity);
     }
     
-    public void RemoveItem(ShoppingCartItem item, int userId)
+    public void RemoveItem(int cartItemId)
     {
-        if (item == null)
-            throw new ArgumentException("Item doesn't exist in cart");
-
-        _cartAccess.RemoveItemsFromCart(item, userId);
+        _cartAccess.RemoveItemsFromCart(cartItemId);
     }
 
     public void ChangeCount(ShoppingCartModel item, int newQuantity)

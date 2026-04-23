@@ -21,7 +21,6 @@ public class ShoppingCartAccess
             P.Name,
             P.Price,
             P.Brand,
-            P.Category,
             P.Ingredients
         FROM CART C
         JOIN CART_ITEM CI ON CI.CartId = C.CartId
@@ -43,7 +42,6 @@ public class ShoppingCartAccess
     
     public void AddItemsToCart(int userId, int productId, int quantity)
     {
-        // Haal cartId op, maak aan als die niet bestaat
         string selectSql = "SELECT CartId FROM CART WHERE UserId = @UserId";
         var cartId = _connection.QueryFirstOrDefault<int?>(selectSql, new { UserId = userId });
 
@@ -70,10 +68,11 @@ public class ShoppingCartAccess
         _connection.Execute(sql, cart);
     }
 
-    public void RemoveItemsFromCart(ShoppingCartModel cart, int userId)
+    public void RemoveItemsFromCart(int cartItemId)
     {
-        string sql = $"DELETE FROM CART_ITEM WHERE UserID=@UserId AND CartItemId = @CartItemId;";
+        string sql =
+            "DELETE FROM CART_ITEM WHERE CartItemId=@CartItemId";
 
-        _connection.Execute(sql, cart);
+        _connection.Execute(sql, new { CartItemId = cartItemId });
     }
 }
