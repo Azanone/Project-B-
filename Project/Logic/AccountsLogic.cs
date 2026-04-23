@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Net.Mail;
+using Project.Logic;
 using Project.Presentation;
 
 public class AccountsLogic
@@ -24,14 +25,11 @@ public class AccountsLogic
     public AccountModel? CheckLogin(string identifier, string password)
     {
 
-        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
-        {
-            return null;
-        }
-
-
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password)) return null;
+        
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
-        if (acc != null && acc.Password == password)
+        
+        if (acc != null && PasswordSecurityLogic.VerifyPassword(password, acc.Password))
         {
             CurrentAccount = acc;
             return acc;
@@ -168,12 +166,17 @@ public class AccountsLogic
 
     public void Register(string username, string email, string password, string phoneNumber)
     {
-        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, "0", phoneNumber);
+        string hashedPassword = PasswordSecurityLogic.HashPassword(password);
+        
+        AccountModel newAccount = new AccountModel(
+            username.ToLower(), 
+            email.ToLower(), 
+            hashedPassword,
+            username, 
+            string.Empty, 
+            "0", 
+            phoneNumber);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }
 }
-
-
-
-
