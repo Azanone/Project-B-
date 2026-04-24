@@ -59,6 +59,13 @@ static class Dashboard
             }
             else if (input == "6")
             {
+                if (account == null)
+                {
+                    MenuHelpers.Warn("You must be logged in.");
+                    WaitForContinue();
+                    continue;
+                }
+
                 ShoppingCart.ClearCurrentCart();
                 MenuHelpers.Confirm("Shopping list cleared");
                 WaitForContinue();

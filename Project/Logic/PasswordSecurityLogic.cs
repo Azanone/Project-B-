@@ -21,19 +21,41 @@ public class PasswordSecurityLogic
 
     public static bool VerifyPassword(string password, string storedHash)
     {
-        var parts = storedHash.Split('.');
+        if (string.IsNullOrEmpty(storedHash))
+        {
+            return false;
+        }
 
-        byte[] salt = Convert.FromBase64String(parts[0]);
-        byte[] hash = Convert.FromBase64String(parts[1]);
+        if (!storedHash.Contains('.'))
+        {
+            return string.Equals(password, storedHash, StringComparison.Ordinal);
+        }
 
-        var pbkdf2 = new Rfc2898DeriveBytes(
-            password,
-            salt,
-            100000,
-            HashAlgorithmName.SHA256);
+        var parts = storedHash.Split('.', 2);
 
-        byte[] testHash = pbkdf2.GetBytes(32);
+        if (parts.Length != 2)
+        {
+            return false;
+        }
 
-        return CryptographicOperations.FixedTimeEquals(hash, testHash);
+        try
+        {
+            byte[] salt = Convert.FromBase64String(parts[0]);
+            byte[] hash = Convert.FromBase64String(parts[1]);
+
+            var pbkdf2 = new Rfc2898DeriveBytes(
+                password,
+                salt,
+                100000,
+                HashAlgorithmName.SHA256);
+
+            byte[] testHash = pbkdf2.GetBytes(32);
+
+            return CryptographicOperations.FixedTimeEquals(hash, testHash);
+        }
+        catch (FormatException)
+        {
+            return string.Equals(password, storedHash, StringComparison.Ordinal);
+        }
     }
 }

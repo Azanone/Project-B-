@@ -4,9 +4,7 @@ using Project.Models;
 
 public class ShoppingCartAccess
 {
-    private string Table = "\"CART\"";
-
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private readonly SqliteConnection _connection = DBconnection._c;
     
     public List<ShoppingCartItem> GetAll(int userId)
     {
