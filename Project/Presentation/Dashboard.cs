@@ -1,14 +1,13 @@
 using Project.Logic;
 using Project.Models;
-using Project.Models;
 
 static class Dashboard
 {
     private static readonly ProductLogic ProductLogic = new();
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
-    public static readonly ShoppingListLogic ShoppingCart = new();
-    private static readonly ShoppingListLogic Wishlist = new();
+    public static readonly ShoppingCartLogic ShoppingCart = new();
+    private static readonly ShoppingCartLogic Wishlist = new();
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
@@ -60,9 +59,8 @@ static class Dashboard
             }
             else if (input == "6")
             {
-                ShoppingCart.GetAllItems().Clear();
+                ShoppingCart.ClearCurrentCart();
                 MenuHelpers.Confirm("Shopping list cleared");
-                RemoveItemFromCart();
                 WaitForContinue();
             }
             else if (input == "7")
@@ -127,7 +125,6 @@ static class Dashboard
         }
 
         var products = ProductLogic.GetProducts();
-        AccountModel? account = AccountsLogic.CurrentAccount;
         MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
 
         foreach (var item in products)
@@ -177,14 +174,10 @@ static class Dashboard
         //     selectedProduct.Ingredients
         // );
 
-        var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
+        var cartItem = new ShoppingCartItem(selectedProduct, 1);
         ShoppingCart.AddItem(cartItem);
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
-        
-        ShoppingCart.AddItem(account.UserId, selectedProduct.ProductID, 1);
-
-        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
 
         WaitForContinue();
     }
@@ -202,7 +195,7 @@ static class Dashboard
             return;
         }
 
-        var cartItems = ShoppingCart.GetAllItems(account.UserId);
+        var cartItems = ShoppingCart.GetAllItems();
 
         if (!cartItems.Any())
         {
@@ -229,7 +222,15 @@ static class Dashboard
             return;
         }
 
-        ShoppingCart.RemoveItem(cartItemId);
+        var itemToRemove = cartItems.FirstOrDefault(item => item.CartItemId == cartItemId);
+        if (itemToRemove == null)
+        {
+            MenuHelpers.Warn("Item not found");
+            WaitForContinue();
+            return;
+        }
+
+        ShoppingCart.RemoveItem(itemToRemove);
 
         MenuHelpers.Confirm("Item removed");
         WaitForContinue();
@@ -238,10 +239,6 @@ static class Dashboard
     private static void ShowShoppingCart()
     {
         Console.Clear();
-        MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
-
-        var items = ShoppingCart.GetAllItems();
-        if (items.Count == 0)
         var account = AccountsLogic.CurrentAccount;
 
         if (account == null)
@@ -251,7 +248,9 @@ static class Dashboard
             return;
         }
 
-        var items = ShoppingCart.GetAllItems(account.UserId);
+        MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
+
+        var items = ShoppingCart.GetAllItems();
 
         if (items.Count == 0)
         {
@@ -262,22 +261,16 @@ static class Dashboard
 
         decimal total = 0;
         for (int i = 0; i < items.Count; i++)
-
-        for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
-            total += (decimal)item.Price * item.Quantity;
-            MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Price} EUR");
-            var item = items[i];
-
-            total += item.Product.Price;
+            total += item.Product.Price * item.Quantity;
 
             MenuHelpers.Confirm(
                 $"{i + 1}. {item.Product.Name} | " +
                 $"Category: {item.Product.Category} | " +
                 $"Brand: {item.Product.Brand} | " +
-                $"Price: {item.Product.Price} EUR | " +
-                $"Qty: {item.Quantity}"
+                $"Qty: {item.Quantity} | " +
+                $"Price: {item.Product.Price} EUR"
             );
         }
 
@@ -325,7 +318,7 @@ static class Dashboard
             return;
         }
 
-        var receipts = ReceiptLogic.GetPurchasesByAccountID((int)account.Id);
+        var receipts = ReceiptLogic.GetPurchasesByAccountID(account.UserId);
         MenuHelpers.Announce("--- YOUR PURCHASE HISTORY ---");
 
         if (receipts.Count == 0)

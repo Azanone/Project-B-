@@ -52,7 +52,7 @@ public class AdminLogic
             }
 
             AccountModel? currentAccount = AccountsLogic.CurrentAccount;
-            if (currentAccount != null && currentAccount.Id == userId && normalizedRole.Equals("User", StringComparison.OrdinalIgnoreCase))
+            if (currentAccount != null && currentAccount.UserId == userId && normalizedRole.Equals("User", StringComparison.OrdinalIgnoreCase))
             {
                 return (false, "You cannot remove your own Admin role.");
             }
@@ -84,7 +84,7 @@ public class AdminLogic
             }
 
             AccountModel? currentAccount = AccountsLogic.CurrentAccount;
-            if (currentAccount != null && currentAccount.Id == userId)
+            if (currentAccount != null && currentAccount.UserId == userId)
             {
                 return (false, "You cannot remove your own account.");
             }
@@ -142,7 +142,7 @@ public class AdminLogic
                 return (false, errorMessage);
             }
 
-            product!.ProductID = productId;
+            product!.ProductID = (int)productId;
             bool updated = _productAccess.Update(product);
             return updated
                 ? (true, "Product updated successfully.")

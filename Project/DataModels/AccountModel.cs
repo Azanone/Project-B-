@@ -3,6 +3,12 @@
 
     public int UserId { get; set; }
 
+    public long Id
+    {
+        get => UserId;
+        set => UserId = (int)value;
+    }
+
     public String Role { get; set; } = "User";
 
     public string Username { get; set; } = string.Empty;
@@ -45,7 +51,7 @@
 
     public AccountModel(Int64 id, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, DateTime? birthDate = null)
     {
-        UserId = userId;
+        UserId = (int)id;
         Username = username;
         EmailAddress = email;
         Password = password;

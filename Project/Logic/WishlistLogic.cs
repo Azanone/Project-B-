@@ -1,6 +1,6 @@
 public class WishlistLogic
 {
-        private static readonly Project.Logic.ShoppingListLogic ShoppingCart = Dashboard.ShoppingCart;
+    private static readonly Project.Logic.ShoppingCartLogic ShoppingCart = Dashboard.ShoppingCart;
 
     private long UserId;
     private WishlistAccess _data = new WishlistAccess();

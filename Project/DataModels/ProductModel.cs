@@ -12,7 +12,7 @@ public class ProductModel
 
     public ProductModel(Int64 productid, string name, Decimal price, string brand, string ingredients, Int64 categoryid, Int64 stock, int minAge)
     {
-        ProductID = productid;
+        ProductID = (int)productid;
         Name = name;
         Price = price;
         Brand = brand;
