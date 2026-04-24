@@ -2,48 +2,84 @@ static class AdminMenu
 {
     static public void Start()
     {
-        AccountModel? account = AccountsLogic.CurrentAccount;
-        if (account != null)
-        {
-            Console.WriteLine("Welcome back " + account.FullName);
-        }
+        AccountsLogic accountsLogic = new();
 
-        Console.WriteLine("Enter 1 to see all past transactions");
-        Console.WriteLine("Enter 2 to see a list of all the products");
-        Console.WriteLine("Enter 3 to see the store layout");
-        Console.WriteLine("Enter 4 to see all the offers");
-        Console.WriteLine("Enter 5 to see the stock of the products");
-        Console.WriteLine("Enter 6 to log-out");
+        while (true)
+        {
+            Console.Clear();
+            AccountModel? account = AccountsLogic.CurrentAccount;
+            if (account != null)
+            {
+                MenuHelpers.Announce("Admin Dashboard: Welcome back " + account.FullName);
+            }
 
-        string input = Console.ReadLine();
-        if (input == "1")
-        {
-            PastTransactions.Start();
-        }
-        else if (input == "2")
-        {
-            ShowProducts.Start();
-        }
-        else if (input == "3")
-        {
-            ShowLayout.Start();
-        }
-        else if (input == "4")
-        {
-            ShowOffers.Start();
-        }
-        else if (input == "5")
-        {
-            ShowStock.Start();
-        }
-        else if (input == "6")
-        {
-            Menu.Start();
-        }
-        else
-        {
-            Console.WriteLine("Invalid input");
-            Start();
+            MenuHelpers.Confirm("Enter 1 to see all past transactions");
+            MenuHelpers.Confirm("Enter 2 to see a list of all the products");
+            MenuHelpers.Confirm("Enter 3 to manage products");
+            MenuHelpers.Confirm("Enter 4 to see the store layout");
+            MenuHelpers.Confirm("Enter 5 to see all the offers");
+            MenuHelpers.Confirm("Enter 6 to see the stock of the products");
+            MenuHelpers.Confirm("Enter 7 to see the receipts");
+            MenuHelpers.Confirm("Enter 8 to see products sold in date range");
+            MenuHelpers.Confirm("Enter 9 to manage users");
+            MenuHelpers.Confirm("Enter 10 to log-out");
+
+            string? input = MenuHelpers.Prompt("");
+            if (input == "1")
+            {
+                PastTransactions.Start();
+                return;
+            }
+            else if (input == "2")
+            {
+                ShowProducts.Start();
+                return;
+            }
+            else if (input == "3")
+            {
+                AdminProductManagement.Start();
+                return;
+            }
+            else if (input == "4")
+            {
+                ShowLayout.Start();
+                return;
+            }
+            else if (input == "5")
+            {
+                ShowOffers.Start();
+                return;
+            }
+            else if (input == "6")
+            {
+                ShowStock.Start();
+                return;
+            }
+            else if (input == "7")
+            {
+                ShowReceipt.Start();
+                return;
+            }
+            else if (input == "8")
+            {
+                ShowFinancialOverview.Start();
+                return;
+            }
+            else if (input == "9")
+            {
+                AdminUserManagement.Start();
+                return;
+            }
+            else if (input == "10")
+            {
+                accountsLogic.Logout();
+                Menu.Start();
+                return;
+            }
+            else
+            {
+                MenuHelpers.Warn("Invalid input");
+            }
         }
     }
 

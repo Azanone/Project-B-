@@ -43,7 +43,9 @@ public static class ShowReceipt
             foreach (ReceiptModel item in group)
             {
                 string name = item.ProductName.Length > 25 ? item.ProductName.Substring(0, 25) : item.ProductName;
-                Console.WriteLine($"  |  {name,-27}{item.ProductPrice + " EUR",-11}  |");
+                string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
+                decimal lineTotal = item.ProductPrice * item.Quantity;
+                Console.WriteLine($"  |  {name,-27}{qtyLabel + lineTotal + " EUR",-11}  |");
             }
             
             Console.WriteLine(@"  | ---------------------------------------  |");

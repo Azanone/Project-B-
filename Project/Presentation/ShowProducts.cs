@@ -4,15 +4,14 @@ public static class ShowProducts
     static public void Start()
     {
         ShowAll();
-        Console.WriteLine("Enter 1 to return to Admin Menu");
-        string input = Console.ReadLine();
+        string? input = MenuHelpers.Prompt("Enter 1 to return to Admin Menu");
         if (input == "1")
         {
             AdminMenu.Start();
         }
         else
         {
-            Console.WriteLine("Invalid input");
+            MenuHelpers.Warn("Invalid input");
             Start();
         }
     }
@@ -20,10 +19,10 @@ public static class ShowProducts
     public static void ShowAll()
     {
         var list = productLogic.GetProducts();
-        Console.WriteLine("--- ALL PRODUCTS ---");
+        MenuHelpers.Announce("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            Console.WriteLine($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR");
+            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR");
         }
     }
 }
