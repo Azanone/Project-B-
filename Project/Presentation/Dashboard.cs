@@ -7,6 +7,7 @@ static class Dashboard
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
     private static readonly ShoppingListLogic ShoppingCart = new();
+    private static readonly ShoppingListLogic Wishlist = new();
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
@@ -30,9 +31,10 @@ static class Dashboard
             MenuHelpers.Confirm("Enter 3 to see store layout");
             MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
             MenuHelpers.Confirm("Enter 5 to view shopping list and total");
-            MenuHelpers.Confirm("Enter 6 to clear shopping list");
-            MenuHelpers.Confirm("Enter 7 to show purchase history");
-            MenuHelpers.Confirm("Enter 8 to logout");
+            MenuHelpers.Confirm("Enter 6 to clear shopping cart");
+            MenuHelpers.Confirm("Enter 7 to Wishlist");
+            MenuHelpers.Confirm("Enter 8 to show purchase history");
+            MenuHelpers.Confirm("Enter 9 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
             if (input == "1")
@@ -63,9 +65,13 @@ static class Dashboard
             }
             else if (input == "7")
             {
-                ShowPurchaseHistory();
+                ShowWishlist.Start();
             }
             else if (input == "8")
+            {
+                ShowPurchaseHistory();
+            }
+            else if (input == "9")
             {
                 AccountsLogic.Logout();
                 Menu.Start();
@@ -147,15 +153,15 @@ static class Dashboard
             return;
         }
 
-        var shoppingItem = new ShoppingListModel(
-            selectedProduct.Name,
-            selectedProduct.Category,
-            selectedProduct.Price,
-            selectedProduct.Brand,
-            selectedProduct.Ingredients
-        );
+        // var shoppingItem = new ShoppingListModel(
+        //     selectedProduct.Name,
+        //     selectedProduct.Category,
+        //     selectedProduct.Price,
+        //     selectedProduct.Brand,
+        //     selectedProduct.Ingredients
+        // );
 
-        var cartItem = new ShoppingCartItem(shoppingItem, 1, (double)selectedProduct.Price);
+        var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
         ShoppingCart.AddItem(cartItem);
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
