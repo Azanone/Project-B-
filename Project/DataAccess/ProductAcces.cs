@@ -41,4 +41,15 @@ public class ProductAccess
         int changedRows = _connection.Execute(sql, new { ProductID = productId });
         return changedRows > 0;
     }
+    public int IDSearchByName(string name)
+    {
+        string sql = $"SELECT ProductID FROM Product WHERE Name = @name";
+        return _connection.QuerySingleOrDefault<int>(sql, new { name });
+    }
+
+    public void UpdateStock(int productId,int amount)
+    {
+        string sql = "UPDATE Product SET Stock = Stock + @amount WHERE ProductID = @productId";
+        _connection.Execute(sql, new {amount,productId});
+    }
 }
