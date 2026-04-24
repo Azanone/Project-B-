@@ -1,5 +1,4 @@
-    using Microsoft.Data.Sqlite;
-
+using Microsoft.Data.Sqlite;
 using Dapper;
 
 
@@ -55,8 +54,8 @@ public class AccountsAccess
 
     public void Delete(AccountModel account)
     {
-        string sql = $"DELETE FROM {Table} WHERE UserID = @Id";
-        _connection.Execute(sql, new { Id = account.Id });
+        string sql = $"DELETE FROM {Table} WHERE UserID = @UserId";
+        _connection.Execute(sql, new { UserId = account.UserId });
     }
 
 }

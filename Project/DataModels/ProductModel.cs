@@ -1,8 +1,8 @@
 public class ProductModel
 {
-    public Int64 ProductID {get; set;}
+    public int ProductID {get; set;}
     public string Name {get; set;}
-    public Decimal Price {get; set;}
+    public decimal Price {get; set;}
     public string Brand {get; set;}
     public string Ingredients {get; set;}
     public Int64 CategoryID {get; set;}
@@ -12,7 +12,7 @@ public class ProductModel
 
     public ProductModel(Int64 productid, string name, Decimal price, string brand, string ingredients, Int64 categoryid, Int64 stock, int minAge)
     {
-        ProductID = productid;
+        ProductID = (int)productid;
         Name = name;
         Price = price;
         Brand = brand;

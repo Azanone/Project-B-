@@ -1,0 +1,78 @@
+﻿using Microsoft.Data.Sqlite;
+using Dapper;
+using Project.Models;
+
+public class ShoppingCartAccess
+{
+    private string Table = "\"CART\"";
+
+    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    
+    public List<ShoppingCartItem> GetAll(int userId)
+    {
+        {
+            string sql = @"
+        SELECT 
+            CI.CartItemId,
+            CI.CartId,
+            CI.ProductId,
+            CI.Quantity,
+            P.ProductID,
+            P.Name,
+            P.Price,
+            P.Brand,
+            P.Ingredients
+        FROM CART C
+        JOIN CART_ITEM CI ON CI.CartId = C.CartId
+        JOIN PRODUCT P ON P.ProductId = CI.ProductId
+        WHERE C.UserId = @UserId";
+
+            return _connection.Query<ShoppingCartItem, ProductModel, ShoppingCartItem>(
+                sql,
+                (cartItem, product) =>
+                {
+                    cartItem.Product = product;
+                    return cartItem;
+                },
+                new { UserId = userId },
+                splitOn: "ProductID"
+            ).ToList();
+        }
+    }
+    
+    public void AddItemsToCart(int userId, int productId, int quantity)
+    {
+        string selectSql = "SELECT CartId FROM CART WHERE UserId = @UserId";
+        var cartId = _connection.QueryFirstOrDefault<int?>(selectSql, new { UserId = userId });
+
+        if (!cartId.HasValue)
+        {
+            string insertCartSql = @"
+            INSERT INTO CART (UserId, CreatedAt) 
+            VALUES (@UserId, @CreatedAt);
+            SELECT last_insert_rowid();";
+            cartId = _connection.QuerySingle<int>(insertCartSql, new { UserId = userId, CreatedAt = DateTime.Now });
+        }
+
+        string insertItemSql = @"
+        INSERT INTO CART_ITEM (CartId, ProductId, Quantity)
+        VALUES (@CartId, @ProductId, @Quantity);";
+
+        _connection.Execute(insertItemSql, new { CartId = cartId.Value, ProductId = productId, Quantity = quantity });
+    }
+
+    public void UpdateCart(ShoppingCartModel cart)
+    {
+        string sql = $"UPDATE CART_ITEM SET Quantity=@Quantity WHERE CartItemID=@CartItemId";
+
+        _connection.Execute(sql, cart);
+    }
+
+    public void RemoveItemsFromCart(int cartItemId)
+    {
+        string sql =
+            "DELETE FROM CART_ITEM WHERE CartItemId=@CartItemId";
+
+        _connection.Execute(sql, new { CartItemId = cartItemId });
+    }
+}

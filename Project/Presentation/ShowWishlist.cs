@@ -3,7 +3,7 @@ public static class ShowWishlist
     public static void Start()
     {
         AccountModel? account = AccountsLogic.CurrentAccount;
-        WishlistLogic WLlogic = new(account.Id);
+        WishlistLogic WLlogic = new(account.UserId);
         Console.Clear();
         MenuHelpers.Confirm("Enter 1 View Wishlist");
         MenuHelpers.Confirm("Enter 2 Add product");
