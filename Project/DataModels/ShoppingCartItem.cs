@@ -2,11 +2,11 @@
 
 public class ShoppingCartItem
 {
-    public ShoppingListModel Product { get; }
+    public ProductModel Product { get; }
     public int Quantity { get; set; }
-    public double Price { get; set; }
+    public decimal Price { get; set; }
 
-    public ShoppingCartItem(ShoppingListModel product, int quantity, double price)
+    public ShoppingCartItem(ProductModel product, int quantity, decimal price)
     {
         Product = product;
         Quantity = quantity;

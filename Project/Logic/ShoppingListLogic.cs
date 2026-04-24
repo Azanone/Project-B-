@@ -5,6 +5,15 @@ public class ShoppingListLogic
     private readonly List<Models.ShoppingCartItem> _items = new();
     private readonly List<Models.ShoppingListModel> _FullShop = new();
 
+
+    public void AddMultiple(List<ProductModel> products)
+    {
+        foreach (var p in products)
+        {
+            Models.ShoppingCartItem newItem = new Models.ShoppingCartItem(p, 1, p.Price);
+            AddItem(newItem);
+        }
+    }
     public void AddItem(Models.ShoppingCartItem item)
     {
         if (item == null)
