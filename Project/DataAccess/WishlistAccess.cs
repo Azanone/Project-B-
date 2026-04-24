@@ -5,24 +5,6 @@ public class WishlistAccess
 {
     private SqliteConnection _connection = DBconnection._c;
 
-    public WishlistAccess()
-    {
-        EnsureWishlistTable();
-    }
-
-    private void EnsureWishlistTable()
-    {
-        string sql = @"
-            CREATE TABLE IF NOT EXISTS Wishlist (
-                UserID INTEGER NOT NULL,
-                ProductID INTEGER NOT NULL,
-                PRIMARY KEY (UserID, ProductID),
-                FOREIGN KEY(UserID) REFERENCES Account(UserID),
-                FOREIGN KEY(ProductID) REFERENCES Product(ProductID)
-            );";
-
-        _connection.Execute(sql);
-    }
 
     public List<ProductModel> GetAll(long UserID)
     {
