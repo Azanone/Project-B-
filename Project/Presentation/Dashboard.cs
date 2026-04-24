@@ -89,10 +89,6 @@ static class Dashboard
         {
             string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
             MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}");
-            if (item.MinAge > 0 && account != null && account.Age < item.MinAge)
-            {
-                MenuHelpers.Warn($"  ^ You must be {item.MinAge}+ to purchase this product");
-            }
         }
         WaitForContinue();
     }
