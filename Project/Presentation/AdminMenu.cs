@@ -15,11 +15,14 @@ static class AdminMenu
 
             MenuHelpers.Confirm("Enter 1 to see all past transactions");
             MenuHelpers.Confirm("Enter 2 to see a list of all the products");
-            MenuHelpers.Confirm("Enter 3 to see the store layout");
-            MenuHelpers.Confirm("Enter 4 to see all the offers");
-            MenuHelpers.Confirm("Enter 5 to see the stock of the products");
-            MenuHelpers.Confirm("Enter 6 to see the receipts");
-            MenuHelpers.Confirm("Enter 7 to log-out");
+            MenuHelpers.Confirm("Enter 3 to manage products");
+            MenuHelpers.Confirm("Enter 4 to see the store layout");
+            MenuHelpers.Confirm("Enter 5 to see all the offers");
+            MenuHelpers.Confirm("Enter 6 to see the stock of the products");
+            MenuHelpers.Confirm("Enter 7 to see the receipts");
+            MenuHelpers.Confirm("Enter 8 to see products sold in date range");
+            MenuHelpers.Confirm("Enter 9 to manage users");
+            MenuHelpers.Confirm("Enter 10 to log-out");
 
             string? input = MenuHelpers.Prompt("");
             if (input == "1")
@@ -34,25 +37,40 @@ static class AdminMenu
             }
             else if (input == "3")
             {
-                ShowLayout.Start();
+                AdminProductManagement.Start();
                 return;
             }
             else if (input == "4")
             {
-                ShowOffers.Start();
+                ShowLayout.Start();
                 return;
             }
             else if (input == "5")
             {
-                ShowStock.Start();
+                ShowOffers.Start();
                 return;
             }
             else if (input == "6")
             {
-                ShowReceipt.Start();
+                ShowStock.Start();
                 return;
             }
             else if (input == "7")
+            {
+                ShowReceipt.Start();
+                return;
+            }
+            else if (input == "8")
+            {
+                ShowFinancialOverview.Start();
+                return;
+            }
+            else if (input == "9")
+            {
+                AdminUserManagement.Start();
+                return;
+            }
+            else if (input == "10")
             {
                 accountsLogic.Logout();
                 Menu.Start();
