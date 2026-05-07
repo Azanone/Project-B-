@@ -1,5 +1,4 @@
-    using Microsoft.Data.Sqlite;
-
+using Microsoft.Data.Sqlite;
 using Dapper;
 
 
@@ -11,25 +10,25 @@ public class AccountsAccess
 
     public void Write(AccountModel account)
     {
-        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, Role) VALUES (@Username, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber, @Role)";
+        string sql = $"INSERT INTO {Table} (Name, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, Role, BirthDate) VALUES (@Username, @Username, @EmailAddress, @Password, @FullName, @Postcode, @HouseNumber, @phoneNumber, @Role, @BirthDate)";
         _connection.Execute(sql, account);
     }
 
     public AccountModel? GetByIdentifier(string identifier)
     {
-        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
+        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, BirthDate FROM {Table} WHERE EmailAddress = @Identifier OR Username = @Identifier";
         return _connection.QueryFirstOrDefault<AccountModel>(sql, new { Identifier = identifier });
     }
 
     public AccountModel? GetById(long userId)
-    {
-        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} WHERE UserID = @UserId";
+    { 
+        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, BirthDate FROM {Table} WHERE UserID = @UserId";
         return _connection.QueryFirstOrDefault<AccountModel>(sql, new { UserId = userId });
     }
 
     public List<AccountModel> GetAllUsers()
     {
-        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber FROM {Table} ORDER BY UserID";
+        string sql = $"SELECT UserID AS Id, CASE WHEN Role IS NOT NULL AND trim(Role) <> '' THEN Role WHEN lower(Username) = 'admin' OR lower(EmailAddress) = 'admin' THEN 'Admin' ELSE 'User' END AS Role, Username, EmailAddress, Password, FullName, Postcode, HouseNumber, phoneNumber, BirthDate FROM {Table} ORDER BY UserID";
         return _connection.Query<AccountModel>(sql).ToList();
     }
 
@@ -49,14 +48,14 @@ public class AccountsAccess
 
     public void Update(AccountModel account)
     {
-        string sql = $"UPDATE {Table} SET Name = @FullName, Username = @Username, EmailAddress = @EmailAddress, Password = @Password, FullName = @FullName, Postcode = @Postcode, HouseNumber = @HouseNumber, phoneNumber = @phoneNumber, Role = @Role WHERE UserID = @Id";
+        string sql = $"UPDATE {Table} SET Name = @FullName, Username = @Username, EmailAddress = @EmailAddress, Password = @Password, FullName = @FullName, Postcode = @Postcode, HouseNumber = @HouseNumber, phoneNumber = @phoneNumber, Role = @Role, BirthDate = @BirthDate WHERE UserID = @Id";
         _connection.Execute(sql, account);
     }
 
     public void Delete(AccountModel account)
     {
-        string sql = $"DELETE FROM {Table} WHERE UserID = @Id";
-        _connection.Execute(sql, new { Id = account.Id });
+        string sql = $"DELETE FROM {Table} WHERE UserID = @UserId";
+        _connection.Execute(sql, new { UserId = account.UserId });
     }
 
 }

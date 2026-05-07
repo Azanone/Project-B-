@@ -1,3 +1,4 @@
+namespace Project.Presentation;
 
 static class UserRegister
 {
@@ -7,7 +8,9 @@ static class UserRegister
         Console.Clear();
         MenuHelpers.Announce("Register your account");
 
-        string username = MenuHelpers.PromptUntilValid("What's your username", AL.ValidateUsername);
+        string firstname = MenuHelpers.PromptUntilValid("What's your first name?", AL.ValidateFirstName);
+        string lastname  = MenuHelpers.PromptUntilValid("What's your last name?", AL.ValidateLastName);
+        string username = AL.CreateUsername(firstname, lastname);
         string email = MenuHelpers.PromptUntilValid("What's your Email", AL.ValidateEmail);
         string password = MenuHelpers.PromptUntilValid("What's your Password (atleast 7 characters)", AL.ValidatePassword);
         string phoneNumber = MenuHelpers.PromptUntilValid("What's your phone number (only Dutch numbers)", AL.ValidatePhonenumber);
