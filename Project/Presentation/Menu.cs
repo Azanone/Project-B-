@@ -1,12 +1,15 @@
 static class Menu
-{
-
-    //This shows the menu. You can call back to this method to show the menu again
-    //after another presentation method is completed.
-    //You could edit this to show different menus depending on the user's role
-    static public void Start()
+{    static public void Start()
     {
         Console.Clear();
+        MenuHelpers.Announce(@".·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''':·.
+: :     ____             __               __                   __  ___                    __     __  : :
+: :    / __ )  ____ _   / /_    __  __   / /  ____    ____    /  |/  /  ____ _   _____   / /__  / /_ : :
+: :   / __  | / __ `/  / __ \  / / / /  / /  / __ \  / __ \  / /|_/ /  / __ `/  / ___/  / //_/ / __/ : :
+: :  / /_/ / / /_/ /  / /_/ / / /_/ /  / /  / /_/ / / / / / / /  / /  / /_/ /  / /     / ,<   / /_   : :
+: : /_____/  \__,_/  /_.___/  \__, /  /_/   \____/ /_/ /_/ /_/  /_/   \__,_/  /_/     /_/|_|  \__/   : :
+: :                          /____/                                                                  : :
+'·:..................................................................................................:·'");
         MenuHelpers.Announce("Enter 1 to login");
         MenuHelpers.Announce("Enter 2 to register");
         MenuHelpers.Announce("Enter 3 to continue as guest");
