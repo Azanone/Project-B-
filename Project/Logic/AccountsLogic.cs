@@ -164,6 +164,15 @@ public class AccountsLogic
         }
     }
 
+    public bool ValidateBirthDate(string date)
+    {
+        if (string.IsNullOrWhiteSpace(date)) return false;
+        try
+        {
+            if(date)
+        }
+        
+    }
     public void Register(string username, string email, string password, string phoneNumber)
     {
         string hashedPassword = PasswordSecurityLogic.HashPassword(password);
