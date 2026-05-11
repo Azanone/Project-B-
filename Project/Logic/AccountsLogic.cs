@@ -164,29 +164,41 @@ public class AccountsLogic
         }
     }
 
-    public bool ValidateBirthDate(string date)
+    private DateTime? ParseBirthDate(string date)
     {
         string user_friendly_format = "dd-MM-yyyy";
-        if (string.IsNullOrWhiteSpace(date)) return false;
+        if (string.IsNullOrWhiteSpace(date)) return null;
         try
         {
-            DateTime parsedDate = DateTime.ParseExact(date, user_friendly_format, null);
-            if (parsedDate > DateTime.Now)
-            {
-                MenuHelpers.Error("Birthdate cannot be in the future");
-                return false;
-            }
-            return true;
+            return DateTime.ParseExact(date, user_friendly_format, null);
         }
-        catch (Exception e)
+        catch
         {
-            MenuHelpers.Error($"Validation error: {e.Message}");
-            return false;
+            return null;
         }
     }
-    public void Register(string username, string email, string password, string phoneNumber)
+
+    public bool ValidateBirthDate(string date)
+    {
+        var parsedDate = ParseBirthDate(date);
+        if (parsedDate == null)
+        {
+            MenuHelpers.Error("Invalid birth date format");
+            return false;
+        }
+        
+        if (parsedDate > DateTime.Now)
+        {
+            MenuHelpers.Error("Birthdate cannot be in the future");
+            return false;
+        }
+        return true;
+    }
+
+    public void Register(string username, string email, string password, string phoneNumber, string birthDate)
     {
         string hashedPassword = PasswordSecurityLogic.HashPassword(password);
+        var parsedDate = ParseBirthDate(birthDate);
         
         AccountModel newAccount = new AccountModel(
             username.ToLower(), 
@@ -195,7 +207,8 @@ public class AccountsLogic
             username, 
             string.Empty, 
             "0", 
-            phoneNumber);
+            phoneNumber,
+            parsedDate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }
