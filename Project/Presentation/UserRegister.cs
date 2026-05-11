@@ -15,7 +15,7 @@ static class UserRegister
         string password = MenuHelpers.PromptUntilValid("What's your Password (atleast 7 characters)", AL.ValidatePassword);
         string phoneNumber = MenuHelpers.PromptUntilValid("What's your phone number (only Dutch numbers)", AL.ValidatePhonenumber);
         string birthDate = MenuHelpers.PromptUntilValid("What's your BirthDate? (DD-MM-YYYY)", AL.ValidateBirthDate);
-        AL.Register(username, email, password, phoneNumber);
+        AL.Register(username, email, password, phoneNumber, birthDate);
         MenuHelpers.Confirm($"Successfully registered as {username}");
         System.Threading.Thread.Sleep(1000);
         Menu.Start();
