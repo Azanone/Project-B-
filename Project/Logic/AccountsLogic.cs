@@ -166,12 +166,23 @@ public class AccountsLogic
 
     public bool ValidateBirthDate(string date)
     {
+        string user_friendly_format = "dd-MM-yyyy";
         if (string.IsNullOrWhiteSpace(date)) return false;
         try
         {
-            if(date)
+            DateTime parsedDate = DateTime.ParseExact(date, user_friendly_format, null);
+            if (parsedDate > DateTime.Now)
+            {
+                MenuHelpers.Error("Birthdate cannot be in the future");
+                return false;
+            }
+            return true;
         }
-        
+        catch (Exception e)
+        {
+            MenuHelpers.Error($"Validation error: {e.Message}");
+            return false;
+        }
     }
     public void Register(string username, string email, string password, string phoneNumber)
     {
