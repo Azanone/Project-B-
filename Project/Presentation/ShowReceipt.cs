@@ -3,17 +3,7 @@ public static class ShowReceipt
     static public void Start()
     {
         ShowAll();
-        MenuHelpers.Confirm("Enter 1 to return to Admin Menu");
-        string? input = MenuHelpers.Prompt("");
-        if (input == "1")
-        {
-            AdminMenu.Start();
-        }
-        else
-        {
-            MenuHelpers.Warn("Invalid input");
-            Start();
-        }
+        MenuHelpers.PromptReturnToMenu("Enter 1 to return to Admin Menu", AdminMenu.Start);
     }
 
     public static void ShowAll()
