@@ -1,3 +1,5 @@
+using System.Text;
+
 public static class MenuHelpers
 {
     public static void Warn(string input)
@@ -31,6 +33,30 @@ public static class MenuHelpers
         Console.ResetColor();
         return Console.ReadLine();
      }
+    public static string PromptPassword(string message)
+{
+    Console.Write(message);
+
+    var password = new StringBuilder();
+    ConsoleKeyInfo key;
+
+    while ((key = Console.ReadKey(true)).Key != ConsoleKey.Enter)
+    {
+        if (key.Key == ConsoleKey.Backspace && password.Length > 0)
+        {
+            password.Length--;
+            Console.Write("\b \b");
+        }
+        else if (!char.IsControl(key.KeyChar))
+        {
+            password.Append(key.KeyChar);
+            Console.Write("*");
+        }
+    }
+
+    Console.WriteLine();
+    return password.ToString();
+}
     public static int PromptInt(string strin)
     {
         Console.ForegroundColor = ConsoleColor.White;
