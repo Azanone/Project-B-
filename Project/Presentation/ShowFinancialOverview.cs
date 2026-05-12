@@ -4,7 +4,6 @@ public static class ShowFinancialOverview
     {
         MenuHelpers.Announce("--- FINANCIAL OVERVIEW ---\n");
         MenuHelpers.Confirm("Choose date range (DD-MM-YYYY): ");
-        MenuHelpers.Confirm("Enter 1 to return to Admin Menu");
         string? firstDate = MenuHelpers.Prompt("");
         if (firstDate == "1")
         {
@@ -26,12 +25,7 @@ public static class ShowFinancialOverview
             DateTime endDate = new DateTime(int.Parse(dates2[2]), int.Parse(dates2[1]), int.Parse(dates2[0]));
             MenuHelpers.Announce($"From {firstDate} to {secondDate} (Sorted by most sold items):\n");
             ShowFinancialOverviewByDate(startDate, endDate);
-            MenuHelpers.Confirm("\nEnter 1 to return to Admin Menu");
-            string? input = MenuHelpers.Prompt("");
-            if (input == "1")
-            {
-                AdminMenu.Start();
-            }
+            MenuHelpers.PromptReturnToMenu("\nEnter 1 to return to Admin Menu", AdminMenu.Start);
         }
         catch (FormatException)
         {

@@ -4,16 +4,7 @@ public static class ShowProducts
     static public void Start()
     {
         ShowAll();
-        string? input = MenuHelpers.Prompt("Enter 1 to return to Admin Menu");
-        if (input == "1")
-        {
-            AdminMenu.Start();
-        }
-        else
-        {
-            MenuHelpers.Warn("Invalid input");
-            Start();
-        }
+        MenuHelpers.PromptReturnToMenu("Enter 1 to return to Admin Menu", AdminMenu.Start);
     }
 
     public static void ShowAll()
