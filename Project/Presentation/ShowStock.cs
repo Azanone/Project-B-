@@ -37,12 +37,10 @@ public static class ShowStock
 
     public static void ShowAll()
     {
-        var list = productLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}");
-        }
+        Display.List(
+            productLogic.GetProducts(),
+            item => $"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}",
+            "--- ALL PRODUCTS ---");
     }
 
     public static void OrderProductByID(int productID, int orderAmount)

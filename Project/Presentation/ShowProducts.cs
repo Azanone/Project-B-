@@ -9,11 +9,9 @@ public static class ShowProducts
 
     public static void ShowAll()
     {
-        var list = productLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR");
-        }
+        Display.List(
+            productLogic.GetProducts(),
+            item => $"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR",
+            "--- ALL PRODUCTS ---");
     }
 }
