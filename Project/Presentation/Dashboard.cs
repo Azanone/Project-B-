@@ -17,20 +17,13 @@ static class Dashboard
             Console.Clear();
             AccountModel? account = AccountsLogic.CurrentAccount;
 
-            if (account == null)
-            {
-                MenuHelpers.Announce("Welcome guest");
-            }
-            else
-            {
-                MenuHelpers.Announce("Welcome back " + account.FullName);
-            }
+            MenuHelpers.Announce("Welcome back " + account.FullName);
             
             MenuHelpers.Confirm("Enter 1 to see all products");
             MenuHelpers.Confirm("Enter 2 to see all offers");
             MenuHelpers.Confirm("Enter 3 to see store layout");
             MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
-            MenuHelpers.Confirm("Enter 5 to view shopping list and total");
+            MenuHelpers.Confirm("Enter 5 to view shopping cart and total");
             MenuHelpers.Confirm("Enter 6 to clear shopping cart");
             MenuHelpers.Confirm("Enter 7 to Wishlist");
             MenuHelpers.Confirm("Enter 8 to show purchase history");

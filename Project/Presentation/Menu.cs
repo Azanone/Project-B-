@@ -78,7 +78,7 @@ static class Menu
         }
         else if (input == "3")
         {
-            Dashboard.Start();
+            DashboardGuest.Start();
         }
         else
         {

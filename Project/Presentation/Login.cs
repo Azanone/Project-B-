@@ -23,14 +23,14 @@ static class Login
                 Dashboard.Start();
             }
         }
-        
+
         if (account != null)
         {
             CurrentSession.User = account;
 
             Dashboard.Start();
         }
-        
+
         else
         {
             if (accountsLogic.IdentifierExists(identifier))
