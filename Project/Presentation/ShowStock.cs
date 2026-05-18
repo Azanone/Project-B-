@@ -9,23 +9,11 @@ public static class ShowStock
         if (input == "1")
         {
             AdminMenu.Start();
+            return;
         }
-        if (input == "2")
+        else if (input == "2")
         {
-            int orderinputId;
-            string? orderinputName = MenuHelpers.Prompt("Please enter the Name OR Id or the product you'd like to order");
-            if (int.TryParse(orderinputName, out orderinputId))
-            {
-                int inputAmount = MenuHelpers.PromptInt("Please enter the the amount you'd like to order");
-                OrderProductByID(orderinputId, inputAmount);
-                MenuHelpers.Announce("Your order has been placed!");
-            }
-            else
-            {
-                int inputAmount = MenuHelpers.PromptInt("Please enter the the amount you'd like to order");
-                OrderProductByName(orderinputName, inputAmount);
-                MenuHelpers.Announce("Your order has been placed!");
-            }
+            OrderProducts();
             AdminMenu.Start();
         }
         else
@@ -35,20 +23,43 @@ public static class ShowStock
         }
     }
 
+    public static void OrderProducts()
+    {
+        string? orderInput = MenuHelpers.Prompt("Please enter the Name or Id of the product you'd like to order");
+        if (string.IsNullOrWhiteSpace(orderInput))
+        {
+            MenuHelpers.Warn("No product given");
+            return;
+        }
+
+        int inputAmount = MenuHelpers.PromptInt("Please enter the amount you'd like to order");
+
+        int orderInputId;
+        bool inputIsId = int.TryParse(orderInput, out orderInputId);
+
+        if (inputIsId)
+        {
+            productLogic.OrderProductByID(orderInputId, inputAmount);
+            MenuHelpers.Announce("Your order has been placed!");
+            return;
+        }
+
+        bool ordered = productLogic.OrderProductByName(orderInput, inputAmount);
+        if (ordered)
+        {
+            MenuHelpers.Announce("Your order has been placed!");
+        }
+        else
+        {
+            MenuHelpers.Warn("Product not found, no order placed");
+        }
+    }
+
     public static void ShowAll()
     {
         Display.List(
             productLogic.GetProducts(),
             item => $"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}",
             "--- ALL PRODUCTS ---");
-    }
-
-    public static void OrderProductByID(int productID, int orderAmount)
-    {
-        productLogic.OrderProductByID(productID, orderAmount);
-    }
-    public static void OrderProductByName(string productName, int orderAmount)
-    {
-        productLogic.OrderProductByName(productName, orderAmount);
     }
 }
