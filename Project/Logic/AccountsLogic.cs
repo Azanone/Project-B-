@@ -192,6 +192,11 @@ public class AccountsLogic
             MenuHelpers.Error("Birthdate cannot be in the future");
             return false;
         }
+        if (parsedDate.Value.Year < 1912)
+        {
+            MenuHelpers.Error("Birthdate cannot be in the very past");
+            return false;
+        }
         return true;
     }
 
