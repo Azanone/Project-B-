@@ -7,83 +7,111 @@ static class Dashboard
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
     private static readonly ShoppingListLogic ShoppingCart = new();
-    // private static readonly WishlistLogic Wishlist = new();
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
+{
+    while (true)
     {
-        while (true)
+        Console.Clear();
+        AccountModel? account = AccountsLogic.CurrentAccount;
+        string userGreeting = "Welcome guest";
+        if (account != null)
         {
-            Console.Clear();
-            AccountModel? account = AccountsLogic.CurrentAccount;
+            userGreeting = "Welcome back " + account.FullName;
+        }
 
-            if (account == null)
-            {
-                MenuHelpers.Announce("Welcome guest");
-            }
-            else
-            {
-                MenuHelpers.Announce("Welcome back " + account.FullName);
-            }
+        List<string> options = new List<string>
+        {
+            "See all products",
+            "See all offers",
+            "See store layout",
+            "Add a product to shopping list",
+            "View shopping list and total",
+            "Clear shopping cart"
+        };
 
-            MenuHelpers.Confirm("Enter 1 to see all products");
-            MenuHelpers.Confirm("Enter 2 to see all offers");
-            MenuHelpers.Confirm("Enter 3 to see store layout");
-            MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
-            MenuHelpers.Confirm("Enter 5 to view shopping list and total");
-            MenuHelpers.Confirm("Enter 6 to clear shopping cart");
-            MenuHelpers.Confirm("Enter 7 to Wishlist");
-            MenuHelpers.Confirm("Enter 8 to show purchase history");
-            MenuHelpers.Confirm("Enter 9 to logout");
+        if (account == null)
+        {
+            options.Add("Login");
+        }
+        else
+        {
+            options.Add("Wishlist");
+            options.Add("Show purchase history");
+            options.Add("Logout");
+        }
 
-            string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
-            if (input == "1")
+        MenuNavigation menu = new MenuNavigation(options, userGreeting);
+        int selection = menu.Start();
+
+        if (account == null)
+        {
+            switch (selection)
             {
-                ShowProducts();
+                case 0:
+                    ShowProducts();
+                    break;
+                case 1:
+                    ShowOffers();
+                    break;
+                case 2:
+                    ShowLayout();
+                    break;
+                case 3:
+                    AddProductToShoppingList();
+                    break;
+                case 4:
+                    ShowShoppingList();
+                    break;
+                case 5:
+                    ShoppingCart.GetAllItems().Clear();
+                    MenuHelpers.Confirm("Shopping list cleared");
+                    WaitForContinue();
+                    break;
+                case 6:
+                    Login.Start();
+                    break;
             }
-            else if (input == "2")
+        }
+        else
+        {
+            switch (selection)
             {
-                ShowOffers();
-            }
-            else if (input == "3")
-            {
-                ShowLayout();
-            }
-            else if (input == "4")
-            {
-                AddProductToShoppingList();
-            }
-            else if (input == "5")
-            {
-                ShowShoppingList();
-            }
-            else if (input == "6")
-            {
-                ShoppingCart.GetAllItems().Clear();
-                MenuHelpers.Confirm("Shopping list cleared");
-                WaitForContinue();
-            }
-            else if (input == "7")
-            {
-                ShowWishlist.Start();
-            }
-            else if (input == "8")
-            {
-                ShowPurchaseHistory();
-            }
-            else if (input == "9")
-            {
-                AccountsLogic.Logout();
-                Menu.Start();
-                return;
-            }
-            else
-            {
-                MenuHelpers.Warn("Invalid input");
-                WaitForContinue();
+                case 0:
+                    ShowProducts();
+                    break;
+                case 1:
+                    ShowOffers();
+                    break;
+                case 2:
+                    ShowLayout();
+                    break;
+                case 3:
+                    AddProductToShoppingList();
+                    break;
+                case 4:
+                    ShowShoppingList();
+                    break;
+                case 5:
+                    ShoppingCart.GetAllItems().Clear();
+                    MenuHelpers.Confirm("Shopping list cleared");
+                    WaitForContinue();
+                    break;
+                case 6:
+                    ShowWishlist.Start();
+                    break;
+                case 7:
+                    ShowPurchaseHistory();
+                    break;
+                case 8:
+                    AccountsLogic.Logout();
+                    Menu.Start();
+                    return;
             }
         }
     }
+}
 
     private static void ShowProducts()
     {
@@ -92,7 +120,6 @@ static class Dashboard
         MenuHelpers.Announce("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            // MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
             MenuHelpers.Confirm($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
         }
         WaitForContinue();
@@ -143,14 +170,6 @@ static class Dashboard
             return;
         }
 
-        // var shoppingItem = new ShoppingListModel(
-        //     selectedProduct.Name,
-        //     selectedProduct.Category,
-        //     selectedProduct.Price,
-        //     selectedProduct.Brand,
-        //     selectedProduct.Ingredients
-        // );
-
         var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
         ShoppingCart.AddItem(cartItem);
 
@@ -188,22 +207,22 @@ static class Dashboard
         Console.Clear();
         MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
 ║              ║                  ║                   ║
-║   BAKERY     ║     DAIRY        ║     FROZEN        ║
+║   BAKERY     ║    DAIRY         ║     FROZEN        ║
 ║              ║                  ║                   ║
 ╠══════════════╩══════════════════╣                   ║
 ║                                 ╚═══════════════════╣
-║  ┌───────┐ ┌──────────┐ ┌─────┐ ┌─────────┐        ║
-║  │       │ │ Canned & │ │Beve-│ │ Snacks  │        ║
-║  │ Deli  │ │ Dry Food │ │rage │ │  And    │        ║
-║  │       │ │          │ │     │ │  Goods  │        ║
-║  └───────┘ └──────────┘ └─────┘ └─────────┘        ║
+║  ┌───────┐ ┌──────────┐ ┌─────┐ ┌_________┐         ║
+║  │       │ │ Canned & │ │Beve-│ │ Snacks  │         ║
+║  │ Deli  │ │ Dry Food │ │rage │ │  And    │         ║
+║  │       │ │          │ │     │ │  Goods  │         ║
+║  └───────┘ └──────────┘ └─────┘ └_________┘         ║
 ╠════════════════════╦════════════════════════════════╣
 ║                    ║                                ║
 ║   FRESH PRODUCE    ║    CASHOUT /                   ║
 ║                    ║    CUSTOMER SERVICE            ║
 ║                    ║                                ║
 ╚════════════════════╝        ↑           ╚═══════════╝
-                        ENTRANCE / EXIT");
+                         ENTRANCE / EXIT");
         WaitForContinue();
     }
 
@@ -211,7 +230,7 @@ static class Dashboard
     {
         MenuHelpers.Prompt("Press Enter to continue");
     }
-    
+
     private static void ShowPurchaseHistory()
     {
         Console.Clear();

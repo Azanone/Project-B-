@@ -46,6 +46,26 @@ public class AccountsLogic
         CurrentAccount = null;
     }
 
+   public bool ValidateBirthday(string birthdayInput)
+    {
+        if (string.IsNullOrWhiteSpace(birthdayInput))
+        {
+            MenuHelpers.Error("Birthday cannot be empty");
+            return false;
+        }
+        if (!DateTime.TryParse(birthdayInput, out DateTime birthday))
+        {
+            MenuHelpers.Error("Invalid date format");
+            return false;
+        }
+        if (birthday > DateTime.Today)
+        {
+            MenuHelpers.Error("Birthday cannot be in the future");
+            return false;
+        }
+        return true;
+    }
+
     public bool ValidateUsername(string username)
     {
         if (string.IsNullOrWhiteSpace(username) || username.Length < 3)
@@ -119,9 +139,9 @@ public class AccountsLogic
         }
     }
 
-    public void Register(string username, string email, string password, string phoneNumber)
+    public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, "0", phoneNumber);
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, "0", phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }

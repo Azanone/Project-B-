@@ -16,7 +16,7 @@
     public string Postcode { get; set; } = string.Empty;
 
     public string HouseNumber { get; set; }
-
+    public string Birthdate { get; set; }
     public string phoneNumber { get; set; } = string.Empty;
 
 
@@ -41,7 +41,7 @@
         this.phoneNumber = phoneNumber;
         Role = "User";
     }
-    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
+    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, string bdate)
     {
         Username = username;
         EmailAddress = email;
@@ -51,6 +51,7 @@
         HouseNumber = houseNumber;
         this.phoneNumber = phoneNumber;
         Role = "User";
+        Birthdate = bdate;
     }
 
 
