@@ -180,14 +180,6 @@ static class Dashboard
             return;
         }
 
-        // var shoppingItem = new ShoppingListModel(
-        //     selectedProduct.Name,
-        //     selectedProduct.Category,
-        //     selectedProduct.Price,
-        //     selectedProduct.Brand,
-        //     selectedProduct.Ingredients
-        // );
-
         var cartItem = new ShoppingCartItem(selectedProduct, 1);
         ShoppingCart.AddItem(cartItem);
 
@@ -292,8 +284,11 @@ static class Dashboard
         //WaitForContinue();
     }
 
+<<<<<<< HEAD
     static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
     
+=======
+>>>>>>> c27790a039f48ccd1a48462037209ff78568425c
     private static void ShowLayout()
     {
         Console.Clear();
