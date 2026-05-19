@@ -12,14 +12,15 @@ static class UserRegister
         string lastname  = MenuHelpers.PromptUntilValid("What's your last name?", AL.ValidateLastName);
         string username = AL.CreateUsername(firstname, lastname);
         string email = MenuHelpers.PromptUntilValid("What's your Email", AL.ValidateEmail);
-        string password;
+        string birthInput = MenuHelpers.PromptUntilValid("What's your birthdate? (yyyy-mm-dd)", AL.ValidateBirthDate);
+        DateTime birthDate = DateTime.Parse(birthInput);
+        string password = MenuHelpers.PromptUntilValid("What's your Password (atleast 7 characters)", AL.ValidatePassword);
         do
         {
             password = MenuHelpers.PromptPassword("What's your Password (atleast 7 characters)");
         }
         while (!AL.ValidatePassword(password));
         string phoneNumber = MenuHelpers.PromptUntilValid("What's your phone number (only Dutch numbers)", AL.ValidatePhonenumber);
-        string birthDate = MenuHelpers.PromptUntilValid("What's your BirthDate? (DD-MM-YYYY)", AL.ValidateBirthDate);
         AL.Register(username, email, password, phoneNumber, birthDate);
         MenuHelpers.Confirm($"Successfully registered as {username}");
         System.Threading.Thread.Sleep(1000);

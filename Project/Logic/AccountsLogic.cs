@@ -106,6 +106,32 @@ public class AccountsLogic
         return username;
     }
 
+    public bool ValidateBirthDate(string input)
+    {
+        if (!DateTime.TryParse(input, out DateTime birthDate))
+        {
+            MenuHelpers.Error("Invalid date format");
+            return false;
+        }
+
+        int age = DateTime.Today.Year - birthDate.Year;
+        if (birthDate > DateTime.Today.AddYears(-age)) age--;
+
+        if (age < 5)
+        {
+            MenuHelpers.Error("You must be older than 4 years old");
+            return false;
+        }
+
+        if (age > 120)
+        {
+            MenuHelpers.Error("Enter valid birthdate");
+            return false;
+        }
+
+        return true;
+    }
+
     public bool ValidateEmail(string email)
     {
         try
@@ -164,56 +190,25 @@ public class AccountsLogic
         }
     }
 
-    private DateTime? ParseBirthDate(string date)
-    {
-        string user_friendly_format = "dd-MM-yyyy";
-        if (string.IsNullOrWhiteSpace(date)) return null;
-        try
-        {
-            return DateTime.ParseExact(date, user_friendly_format, null);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    public bool ValidateBirthDate(string date)
-    {
-        var parsedDate = ParseBirthDate(date);
-        if (parsedDate == null)
-        {
-            MenuHelpers.Error("Invalid birth date format");
-            return false;
-        }
-        
-        if (parsedDate > DateTime.Now)
-        {
-            MenuHelpers.Error("Birthdate cannot be in the future");
-            return false;
-        }
-        if (parsedDate.Value.Year < 1912)
-        {
-            MenuHelpers.Error("Birthdate cannot be in the very past");
-            return false;
-        }
-        return true;
-    }
-
-    public void Register(string username, string email, string password, string phoneNumber, string birthDate)
+    public void Register(
+        string username,
+        string email,
+        string password,
+        string phoneNumber,
+        DateTime birthDate)
     {
         string hashedPassword = PasswordSecurityLogic.HashPassword(password);
-        var parsedDate = ParseBirthDate(birthDate);
-        
+
         AccountModel newAccount = new AccountModel(
-            username.ToLower(), 
-            email.ToLower(), 
+            username.ToLower(),
+            email.ToLower(),
             hashedPassword,
-            username, 
-            string.Empty, 
-            "0", 
+            username,
+            string.Empty,
+            "0",
             phoneNumber,
-            parsedDate);
+            birthDate);
+
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }

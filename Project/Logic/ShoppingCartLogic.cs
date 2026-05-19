@@ -8,10 +8,6 @@ public class ShoppingCartLogic
     private static int GetCurrentUserId()
     {
         AccountModel? account = AccountsLogic.CurrentAccount;
-        if (account == null)
-        {
-            throw new InvalidOperationException("User must be logged in.");
-        }
 
         return account.UserId;
     }
