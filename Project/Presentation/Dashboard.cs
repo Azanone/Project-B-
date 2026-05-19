@@ -180,14 +180,6 @@ static class Dashboard
             return;
         }
 
-        // var shoppingItem = new ShoppingListModel(
-        //     selectedProduct.Name,
-        //     selectedProduct.Category,
-        //     selectedProduct.Price,
-        //     selectedProduct.Brand,
-        //     selectedProduct.Ingredients
-        // );
-
         var cartItem = new ShoppingCartItem(selectedProduct, 1);
         ShoppingCart.AddItem(cartItem);
 
@@ -291,40 +283,6 @@ static class Dashboard
         MenuHelpers.Announce($"Total: {total} EUR");
         //WaitForContinue();
     }
-
-    static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
-    // private static void PurchaseChoice()
-    // {
-
-    //     bool validinput = false;
-    //     while (!validinput)
-    //     {
-    //         ShowShoppingCart();
-    //         MenuHelpers.Confirm($"\nEnter 1 to return\nEnter 2 to continue to checkout");
-    //         string userChoice = Console.ReadLine();
-    //         if(userChoice  == "1")
-    //         {
-    //             validinput = true;
-    //         }
-    //         else if(userChoice == "2")
-    //         {
-    //             validinput = true;
-    //             bool purchaseSucces = shoppingCartLogic.CompletePurchase(ReceiptLogic.GetCurrentUserId());//Belasting word nog niet gerekend bij de transactie, het is niet te zien op de bon
-    //             if (purchaseSucces)
-    //             {
-    //                 MenuHelpers.Announce("Thank you for your purchase!");
-    //             }
-    //             else
-    //             {
-    //                 MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
-    //             }
-    //         }
-    //         else
-    //         {
-    //             MenuHelpers.Warn("Invalid Input");
-    //         }
-    //     }
-    // }
 
     private static void ShowLayout()
     {
