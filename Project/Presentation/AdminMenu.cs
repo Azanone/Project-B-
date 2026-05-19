@@ -20,7 +20,7 @@ static class AdminMenu
             "Log-out"
         };
 
-        MenuNavigation menu = new MenuNavigation(options, "Admin Dashboard: Welcome back " + account.FullName);
+        MenuNavigation menu = new MenuNavigation(options, "--- Admin Dashboard: --- \n Welcome back " + account.FullName);
         int selection = menu.Start();
 
         switch (selection)

@@ -15,10 +15,10 @@ static class Dashboard
     {
         Console.Clear();
         AccountModel? account = AccountsLogic.CurrentAccount;
-        string userGreeting = "Welcome guest";
+        string userGreeting = "--- Welcome GUEST ---";
         if (account != null)
         {
-            userGreeting = "Welcome back " + account.FullName;
+            userGreeting = "--- Welcome back " + account.FullName + " ---";
         }
 
         List<string> options = new List<string>

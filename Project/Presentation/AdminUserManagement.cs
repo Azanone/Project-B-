@@ -20,7 +20,7 @@ public static class AdminUserManagement
                 "Return to Admin Menu"
             };
 
-            MenuNavigation menu = new MenuNavigation(options, "User Management");
+            MenuNavigation menu = new MenuNavigation(options, "--- USER MANAGEMENT ---");
             int selection = menu.Start();
 
             switch (selection)
