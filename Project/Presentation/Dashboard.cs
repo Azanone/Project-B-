@@ -6,7 +6,7 @@ static class Dashboard
     private static readonly ProductLogic ProductLogic = new();
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
-    private static readonly ShoppingListLogic ShoppingCart = new();
+    public static readonly ShoppingCartLogic ShoppingCart = new();
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()

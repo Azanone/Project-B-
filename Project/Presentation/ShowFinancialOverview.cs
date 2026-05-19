@@ -5,14 +5,16 @@ public static class ShowFinancialOverview
         Console.WriteLine("--- FINANCIAL OVERVIEW ---\n");
         Console.WriteLine("Choose date range (DD-MM-YYYY): ");
         Console.WriteLine("Enter 1 to return to Admin Menu");
-        string firstDate = Console.ReadLine();
+        string? firstDateInput = Console.ReadLine();
+        string firstDate = firstDateInput ?? string.Empty;
         if (firstDate == "1")
         {
             AdminMenu.Start();
             return;
         }
         string[] dates = firstDate.Split('-');
-        string secondDate = Console.ReadLine();
+        string? secondDateInput = Console.ReadLine();
+        string secondDate = secondDateInput ?? string.Empty;
         string[] dates2 = secondDate.Split('-');
         if (dates.Length != 3 || dates2.Length != 3)
         {
@@ -27,7 +29,8 @@ public static class ShowFinancialOverview
             Console.WriteLine($"From {firstDate} to {secondDate} (Sorted by most sold items):\n");
             ShowFinancialOverviewByDate(startDate, endDate);
             Console.WriteLine("\nEnter 1 to return to Admin Menu");
-            string input = Console.ReadLine();
+            string? inputValue = Console.ReadLine();
+            string input = inputValue ?? string.Empty;
             if (input == "1")
             {
                 AdminMenu.Start();
