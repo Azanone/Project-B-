@@ -287,8 +287,6 @@ static class Dashboard
 <<<<<<< HEAD
     static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
     
-=======
->>>>>>> c27790a039f48ccd1a48462037209ff78568425c
     private static void ShowLayout()
     {
         Console.Clear();
