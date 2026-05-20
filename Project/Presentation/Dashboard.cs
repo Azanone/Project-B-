@@ -284,7 +284,6 @@ static class Dashboard
         //WaitForContinue();
     }
 
-<<<<<<< HEAD
     static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
     
     private static void ShowLayout()
