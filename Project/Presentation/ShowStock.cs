@@ -4,58 +4,62 @@ public static class ShowStock
     static public void Start()
     {
         ShowAll();
-        Console.WriteLine("Enter 1 to return to Admin Menu\nEnter 2 to order products");
-        string input = Console.ReadLine();
+        MenuHelpers.Confirm("Enter 1 to return to Admin Menu\nEnter 2 to order products");
+        string? input = MenuHelpers.Prompt("");
         if (input == "1")
         {
             AdminMenu.Start();
+            return;
         }
-        if (input == "2")
+        else if (input == "2")
         {
-            int orderinputId;
-            Console.WriteLine("Please enter the Name OR Id or the product you'd like to order");//handelt nog geen invalid inputs
-            string orderinputName = Console.ReadLine();
-            if (int.TryParse(orderinputName,out orderinputId))
-            {
-            Console.WriteLine("Please enter the the amount you'd like to order");
-            int inputAmount = Convert.ToInt16(Console.ReadLine());
-            OrderProductByID(orderinputId,inputAmount);
-            Console.WriteLine("Your order has been placed!");
-            }
-            else
-            {
-            Console.WriteLine("Please enter the the amount you'd like to order");//Handelt nog geen invalid inputs. Maybe current stock laten zien bij deze stap maar dan moet je eerstgetproducts() weer roepen volgensmij
-            int inputAmount = Convert.ToInt16(Console.ReadLine());
-            OrderProductByName(orderinputName,inputAmount);
-            Console.WriteLine("Your order has been placed!");
-            }
+            OrderProducts();
             AdminMenu.Start();
-
-
         }
         else
         {
-            Console.WriteLine("Invalid input");
-            Start();  
+            MenuHelpers.Warn("Invalid input");
+            Start();
+        }
+    }
+
+    public static void OrderProducts()
+    {
+        string? orderInput = MenuHelpers.Prompt("Please enter the Name or Id of the product you'd like to order");
+        if (string.IsNullOrWhiteSpace(orderInput))
+        {
+            MenuHelpers.Warn("No product given");
+            return;
+        }
+
+        int inputAmount = MenuHelpers.PromptInt("Please enter the amount you'd like to order");
+
+        int orderInputId;
+        bool inputIsId = int.TryParse(orderInput, out orderInputId);
+
+        if (inputIsId)
+        {
+            productLogic.OrderProductByID(orderInputId, inputAmount);
+            MenuHelpers.Announce("Your order has been placed!");
+            return;
+        }
+
+        bool ordered = productLogic.OrderProductByName(orderInput, inputAmount);
+        if (ordered)
+        {
+            MenuHelpers.Announce("Your order has been placed!");
+        }
+        else
+        {
+            MenuHelpers.Warn("Product not found, no order placed");
         }
     }
 
     public static void ShowAll()
     {
-        var list = productLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}");
-        }
-    }
-
-    public static void OrderProductByID(int productID, int orderAmount)
-    {
-        productLogic.OrderProductByID(productID,orderAmount);
-    }
-    public static void OrderProductByName(string productName, int orderAmount)
-    {
-        productLogic.OrderProductByName(productName,orderAmount); //Deze code is niet geschreven om foute input te catchen/handelen, also misschien als het aantal dat bestelt word te hoog is vragen of de user zeker is?
+        Display.List(
+            productLogic.GetProducts(),
+            item => $"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}",
+            "--- ALL PRODUCTS ---");
     }
 }

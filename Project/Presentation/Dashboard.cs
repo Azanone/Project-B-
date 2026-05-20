@@ -17,20 +17,13 @@ static class Dashboard
             Console.Clear();
             AccountModel? account = AccountsLogic.CurrentAccount;
 
-            if (account == null)
-            {
-                MenuHelpers.Announce("Welcome guest");
-            }
-            else
-            {
-                MenuHelpers.Announce("Welcome back " + account.FullName);
-            }
+            MenuHelpers.Announce("Welcome back " + account.FullName);
             
             MenuHelpers.Confirm("Enter 1 to see all products");
             MenuHelpers.Confirm("Enter 2 to see all offers");
             MenuHelpers.Confirm("Enter 3 to see store layout");
             MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
-            MenuHelpers.Confirm("Enter 5 to view shopping list and total");
+            MenuHelpers.Confirm("Enter 5 to view shopping cart and total");
             MenuHelpers.Confirm("Enter 6 to clear shopping cart");
             MenuHelpers.Confirm("Enter 7 to Wishlist");
             MenuHelpers.Confirm("Enter 8 to show purchase history");
@@ -40,15 +33,19 @@ static class Dashboard
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
             if (input == "1")
             {
-                ShowProducts();
+                Console.Clear();
+                ShowProducts.ShowAll();
+                MenuHelpers.Pause();
             }
             else if (input == "2")
             {
-                ShowOffers();
+                Console.Clear();
+                ShowOffers.ShowAll();
+                MenuHelpers.Pause();
             }
             else if (input == "3")
             {
-                ShowLayout();
+                ShowLayout.Start();
             }
             else if (input == "4")
             {
@@ -64,13 +61,13 @@ static class Dashboard
                 if (account == null)
                 {
                     MenuHelpers.Warn("You must be logged in.");
-                    WaitForContinue();
+                    MenuHelpers.Pause();
                     continue;
                 }
 
                 ShoppingCart.ClearCurrentCart();
                 MenuHelpers.Confirm("Shopping list cleared");
-                WaitForContinue();
+                MenuHelpers.Pause();
             }
             else if (input == "7")
             {
@@ -94,35 +91,9 @@ static class Dashboard
             else
             {
                 MenuHelpers.Warn("Invalid input");
-                WaitForContinue();
+                MenuHelpers.Pause();
             }
         }
-    }
-
-    private static void ShowProducts()
-    {
-        Console.Clear();
-        var list = ProductLogic.GetProducts();
-        AccountModel? account = AccountsLogic.CurrentAccount;
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}");
-        }
-        WaitForContinue();
-    }
-
-    private static void ShowOffers()
-    {
-        Console.Clear();
-        var list = OfferLogic.GetOffers();
-        MenuHelpers.Announce("--- ALL OFFERS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.OfferID} | Description: {item.Description} | Begin: {item.StartDate} | End: {item.EndDate} | Price: {item.RegularPrice} EUR | Discount: {item.DiscountPercentage}% | Discount-price: {item.DiscountPrice} EUR");
-        }
-        WaitForContinue();
     }
 
     private static void AddProductToShoppingCart()
@@ -134,7 +105,7 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in.");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -152,7 +123,7 @@ static class Dashboard
         if (!int.TryParse(rawId, out int productId))
         {
             MenuHelpers.Warn("Invalid product ID");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -162,21 +133,21 @@ static class Dashboard
         if (selectedProduct == null)
         {
             MenuHelpers.Warn("Product not found");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
         if (selectedProduct.MinAge > 0 && account != null && !ProductLogic.IsOldEnoughForProduct(selectedProduct, account.Age))
         {
             MenuHelpers.Warn($"You must be {selectedProduct.MinAge}+ to purchase {selectedProduct.Name}");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
         if (selectedProduct.Stock <= 0)
         {
             MenuHelpers.Warn("Selected product is out of stock");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -185,7 +156,7 @@ static class Dashboard
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
 
-        WaitForContinue();
+        MenuHelpers.Pause();
     }
     
     private static void RemoveItemFromCart()
@@ -197,7 +168,7 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("Account not found");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -206,7 +177,7 @@ static class Dashboard
         if (!cartItems.Any())
         {
             MenuHelpers.Warn("Cart is empty");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -224,7 +195,7 @@ static class Dashboard
         if (!int.TryParse(rawId, out int cartItemId))
         {
             MenuHelpers.Warn("Invalid ID");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -232,14 +203,14 @@ static class Dashboard
         if (itemToRemove == null)
         {
             MenuHelpers.Warn("Item not found");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
         ShoppingCart.RemoveItem(itemToRemove);
 
         MenuHelpers.Confirm("Item removed");
-        WaitForContinue();
+        MenuHelpers.Pause();
     }
 
     private static void ShowShoppingCart()
@@ -250,7 +221,11 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in.");
+<<<<<<< HEAD
             //WaitForContinue();
+=======
+            MenuHelpers.Pause();
+>>>>>>> main
             return;
         }
 
@@ -261,7 +236,11 @@ static class Dashboard
         if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
+<<<<<<< HEAD
            // WaitForContinue();
+=======
+            MenuHelpers.Pause();
+>>>>>>> main
             return;
         }
 
@@ -281,6 +260,7 @@ static class Dashboard
         }
 
         MenuHelpers.Announce($"Total: {total} EUR");
+<<<<<<< HEAD
         //WaitForContinue();
     }
 
@@ -313,6 +293,9 @@ static class Dashboard
     public static void WaitForContinue()
     {
         MenuHelpers.Prompt("Press Enter to continue");
+=======
+        MenuHelpers.Pause();
+>>>>>>> main
     }
     
     private static void ShowPurchaseHistory()
@@ -322,7 +305,7 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in to view purchase history");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -332,7 +315,7 @@ static class Dashboard
         if (receipts.Count == 0)
         {
             MenuHelpers.Warn("No purchases found");
-            WaitForContinue();
+            MenuHelpers.Pause();
             return;
         }
 
@@ -354,6 +337,6 @@ static class Dashboard
             Console.WriteLine();
         }
 
-        WaitForContinue();
+        MenuHelpers.Pause();
     }
 }

@@ -9,7 +9,7 @@ static class Login
         Console.Clear();
         MenuHelpers.Announce("Welcome to the login page");
         string identifier = MenuHelpers.Prompt("Please enter your email address or username") ?? string.Empty;
-        string password = MenuHelpers.Prompt("Please enter your password") ?? string.Empty;
+        string password = MenuHelpers.PromptPassword("Please enter your password");
 
         AccountModel? account = accountsLogic.CheckLogin(identifier, password);
         if (account != null)
@@ -23,14 +23,14 @@ static class Login
                 Dashboard.Start();
             }
         }
-        
+
         if (account != null)
         {
             CurrentSession.User = account;
 
             Dashboard.Start();
         }
-        
+
         else
         {
             if (accountsLogic.IdentifierExists(identifier))
