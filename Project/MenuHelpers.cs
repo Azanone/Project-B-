@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 public static class MenuHelpers
 {
     public static void Warn(string input)
@@ -108,5 +110,26 @@ public static class MenuHelpers
 
         Warn("Invalid input");
         PromptReturnToMenu(message, onReturn);
+    }
+
+    public static void WriteColor(string str, ConsoleColor color)
+         {
+        var matches = Regex.Matches(str, @"\[(.*?)\]");
+
+        int lastIndex = 0;
+
+        foreach (Match match in matches)
+        {
+            Console.ResetColor();
+            Console.Write(str.Substring(lastIndex, match.Index - lastIndex));
+
+            Console.ForegroundColor = color;
+            Console.Write(match.Groups[1].Value);
+
+            lastIndex = match.Index + match.Length;
+        }
+
+        Console.ResetColor();
+        Console.WriteLine(str.Substring(lastIndex));
     }
 }
