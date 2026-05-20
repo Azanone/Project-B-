@@ -51,6 +51,7 @@ public static class AdminProductManagement
         string price = PromptValidDecimal("Price:", "Price must be a valid non-negative number.");
         string brand = PromptRequiredText("Brand:", "Brand is required.");
         string ingredients = PromptRequiredText("Ingredients:", "Ingredients are required.");
+        string ageRestriction = PromptValidNonNegativeWholeNumber("Age restriction (0 if none):", "Age restriction must be zero or a positive whole number.");
 
         List<CategoryModel> categories = _adminLogic.GetCategories();
         string? categoryId = PromptValidCategoryId(categories);
@@ -60,7 +61,7 @@ public static class AdminProductManagement
         }
         string stock = PromptValidNonNegativeWholeNumber("Stock:", "Stock must be zero or a positive whole number.");
 
-        var result = _adminLogic.AddProduct(name, price, brand, ingredients, categoryId, stock);
+        var result = _adminLogic.AddProduct(name, price, brand, ingredients, categoryId, stock, ageRestriction);
         if (result.Success)
         {
             MenuHelpers.Confirm(result.Message);

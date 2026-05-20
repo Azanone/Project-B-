@@ -221,11 +221,7 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in.");
-<<<<<<< HEAD
-            //WaitForContinue();
-=======
             MenuHelpers.Pause();
->>>>>>> main
             return;
         }
 
@@ -236,11 +232,7 @@ static class Dashboard
         if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
-<<<<<<< HEAD
-           // WaitForContinue();
-=======
             MenuHelpers.Pause();
->>>>>>> main
             return;
         }
 
@@ -260,42 +252,14 @@ static class Dashboard
         }
 
         MenuHelpers.Announce($"Total: {total} EUR");
-<<<<<<< HEAD
-        //WaitForContinue();
+        MenuHelpers.Pause();
     }
 
     static private ShoppingCartLogic shoppingCartLogic = new();// Dit stuk code moet bovenaan de class staan maar eigenlijk moet het grootste deel van deze class in andere files staan dus dan kan later
     
-    private static void ShowLayout()
-    {
-        Console.Clear();
-        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
-║              ║                  ║                   ║
-║   BAKERY     ║     DAIRY        ║     FROZEN        ║
-║              ║                  ║                   ║
-╠══════════════╩══════════════════╣                   ║
-║                                 ╚═══════════════════╣
-║  ┌───────┐ ┌──────────┐ ┌─────┐ ┌─────────┐        ║
-║  │       │ │ Canned & │ │Beve-│ │ Snacks  │        ║
-║  │ Deli  │ │ Dry Food │ │rage │ │  And    │        ║
-║  │       │ │          │ │     │ │  Goods  │        ║
-║  └───────┘ └──────────┘ └─────┘ └─────────┘        ║
-╠════════════════════╦════════════════════════════════╣
-║                    ║                                ║
-║   FRESH PRODUCE    ║    CASHOUT /                   ║
-║                    ║    CUSTOMER SERVICE            ║
-║                    ║                                ║
-╚════════════════════╝        ↑           ╚═══════════╝
-                        ENTRANCE / EXIT");
-        WaitForContinue();
-    }
-
     public static void WaitForContinue()
     {
         MenuHelpers.Prompt("Press Enter to continue");
-=======
-        MenuHelpers.Pause();
->>>>>>> main
     }
     
     private static void ShowPurchaseHistory()

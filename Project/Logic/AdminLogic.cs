@@ -105,9 +105,9 @@ public class AdminLogic
         return _productAccess.GetCategories();
     }
 
-    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput)
+    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string ageRestrictionInput)
     {
-        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, out ProductModel? product, out string errorMessage))
+        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, ageRestrictionInput, out ProductModel? product, out string errorMessage))
         {
             return (false, errorMessage);
         }
@@ -132,12 +132,13 @@ public class AdminLogic
 
         try
         {
-            if (_productAccess.GetById(productId) == null)
+            ProductModel? existing = _productAccess.GetById(productId);
+            if (existing == null)
             {
                 return (false, $"No product found with ID {productId}.");
             }
 
-            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, out ProductModel? product, out string errorMessage))
+            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, existing.MinAge.ToString(), out ProductModel? product, out string errorMessage))
             {
                 return (false, errorMessage);
             }
@@ -174,7 +175,7 @@ public class AdminLogic
         }
     }
 
-    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, out ProductModel? product, out string errorMessage)
+    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string ageRestrictionInput, out ProductModel? product, out string errorMessage)
     {
         product = null;
         errorMessage = string.Empty;
@@ -228,6 +229,12 @@ public class AdminLogic
             return false;
         }
 
+        if (!int.TryParse(ageRestrictionInput, out int minAge) || minAge < 0)
+        {
+            errorMessage = "Age restriction must be zero or a positive whole number.";
+            return false;
+        }
+
         product = new ProductModel
         {
             Name = name.Trim(),
@@ -235,7 +242,8 @@ public class AdminLogic
             Brand = brand.Trim(),
             Ingredients = ingredients.Trim(),
             CategoryID = categoryId,
-            Stock = stock
+            Stock = stock,
+            MinAge = minAge
         };
 
         return true;
