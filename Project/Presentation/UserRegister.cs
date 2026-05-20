@@ -12,9 +12,9 @@ static class UserRegister
         string lastname  = MenuHelpers.PromptUntilValid("What's your last name?", AL.ValidateLastName);
         string username = AL.CreateUsername(firstname, lastname);
         string email = MenuHelpers.PromptUntilValid("What's your Email", AL.ValidateEmail);
-        string birthInput = MenuHelpers.PromptUntilValid("What's your birthdate? (yyyy-mm-dd)", AL.ValidateBirthDate);
-        DateTime birthDate = DateTime.Parse(birthInput);
-        string password = MenuHelpers.PromptUntilValid("What's your Password (atleast 7 characters)", AL.ValidatePassword);
+        string birthInput = MenuHelpers.PromptUntilValid("What's your birthdate? (dd-mm-yyyy)", AL.ValidateBirthDate);
+        DateTime birthDate = AL.ParseBirthDate(birthInput)!.Value;
+        string password;
         do
         {
             password = MenuHelpers.PromptPassword("What's your Password (atleast 7 characters)");

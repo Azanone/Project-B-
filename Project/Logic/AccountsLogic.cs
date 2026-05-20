@@ -106,16 +106,40 @@ public class AccountsLogic
         return username;
     }
 
+    public const string BirthDateFormat = "dd-MM-yyyy";
+
+    public DateTime? ParseBirthDate(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+
+        try
+        {
+            return DateTime.ParseExact(input.Trim(), BirthDateFormat, null);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public bool ValidateBirthDate(string input)
     {
-        if (!DateTime.TryParse(input, out DateTime birthDate))
+        DateTime? parsed = ParseBirthDate(input);
+        if (parsed == null)
         {
-            MenuHelpers.Error("Invalid date format");
+            MenuHelpers.Error("Invalid date format. Use dd-MM-yyyy");
+            return false;
+        }
+
+        DateTime birthDate = parsed.Value;
+        if (birthDate.Date > DateTime.Today)
+        {
+            MenuHelpers.Error("Birthdate cannot be in the future");
             return false;
         }
 
         int age = DateTime.Today.Year - birthDate.Year;
-        if (birthDate > DateTime.Today.AddYears(-age)) age--;
+        if (birthDate.Date > DateTime.Today.AddYears(-age)) age--;
 
         if (age < 5)
         {
