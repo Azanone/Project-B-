@@ -35,8 +35,6 @@ static class Dashboard
             {
                 Console.Clear();
                 ShowProducts.ShowAll();
-                MenuHelpers.WriteColor("\nWant to leave a review? [Type 1]", ConsoleColor.Red);
-                MenuHelpers.WriteColor("Want to continue Shopping? [Type 2]\n", ConsoleColor.Red);
                 MenuHelpers.Pause();
             }
             else if (input == "2")
