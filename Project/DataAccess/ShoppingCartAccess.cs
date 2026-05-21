@@ -21,7 +21,8 @@ public class ShoppingCartAccess
             P.Name,
             P.Price,
             P.Brand,
-            P.Ingredients
+            P.Ingredients,
+            P.MinAge
         FROM CART C
         JOIN CART_ITEM CI ON CI.CartId = C.CartId
         JOIN PRODUCT P ON P.ProductId = CI.ProductId
