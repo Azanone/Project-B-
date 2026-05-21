@@ -9,7 +9,12 @@ static class AdminMenu
         AccountsLogic accountsLogic = new AccountsLogic();
 
         Console.Clear();
-        AccountModel account = AccountsLogic.CurrentAccount;
+        AccountModel? account = AccountsLogic.CurrentAccount;
+        if (account == null)
+        {
+            Console.WriteLine("Error: Not logged in as admin.");
+            return;
+        }
 
         List<string> options = new List<string>
         {

@@ -2,7 +2,12 @@ public static class ShowWishlist
 {
     public static void Start()
     {
-        AccountModel account = AccountsLogic.CurrentAccount;
+        AccountModel? account = AccountsLogic.CurrentAccount;
+        if (account == null)
+        {
+            Console.WriteLine("Error: Not logged in.");
+            return;
+        }
         WishlistLogic WLlogic = new WishlistLogic(account.Id);
         
         Console.Clear();

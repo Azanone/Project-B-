@@ -125,7 +125,7 @@ public class AdminLogic
 
     public (bool Success, string Message) UpdateProduct(string productIdInput, string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput)
     {
-        if (!long.TryParse(productIdInput, out long productId) || productId <= 0)
+        if (!long.TryParse(productIdInput, out Int64 productId) || productId <= 0)
         {
             return (false, "Product ID must be a positive number.");
         }
@@ -142,7 +142,7 @@ public class AdminLogic
                 return (false, errorMessage);
             }
 
-            product!.ProductID = productId;
+            product!.ProductID = (int)productId;
             bool updated = _productAccess.Update(product);
             return updated
                 ? (true, "Product updated successfully.")
@@ -234,8 +234,8 @@ public class AdminLogic
             Price = price,
             Brand = brand.Trim(),
             Ingredients = ingredients.Trim(),
-            CategoryID = categoryId,
-            Stock = stock
+            CategoryID = (int)categoryId,
+            Stock = (int)stock
         };
 
         return true;

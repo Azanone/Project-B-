@@ -141,7 +141,7 @@ public class AccountsLogic
 
     public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, "0", phoneNumber, bdate);
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, string.Empty, phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }

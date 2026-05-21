@@ -55,7 +55,7 @@ public static class MenuHelpers
     do
     {
         input = Prompt(prompt);
-        error = validate(input);
+        error = input != null && validate(input);
         if (!error) Warn($"Invalid input: {error}");
         System.Threading.Thread.Sleep(1000);
         Console.Clear();
@@ -63,6 +63,6 @@ public static class MenuHelpers
     }
     while (!error);
 
-    return input;
+    return input ?? string.Empty;
 }
 }

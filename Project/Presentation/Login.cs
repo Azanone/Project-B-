@@ -30,7 +30,7 @@ Welcome to the login page");
         string identifier = results[0];
         string password = results[1];
 
-        AccountModel account = accountsLogic.CheckLogin(identifier, password);
+        AccountModel? account = accountsLogic.CheckLogin(identifier, password);
         if (account != null)
         {
             if (string.Equals(account.Role, "Admin", StringComparison.OrdinalIgnoreCase))

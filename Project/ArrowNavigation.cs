@@ -25,7 +25,7 @@ public class MenuNavigation
     public MenuNavigation(List<string> menuLabels,  string title)
     {
         labels = menuLabels;
-        requiresInput = null;
+        requiresInput = new List<bool>();
         values = new List<string>();
         
         int i = 0;
@@ -62,7 +62,7 @@ public class MenuNavigation
 
     private void InitializeRequiresInput()
     {
-        if (requiresInput == null)
+        if (requiresInput == null || requiresInput.Count == 0)
         {
             requiresInput = new List<bool>();
             int j = 0;
