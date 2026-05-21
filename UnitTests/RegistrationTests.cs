@@ -18,7 +18,7 @@ public sealed class RegistrationTests
 
         try
         {
-            _logic.Register(username, email, password, phoneNumber);
+            _logic.Register(username, email, password, phoneNumber, "01-01-1990");
 
             storedByUsername = _access.GetByIdentifier(username);
             AccountModel? storedByEmail = _access.GetByIdentifier(email);
@@ -60,7 +60,7 @@ public sealed class RegistrationTests
 
         try
         {
-            _logic.Register(username, email, password, "0612345678");
+            _logic.Register(username, email, password, "0612345678", "01-01-1990");
 
             AccountModel? byUsername = _logic.CheckLogin(username, password);
             AccountModel? byEmail = _logic.CheckLogin(email, password);
