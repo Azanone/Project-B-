@@ -1,12 +1,20 @@
-﻿namespace Project.Presentation;
+﻿using Project.Logic;
+
+namespace Project.Presentation;
+using System.Linq;
 
 public static class ProductReviews
 {
+    public static ReviewLogic ReviewLogic = new();
+
     public static void Start()
     {
-        while (true)
-        {
-            MenuHelpers.WriteColor("Choose a product [ID] to leave a review for", ConsoleColor.Red);
-        }
+        Console.Clear();
+
+        MenuHelpers.WriteColor("Choose a product [ID] to leave a review for", ConsoleColor.Red);
+
+        var input = Console.ReadLine();
+
+        ReviewLogic.AddReview(input);
     }
 }

@@ -62,6 +62,7 @@ static class Menu
                                                                @%%*++++++#@
 ");
         
+        Console.Clear();
         MenuHelpers.Announce("Enter 1 to login");
         MenuHelpers.Announce("Enter 2 to register");
         MenuHelpers.Announce("Enter 3 to continue as guest");

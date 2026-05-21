@@ -35,7 +35,6 @@ static class Dashboard
             {
                 Console.Clear();
                 ShowProducts.ShowAll();
-                MenuHelpers.Pause();
             }
             else if (input == "2")
             {

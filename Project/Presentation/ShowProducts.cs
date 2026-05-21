@@ -25,7 +25,12 @@ public static class ShowProducts
             if (input == "1")
             {
                 ProductReviews.Start();
-                return;
+            }
+
+            if (input == "2")
+            {
+                Dashboard.Start();
+                MenuHelpers.Pause();
             }
         }
     }
