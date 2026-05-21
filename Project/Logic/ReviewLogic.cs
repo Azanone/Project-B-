@@ -74,9 +74,11 @@ public class ReviewLogic
         Console.WriteLine("Review toegevoegd!");
         
     }
-
+    
     public string StarCalculate()
     {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        
         string fullStar = "★";
         string halfStar = "⯨";
         string emptyStar = "☆";
@@ -84,14 +86,30 @@ public class ReviewLogic
         var all = reviewAccess.GetAllReviews();
 
         Func<IEnumerable<ReviewModel>, double> rating = r => r.Average(p => p.Rating);
-        
+
         var grouped = all.GroupBy(r => r.ProductId);
 
         foreach (var group in grouped)
         {
-            Console.WriteLine($"{group.Key}: {rating(group):F1}");
+            double avg = rating(group);
+
+            int full = (int)avg;
+            bool half = (avg - full) >= 0.5;
+
+            string stars = "";
+
+            for (int i = 0; i < full; i++)
+                stars += fullStar;
+
+            if (half)
+                stars += halfStar;
+
+            for (int i = full + (half ? 1 : 0); i < 5; i++)
+                stars += emptyStar;
+
+            Console.WriteLine($"{group.Key}: {stars} | {avg:F1}");
         }
-        
+
         return "all";
     }
 
