@@ -84,7 +84,30 @@ public class ShoppingCartLogic
         //create Receipt
     }
  
- 
+     public (bool Allowed, int RequiredAge, string ProductName) CheckAgeRestriction()
+    {
+        var items = _cartAccess.GetAll(GetCurrentUserId());
+        var restricted = items
+            .Where(i => i.Product != null && i.Product.MinAge > 0)
+            .OrderByDescending(i => i.Product.MinAge)
+            .FirstOrDefault();
+
+        if (restricted == null)
+        {
+            return (true, 0, string.Empty);
+        }
+
+        int required = (int)restricted.Product.MinAge;
+        int? age = new AccountsLogic().CalculateAge(AccountsLogic.CurrentAccount?.Birthdate);
+
+        if (age == null || age < required)
+        {
+            return (false, required, restricted.Product.Name);
+        }
+
+        return (true, required, string.Empty);
+    }
+
     public decimal GetTotal(int userId)
     {
         _cartAccess.Connection.Open();

@@ -105,9 +105,9 @@ public class AdminLogic
         return _productAccess.GetCategories();
     }
 
-    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput)
+    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput)
     {
-        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, out ProductModel? product, out string errorMessage))
+        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, out ProductModel? product, out string errorMessage))
         {
             return (false, errorMessage);
         }
@@ -123,7 +123,7 @@ public class AdminLogic
         }
     }
 
-    public (bool Success, string Message) UpdateProduct(string productIdInput, string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput)
+    public (bool Success, string Message) UpdateProduct(string productIdInput, string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput)
     {
         if (!long.TryParse(productIdInput, out Int64 productId) || productId <= 0)
         {
@@ -137,7 +137,7 @@ public class AdminLogic
                 return (false, $"No product found with ID {productId}.");
             }
 
-            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, out ProductModel? product, out string errorMessage))
+            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, out ProductModel? product, out string errorMessage))
             {
                 return (false, errorMessage);
             }
@@ -174,7 +174,7 @@ public class AdminLogic
         }
     }
 
-    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, out ProductModel? product, out string errorMessage)
+    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput, out ProductModel? product, out string errorMessage)
     {
         product = null;
         errorMessage = string.Empty;
@@ -228,6 +228,12 @@ public class AdminLogic
             return false;
         }
 
+        if (!long.TryParse(minAgeInput, out long minAge) || minAge < 0)
+        {
+            errorMessage = "Minimum age must be zero or a positive number.";
+            return false;
+        }
+
         product = new ProductModel
         {
             Name = name.Trim(),
@@ -235,7 +241,8 @@ public class AdminLogic
             Brand = brand.Trim(),
             Ingredients = ingredients.Trim(),
             CategoryID = (int)categoryId,
-            Stock = (int)stock
+            Stock = (int)stock,
+            MinAge = minAge
         };
 
         return true;
