@@ -28,13 +28,8 @@ public static class ShowFinancialOverview
             DateTime endDate = new DateTime(int.Parse(dates2[2]), int.Parse(dates2[1]), int.Parse(dates2[0]));
             Console.WriteLine($"From {firstDate} to {secondDate} (Sorted by most sold items):\n");
             ShowFinancialOverviewByDate(startDate, endDate);
-            Console.WriteLine("\nEnter 1 to return to Admin Menu");
-            string? inputValue = Console.ReadLine();
-            string input = inputValue ?? string.Empty;
-            if (input == "1")
-            {
-                AdminMenu.Start();
-            }
+            MenuHelpers.Prompt("Press Enter to return to Admin Menu");
+            AdminMenu.Start();
         }
         catch (FormatException)
         {
