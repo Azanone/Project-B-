@@ -1,4 +1,6 @@
-﻿public class AccountModel
+﻿using System;
+
+public class AccountModel
 {
 
     public Int64 Id { get; set; }
@@ -18,6 +20,7 @@
     public string HouseNumber { get; set; }
     public string Birthdate { get; set; }
     public string phoneNumber { get; set; } = string.Empty;
+    public string TwoFactorSecret { get; set; } = string.Empty;
 
 
     public AccountModel()
@@ -56,6 +59,3 @@
 
 
 }
-
-
-
