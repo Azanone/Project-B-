@@ -1,8 +1,10 @@
 using Project.Presentation;
+using Project.Logic;
 
 public static class ShowProducts
 {
     static private ProductLogic productLogic = new();
+    static readonly ReviewLogic reviewLogic = new();
     static public void Start()
     {
         ShowAll();
@@ -15,6 +17,8 @@ public static class ShowProducts
             productLogic.GetProducts(),
             item => $"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR",
             "--- ALL PRODUCTS ---");
+        
+        var all = reviewLogic.StarCalculate();
             
         MenuHelpers.WriteColor("\nWant to leave a review? [Type 1]", ConsoleColor.Red);
         MenuHelpers.WriteColor("Want to continue Shopping? [Type 2]", ConsoleColor.Red);
