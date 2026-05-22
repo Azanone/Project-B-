@@ -10,45 +10,48 @@ public static class AdminInformationOverview
 
     public static void Start()
     {
-        Console.Clear();
-
-        List<string> options = new List<string>
+        while (true)
         {
-            "Show Stock",
-            "Show Receipts",
-            "Show Products",
-            "Show Offers",
-            "Show Layout",
-            "Show Past Transactions",
-            "Return to Admin Menu"
-        };
+            Console.Clear();
 
-        MenuNavigation menu = new MenuNavigation(options, "--- ADMIN INFORMATION OVERVIEW ---");
-        int selection = menu.Start();
+            List<string> options = new List<string>
+            {
+                "Show Stock",
+                "Show Receipts",
+                "Show Products",
+                "Show Offers",
+                "Show Layout",
+                "Show Past Transactions",
+                "Return to Admin Menu"
+            };
 
-        switch (selection)
-        {
-            case 0:
-                ShowStock();
-                break;
-            case 1:
-                ShowReceipts();
-                break;
-            case 2:
-                ShowProducts();
-                break;
-            case 3:
-                ShowOffers();
-                break;
-            case 4:
-                ShowLayout();
-                break;
-            case 5:
-                ShowPastTransactions();
-                break;
-            case 6:
-                AdminMenu.Start();
-                return;
+            MenuNavigation menu = new MenuNavigation(options, "--- ADMIN INFORMATION OVERVIEW ---");
+            int selection = menu.Start();
+
+            switch (selection)
+            {
+                case 0:
+                    ShowStock();
+                    break;
+                case 1:
+                    ShowReceipts();
+                    break;
+                case 2:
+                    ShowProducts();
+                    break;
+                case 3:
+                    ShowOffers();
+                    break;
+                case 4:
+                    ShowLayout();
+                    break;
+                case 5:
+                    ShowPastTransactions();
+                    break;
+                case 6:
+                    AdminMenu.Start();
+                    return;
+            }
         }
     }
 
@@ -116,7 +119,7 @@ public static class AdminInformationOverview
         MenuHelpers.Announce("--- ALL PRODUCTS ---");
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR");
+            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Category: {item.Category}| Price: {item.Price} EUR| Min Age: {(item.MinAge > 0 ? item.MinAge.ToString() : "None")}");
         }
         MenuHelpers.Prompt("Press Enter to continue");
     }

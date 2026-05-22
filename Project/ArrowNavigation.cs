@@ -25,7 +25,7 @@ public class MenuNavigation
     public MenuNavigation(List<string> menuLabels,  string title)
     {
         labels = menuLabels;
-        requiresInput = new List<bool>();
+        requiresInput = null;
         values = new List<string>();
         
         int i = 0;
@@ -62,7 +62,7 @@ public class MenuNavigation
 
     private void InitializeRequiresInput()
     {
-        if (requiresInput == null || requiresInput.Count == 0)
+        if (requiresInput == null)
         {
             requiresInput = new List<bool>();
             int j = 0;
@@ -201,4 +201,4 @@ private void DrawUnselectedLine(string label, int index)
             values[selectedIndex] = values[selectedIndex] + inputChar;
         }
     }
-}
+} 

@@ -46,6 +46,51 @@ public class AccountsLogic
         CurrentAccount = null;
     }
 
+    public DateTime ParseBirthday(string birthdayInput)
+    {
+        string[] parts = birthdayInput.Split('-');
+        if (parts.Length == 3
+            && int.TryParse(parts[0], out int day)
+            && int.TryParse(parts[1], out int month)
+            && int.TryParse(parts[2], out int year))
+        {
+            try
+            {
+                return new DateTime(year, month, day);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // fall through to format error
+            }
+        }
+        throw new FormatException("Invalid date format");
+    }
+
+    // Returns age in whole years from a stored dd-MM-yyyy birthdate, or null when missing/invalid.
+    public int? CalculateAge(string? birthdate)
+    {
+        if (string.IsNullOrWhiteSpace(birthdate))
+        {
+            return null;
+        }
+        DateTime dob;
+        try
+        {
+            dob = ParseBirthday(birthdate);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+        DateTime today = DateTime.Today;
+        int age = today.Year - dob.Year;
+        if (dob.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        return age;
+    }
+
    public bool ValidateBirthday(string birthdayInput)
     {
         if (string.IsNullOrWhiteSpace(birthdayInput))
@@ -53,9 +98,14 @@ public class AccountsLogic
             MenuHelpers.Error("Birthday cannot be empty");
             return false;
         }
-        if (!DateTime.TryParse(birthdayInput, out DateTime birthday))
+        DateTime birthday;
+        try
         {
-            MenuHelpers.Error("Invalid date format");
+            birthday = ParseBirthday(birthdayInput);
+        }
+        catch (FormatException)
+        {
+            MenuHelpers.Error("Invalid date format (use dd-MM-yyyy)");
             return false;
         }
         if (birthday > DateTime.Today)

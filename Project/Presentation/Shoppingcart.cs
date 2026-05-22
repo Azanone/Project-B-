@@ -66,6 +66,15 @@ public class PurchaseShoppingCart
             else if(userChoice == "2")
             {
                 validinput = true;
+
+                var ageCheck = shoppingCartLogic.CheckAgeRestriction();
+                if (!ageCheck.Allowed)
+                {
+                    MenuHelpers.Warn($"Age restriction: you must be at least {ageCheck.RequiredAge} years old to buy '{ageCheck.ProductName}'. Purchase blocked.");
+                    MenuHelpers.Pause();
+                    return;
+                }
+
                 bool purchaseSucces = shoppingCartLogic.CompletePurchase(ReceiptLogic.GetCurrentUserId());//Belasting word nog niet gerekend bij de transactie, het is niet te zien op de bon
                 if (purchaseSucces)
                     MenuHelpers.Announce("Thank you for your purchase!");

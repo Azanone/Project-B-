@@ -61,6 +61,7 @@ public static class AdminProductManagement
             "Ingredients",
             "Category ID",
             "Stock",
+            "Minimum Age",
             "Confirm and Save Product",
             "Cancel"
         };
@@ -73,6 +74,7 @@ public static class AdminProductManagement
             true,  // Ingredients
             true,  // Category ID
             true,  // Stock
+            true,  // Minimum Age
             false, // Confirm button
             false  // Cancel button
         };
@@ -92,12 +94,12 @@ public static class AdminProductManagement
             int selection = menu.Start();
             List<string> values = menu.GetValues();
 
-            if (selection == 7)
+            if (selection == 8)
             {
                 return;
             }
 
-            if (selection == 6)
+            if (selection == 7)
             {
                 string name = values[0].Trim();
                 string priceInput = values[1].Trim();
@@ -105,13 +107,15 @@ public static class AdminProductManagement
                 string ingredients = values[3].Trim();
                 string categoryInput = values[4].Trim();
                 string stockInput = values[5].Trim();
+                string minAgeInput = values[6].Trim();
 
                 if (string.IsNullOrWhiteSpace(name) ||
                     string.IsNullOrWhiteSpace(priceInput) ||
                     string.IsNullOrWhiteSpace(brand) ||
                     string.IsNullOrWhiteSpace(ingredients) ||
                     string.IsNullOrWhiteSpace(categoryInput) ||
-                    string.IsNullOrWhiteSpace(stockInput))
+                    string.IsNullOrWhiteSpace(stockInput) ||
+                    string.IsNullOrWhiteSpace(minAgeInput))
                 {
                     MenuHelpers.Error("All required fields must be filled out before submitting.");
                     MenuHelpers.Prompt("Press Enter to return to editing.");
@@ -139,7 +143,14 @@ public static class AdminProductManagement
                     continue;
                 }
 
-                var result = _adminLogic.AddProduct(name, priceInput, brand, ingredients, categoryInput, stockInput);
+                if (!long.TryParse(minAgeInput, out long minAge) || minAge < 0)
+                {
+                    MenuHelpers.Error("Minimum age must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                var result = _adminLogic.AddProduct(name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
                 if (result.Success)
                 {
                     MenuHelpers.Confirm(result.Message);
@@ -185,6 +196,7 @@ public static class AdminProductManagement
             "Ingredients",
             "Category ID",
             "Stock",
+            "Minimum Age",
             "Save Changes",
             "Cancel"
         };
@@ -197,6 +209,7 @@ public static class AdminProductManagement
             true,  // Ingredients
             true,  // Category ID
             true,  // Stock
+            true,  // Minimum Age
             false, // Save button
             false  // Cancel button
         };
@@ -214,6 +227,7 @@ public static class AdminProductManagement
                 menuValues[3] = existingProduct.Ingredients;
                 menuValues[4] = existingProduct.CategoryID.ToString();
                 menuValues[5] = existingProduct.Stock.ToString();
+                menuValues[6] = existingProduct.MinAge.ToString();
             }
 
             Console.Clear();
@@ -228,12 +242,12 @@ public static class AdminProductManagement
             int selection = menu.Start();
             List<string> values = menu.GetValues();
 
-            if (selection == 7)
+            if (selection == 8)
             {
                 return;
             }
 
-            if (selection == 6)
+            if (selection == 7)
             {
                 string name = values[0].Trim();
                 string priceInput = values[1].Trim();
@@ -241,13 +255,15 @@ public static class AdminProductManagement
                 string ingredients = values[3].Trim();
                 string categoryInput = values[4].Trim();
                 string stockInput = values[5].Trim();
+                string minAgeInput = values[6].Trim();
 
-                if (string.IsNullOrWhiteSpace(name) || 
-                    string.IsNullOrWhiteSpace(priceInput) || 
-                    string.IsNullOrWhiteSpace(brand) || 
-                    string.IsNullOrWhiteSpace(ingredients) || 
-                    string.IsNullOrWhiteSpace(categoryInput) || 
-                    string.IsNullOrWhiteSpace(stockInput))
+                if (string.IsNullOrWhiteSpace(name) ||
+                    string.IsNullOrWhiteSpace(priceInput) ||
+                    string.IsNullOrWhiteSpace(brand) ||
+                    string.IsNullOrWhiteSpace(ingredients) ||
+                    string.IsNullOrWhiteSpace(categoryInput) ||
+                    string.IsNullOrWhiteSpace(stockInput) ||
+                    string.IsNullOrWhiteSpace(minAgeInput))
                 {
                     MenuHelpers.Error("Fields cannot be left entirely blank.");
                     MenuHelpers.Prompt("Press Enter to return to editing.");
@@ -275,7 +291,14 @@ public static class AdminProductManagement
                     continue;
                 }
 
-                var result = _adminLogic.UpdateProduct(productId, name, priceInput, brand, ingredients, categoryInput, stockInput);
+                if (!long.TryParse(minAgeInput, out long minAge) || minAge < 0)
+                {
+                    MenuHelpers.Error("Minimum age must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                var result = _adminLogic.UpdateProduct(productId, name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
                 if (result.Success)
                 {
                     MenuHelpers.Confirm(result.Message);
