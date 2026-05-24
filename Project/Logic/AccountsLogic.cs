@@ -1,11 +1,7 @@
 ﻿
 
 //This class is not static so later on we can use inheritance and interfaces
-
-using System.ComponentModel;
 using System.Net.Mail;
-using Project.Logic;
-using Project.Presentation;
 
 public class AccountsLogic
 {
@@ -25,11 +21,14 @@ public class AccountsLogic
     public AccountModel? CheckLogin(string identifier, string password)
     {
 
-        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password)) return null;
-        
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
+
+
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
-        
-        if (acc != null && PasswordSecurityLogic.VerifyPassword(password, acc.Password))
+        if (acc != null && acc.Password == password)
         {
             CurrentAccount = acc;
             return acc;
@@ -46,89 +45,89 @@ public class AccountsLogic
     {
         CurrentAccount = null;
     }
-    
-    public bool ValidateFirstName(string firstname)
-    {
-        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length < 3)
-        {
-            MenuHelpers.Error("First name must be at least 3 characters long");
-            return false;
-        }
 
-        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length > 32)
+    public DateTime ParseBirthday(string birthdayInput)
+    {
+        string[] parts = birthdayInput.Split('-');
+        if (parts.Length == 3
+            && int.TryParse(parts[0], out int day)
+            && int.TryParse(parts[1], out int month)
+            && int.TryParse(parts[2], out int year))
         {
-            MenuHelpers.Error("First name can't be longer than 32 characters");
+            try
+            {
+                return new DateTime(year, month, day);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // fall through to format error
+            }
+        }
+        throw new FormatException("Invalid date format");
+    }
+
+    // Returns age in whole years from a stored dd-MM-yyyy birthdate, or null when missing/invalid.
+    public int? CalculateAge(string? birthdate)
+    {
+        if (string.IsNullOrWhiteSpace(birthdate))
+        {
+            return null;
+        }
+        DateTime dob;
+        try
+        {
+            dob = ParseBirthday(birthdate);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+        DateTime today = DateTime.Today;
+        int age = today.Year - dob.Year;
+        if (dob.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        return age;
+    }
+
+   public bool ValidateBirthday(string birthdayInput)
+    {
+        if (string.IsNullOrWhiteSpace(birthdayInput))
+        {
+            MenuHelpers.Error("Birthday cannot be empty");
             return false;
         }
-        
+        DateTime birthday;
+        try
+        {
+            birthday = ParseBirthday(birthdayInput);
+        }
+        catch (FormatException)
+        {
+            MenuHelpers.Error("Invalid date format (use dd-MM-yyyy)");
+            return false;
+        }
+        if (birthday > DateTime.Today)
+        {
+            MenuHelpers.Error("Birthday cannot be in the future");
+            return false;
+        }
         return true;
     }
-    
-    public bool ValidateLastName(string lastname)
+
+    public bool ValidateUsername(string username)
     {
-        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length < 3)
+        if (string.IsNullOrWhiteSpace(username) || username.Length < 3)
         {
-            MenuHelpers.Error("Last name must be at least 3 characters long");
+            MenuHelpers.Error("Username must be at least 3 characters long");
             return false;
         }
-        
-        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length > 32)
-        {
-            MenuHelpers.Error("Last name can't be longer than 32 characters");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    public string CreateUsername(string firstname, string lastname)
-    {
-        if (firstname.Contains(" "))
-        {
-            firstname = firstname.Replace(" ", "");
-        }
-        
-        if (lastname.Contains(" "))
-        {
-            lastname = lastname.Replace(" ", "");
-        }
-        
-        firstname = char.ToUpper(firstname[0]) + firstname.Substring(1).ToLower();
-        lastname = char.ToUpper(lastname[0]) + lastname.Substring(1).ToLower();
-        
-        string username =  $"{firstname} {lastname}";
-        
-        if (IdentifierExists(username.ToLower())) 
+        if (IdentifierExists(username.ToLower()))
         {
             MenuHelpers.Error($"Username {username} already exists");
-        }
-        
-        return username;
-    }
-
-    public bool ValidateBirthDate(string input)
-    {
-        if (!DateTime.TryParse(input, out DateTime birthDate))
-        {
-            MenuHelpers.Error("Invalid date format");
             return false;
         }
-
-        int age = DateTime.Today.Year - birthDate.Year;
-        if (birthDate > DateTime.Today.AddYears(-age)) age--;
-
-        if (age < 5)
-        {
-            MenuHelpers.Error("You must be older than 4 years old");
-            return false;
-        }
-
-        if (age > 120)
-        {
-            MenuHelpers.Error("Enter valid birthdate");
-            return false;
-        }
-
         return true;
     }
 
@@ -190,26 +189,14 @@ public class AccountsLogic
         }
     }
 
-    public void Register(
-        string username,
-        string email,
-        string password,
-        string phoneNumber,
-        DateTime birthDate)
+    public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        string hashedPassword = PasswordSecurityLogic.HashPassword(password);
-
-        AccountModel newAccount = new AccountModel(
-            username.ToLower(),
-            email.ToLower(),
-            hashedPassword,
-            username,
-            string.Empty,
-            "0",
-            phoneNumber,
-            birthDate);
-
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, string.Empty, phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }
 }
+
+
+
+

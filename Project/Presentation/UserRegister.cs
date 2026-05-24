@@ -1,30 +1,72 @@
-namespace Project.Presentation;
-
 static class UserRegister
 {
     public static void Start()
     {
-        AccountsLogic AL = new();
+        AccountsLogic AL = new AccountsLogic();
         Console.Clear();
-        MenuHelpers.Announce("Register your account");
 
-        string firstname = MenuHelpers.PromptUntilValid("What's your first name?", AL.ValidateFirstName);
-        string lastname  = MenuHelpers.PromptUntilValid("What's your last name?", AL.ValidateLastName);
-        string username = AL.CreateUsername(firstname, lastname);
-        string email = MenuHelpers.PromptUntilValid("What's your Email", AL.ValidateEmail);
-        string birthInput = MenuHelpers.PromptUntilValid("What's your birthdate? (yyyy-mm-dd)", AL.ValidateBirthDate);
-        DateTime birthDate = DateTime.Parse(birthInput);
-        string password = MenuHelpers.PromptUntilValid("What's your Password (atleast 7 characters)", AL.ValidatePassword);
-        do
+        List<string> labels = new List<string>
         {
-            password = MenuHelpers.PromptPassword("What's your Password (atleast 7 characters)");
-        }
-        while (!AL.ValidatePassword(password));
-        string phoneNumber = MenuHelpers.PromptUntilValid("What's your phone number (only Dutch numbers)", AL.ValidatePhonenumber);
-        AL.Register(username, email, password, phoneNumber, birthDate);
-        MenuHelpers.Confirm($"Successfully registered as {username}");
-        System.Threading.Thread.Sleep(1000);
-        Menu.Start();
-    }
+            "Username",
+            "Email",
+            "Password",
+            "Phone number",
+            "Birthdate"
+        };
 
+        List<bool> requiresInput = new List<bool>
+        {
+            true,
+            true,
+            true,
+            true,
+            true
+        };
+
+        MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
+        form.Start();
+        List<string> results = form.GetValues();
+
+        string username = results[0];
+        string email = results[1];
+        string password = results[2];
+        string phoneNumber = results[3];
+        string bDate = results[4];
+
+        bool isValid = true;
+
+        if (!AL.ValidateUsername(username))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidateEmail(email))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidatePassword(password))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidatePhonenumber(phoneNumber))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidateBirthday(bDate))
+        {
+            isValid = false;
+        }
+
+        if (isValid)
+        {
+            AL.Register(username, email, password, phoneNumber, bDate);
+            MenuHelpers.Confirm($"Successfully registered as {username}");
+            System.Threading.Thread.Sleep(1000);
+            Menu.Start();
+        }
+        else
+        {
+            MenuHelpers.Prompt("Press Enter to try again");
+            UserRegister.Start();
+        }
+    }
 }

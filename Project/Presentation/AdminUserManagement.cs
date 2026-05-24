@@ -1,3 +1,6 @@
+using Project.Logic;
+using Project.Models;
+
 public static class AdminUserManagement
 {
     private static readonly AdminLogic _adminLogic = new();
@@ -9,37 +12,31 @@ public static class AdminUserManagement
             Console.Clear();
             ShowUsers();
 
-            MenuHelpers.Announce("--- USER MANAGEMENT ---");
-            MenuHelpers.Confirm("Enter 1 to refresh user list");
-            MenuHelpers.Confirm("Enter 2 to change a user's role");
-            MenuHelpers.Confirm("Enter 3 to remove a user");
-            MenuHelpers.Confirm("Enter 4 to return to Admin Menu");
-
-            string? input = MenuHelpers.Prompt("");
-            if (input == "1")
+            List<string> options = new List<string>
             {
-                continue;
-            }
+                "Refresh user list",
+                "Change a user's role",
+                "Remove a user",
+                "Return to Admin Menu"
+            };
 
-            if (input == "2")
+            MenuNavigation menu = new MenuNavigation(options, "--- USER MANAGEMENT ---");
+            int selection = menu.Start();
+
+            switch (selection)
             {
-                UpdateUserRoleFlow();
-                continue;
+                case 0:
+                    continue;
+                case 1:
+                    UpdateUserRoleFlow();
+                    break;
+                case 2:
+                    RemoveUserFlow();
+                    break;
+                case 3:
+                    AdminMenu.Start();
+                    return;
             }
-
-            if (input == "3")
-            {
-                RemoveUserFlow();
-                continue;
-            }
-
-            if (input == "4")
-            {
-                AdminMenu.Start();
-                return;
-            }
-
-            MenuHelpers.Warn("Invalid input");
         }
     }
 
@@ -73,10 +70,10 @@ public static class AdminUserManagement
         }
         else
         {
-            MenuHelpers.Error(result.Message);
+            MenuHelpers.Warn(result.Message);
         }
 
-        MenuHelpers.Prompt("Press Enter to continue");
+        MenuHelpers.Prompt("Press Enter to continue");;
     }
 
     private static void RemoveUserFlow()
@@ -86,7 +83,7 @@ public static class AdminUserManagement
         if (!string.Equals(confirmation, "REMOVE", StringComparison.Ordinal))
         {
             MenuHelpers.Warn("Removal cancelled.");
-            MenuHelpers.Prompt("Press Enter to continue");
+            MenuHelpers.Prompt("Press Enter to continue");;
             return;
         }
 
@@ -97,10 +94,10 @@ public static class AdminUserManagement
         }
         else
         {
-            MenuHelpers.Error(result.Message);
+            MenuHelpers.Warn(result.Message);
         }
 
-        MenuHelpers.Prompt("Press Enter to continue");
+        MenuHelpers.Prompt("Press Enter to continue");;
     }
 
     private static string PromptRequiredText(string prompt)
@@ -113,7 +110,7 @@ public static class AdminUserManagement
                 return input.Trim();
             }
 
-            MenuHelpers.Error("Input is required.");
+            MenuHelpers.Warn("Input is required.");
         }
     }
 }

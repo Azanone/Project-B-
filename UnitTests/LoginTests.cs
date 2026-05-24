@@ -10,14 +10,13 @@ public sealed class LoginTests
     private string _username = string.Empty;
     private string _email = string.Empty;
     private const string Password = "testpass123";
-    DateTime birthDate = new DateTime(2000, 4, 4);
 
     [TestInitialize]
     public void TestInitialize()
     {
         _username = $"login_test_{Guid.NewGuid():N}";
         _email = $"{_username}@example.com";
-        _logic.Register(_username, _email, Password, "0612345678", birthDate);
+        _logic.Register(_username, _email, Password, "0612345678", "01-01-1990");
     }
 
     [TestCleanup]

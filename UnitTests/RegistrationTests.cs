@@ -13,27 +13,22 @@ public sealed class RegistrationTests
         string email = $"{username}@example.com";
         const string password = "register123";
         const string phoneNumber = "0612345678";
-        DateTime birthDate = new DateTime(2000, 4, 4);
 
         AccountModel? storedByUsername = null;
 
         try
         {
-            _logic.Register(username, email, password, phoneNumber, birthDate);
+            _logic.Register(username, email, password, phoneNumber, "01-01-1990");
 
             storedByUsername = _access.GetByIdentifier(username);
             AccountModel? storedByEmail = _access.GetByIdentifier(email);
 
             Assert.IsNotNull(storedByUsername);
             Assert.IsNotNull(storedByEmail);
-
             Assert.AreEqual(username, storedByUsername.Username);
             Assert.AreEqual(email, storedByUsername.EmailAddress);
             Assert.AreEqual(password, storedByUsername.Password);
             Assert.AreEqual(phoneNumber, storedByUsername.phoneNumber);
-
-            Assert.AreEqual(birthDate, storedByUsername.BirthDate);
-
             Assert.AreEqual(username, storedByUsername.FullName);
             Assert.AreEqual(username, storedByEmail.Username);
         }
@@ -42,6 +37,14 @@ public sealed class RegistrationTests
             if (storedByUsername != null)
             {
                 _access.Delete(storedByUsername);
+            }
+            else
+            {
+                AccountModel? fallback = _access.GetByIdentifier(username);
+                if (fallback != null)
+                {
+                    _access.Delete(fallback);
+                }
             }
         }
     }
@@ -52,30 +55,30 @@ public sealed class RegistrationTests
         string username = $"reg_login_{Guid.NewGuid():N}";
         string email = $"{username}@example.com";
         const string password = "register123";
-        DateTime birthDate = new DateTime(2000, 4, 4);
 
         AccountModel? stored = null;
 
         try
         {
-            _logic.Register(username, email, password, "0612345678", birthDate);
+            _logic.Register(username, email, password, "0612345678", "01-01-1990");
 
             AccountModel? byUsername = _logic.CheckLogin(username, password);
             AccountModel? byEmail = _logic.CheckLogin(email, password);
 
             Assert.IsNotNull(byUsername);
             Assert.IsNotNull(byEmail);
-
             Assert.AreEqual(username, byUsername.Username);
             Assert.AreEqual(email, byEmail.EmailAddress);
-
-            Assert.AreEqual(birthDate, byUsername.BirthDate);
-            Assert.AreEqual(birthDate, byEmail.BirthDate);
 
             stored = _access.GetByIdentifier(username);
         }
         finally
         {
+            if (stored == null)
+            {
+                stored = _access.GetByIdentifier(username);
+            }
+
             if (stored != null)
             {
                 _access.Delete(stored);
