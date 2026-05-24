@@ -1,39 +1,33 @@
-using Project.Presentation;
-
 static class Menu
-{    static public void Start()
+{
+    static public void Start()
     {
         Console.Clear();
-        MenuHelpers.Announce(@".·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''':·.
-: :     ____             __               __                   __  ___                    __     __  : :
-: :    / __ )  ____ _   / /_    __  __   / /  ____    ____    /  |/  /  ____ _   _____   / /__  / /_ : :
-: :   / __  | / __ `/  / __ \  / / / /  / /  / __ \  / __ \  / /|_/ /  / __ `/  / ___/  / //_/ / __/ : :
-: :  / /_/ / / /_/ /  / /_/ / / /_/ /  / /  / /_/ / / / / / / /  / /  / /_/ /  / /     / ,<   / /_   : :
-: : /_____/  \__,_/  /_.___/  \__, /  /_/   \____/ /_/ /_/ /_/  /_/   \__,_/  /_/     /_/|_|  \__/   : :
-: :                          /____/                                                                  : :
-'·:..................................................................................................:·'");
-        MenuHelpers.Announce("Enter 1 to login");
-        MenuHelpers.Announce("Enter 2 to register");
-        MenuHelpers.Announce("Enter 3 to continue as guest");
+        string Logo = @" ____   __   ____  _  _  __     __   __ _    ____  ____  __  ____  ____ 
+(  _ ╲ ╱ _╲ (  _ ╲( ╲╱ )(  )   ╱  ╲ (  ( ╲  ╱ ___)(_  _)╱  ╲(  _ ╲(  __)
+ ) _ (╱    ╲ ) _ ( )  ╱ ╱ (_╱╲(  O )╱    ╱  ╲___ ╲  )( (  O ))   ╱ ) _) 
+(____╱╲_╱╲_╱(____╱(__╱  ╲____╱ ╲__╱ ╲_)__)  (____╱ (__) ╲__╱(__╲_)(____)";
+        List<string> options = new List<string>
+        {
+            "Login",
+            "Register",
+            "Continue as guest"
+        };
 
+        MenuNavigation menu = new MenuNavigation(options, Logo);
+        int selection = menu.Start();
 
-        string input = Console.ReadLine() ?? string.Empty;
-        if (input == "1")
+        switch (selection)
         {
-            Login.Start();
-        }
-        else if (input == "2")
-        {
-            UserRegister.Start();
-        }
-        else if (input == "3")
-        {
-            Dashboard.Start();
-        }
-        else
-        {
-            MenuHelpers.Warn("Invalid input");
-            Start();
+            case 0:
+                Login.Start();
+                break;
+            case 1:
+                UserRegister.Start();
+                break;
+            case 2:
+                Dashboard.Start();
+                break;
         }
     }
 }

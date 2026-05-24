@@ -1,5 +1,3 @@
-using Project.Models;
-
 static class Login
 {
     static private AccountsLogic accountsLogic = new AccountsLogic();
@@ -7,9 +5,30 @@ static class Login
     public static void Start()
     {
         Console.Clear();
-        MenuHelpers.Announce("Welcome to the login page");
-        string identifier = MenuHelpers.Prompt("Please enter your email address or username") ?? string.Empty;
-        string password = MenuHelpers.PromptPassword("Please enter your password");
+
+        List<string> labels = new List<string>
+        {
+            "Email or Username",
+            "Password"
+        };
+
+        List<bool> requiresInput = new List<bool>
+        {
+            true,
+            true
+        };
+
+        MenuNavigation form = new MenuNavigation(labels, requiresInput, @" ____   __   ____  _  _  __     __   __ _    ____  ____  __  ____  ____ 
+(  _ ╲ ╱ _╲ (  _ ╲( ╲╱ )(  )   ╱  ╲ (  ( ╲  ╱ ___)(_  _)╱  ╲(  _ ╲(  __)
+ ) _ (╱    ╲ ) _ ( )  ╱ ╱ (_╱╲(  O )╱    ╱  ╲___ ╲  )( (  O ))   ╱ ) _) 
+(____╱╲_╱╲_╱(____╱(__╱  ╲____╱ ╲__╱ ╲_)__)  (____╱ (__) ╲__╱(__╲_)(____)
+
+Welcome to the login page");
+        form.Start();
+        List<string> results = form.GetValues();
+
+        string identifier = results[0];
+        string password = results[1];
 
         AccountModel? account = accountsLogic.CheckLogin(identifier, password);
         if (account != null)
@@ -23,14 +42,6 @@ static class Login
                 Dashboard.Start();
             }
         }
-        
-        if (account != null)
-        {
-            CurrentSession.User = account;
-
-            Dashboard.Start();
-        }
-        
         else
         {
             if (accountsLogic.IdentifierExists(identifier))
@@ -41,8 +52,9 @@ static class Login
             {
                 MenuHelpers.Warn("Wrong email address or username");
             }
-
-            // Menu.Start();
+            
+            System.Threading.Thread.Sleep(1500);
+            Login.Start();
         }
     }
 }

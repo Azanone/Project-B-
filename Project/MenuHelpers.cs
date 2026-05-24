@@ -30,40 +30,7 @@ public static class MenuHelpers
         Console.WriteLine(input);
         Console.ResetColor();
         return Console.ReadLine();
-    }
-
-    public static string PromptPassword(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine(message);
-        Console.ResetColor();
-
-        string password = string.Empty;
-        ConsoleKeyInfo key;
-
-        while ((key = Console.ReadKey(true)).Key != ConsoleKey.Enter)
-        {
-            if (key.Key == ConsoleKey.Backspace)
-            {
-                if (password.Length > 0)
-                {
-                    password = password[..^1];
-                    Console.Write("\b \b");
-                }
-
-                continue;
-            }
-
-            if (!char.IsControl(key.KeyChar))
-            {
-                password += key.KeyChar;
-                Console.Write("*");
-            }
-        }
-
-        Console.WriteLine();
-        return password;
-    }
+     }
     public static int PromptInt(string strin)
     {
         Console.ForegroundColor = ConsoleColor.White;
@@ -77,29 +44,13 @@ public static class MenuHelpers
         return 0;
      }
 
-    public static void Pause()
+     public static void Pause()
     {
         Prompt("Press Enter to continue");
     }
-    public static string PromptUntilValid(string prompt, Func<string, bool> validate)
+    public static void PromptReturnToMenu(string prompt, Action onReturn)
     {
-        while (true)
-        {
-            string? input = Prompt(prompt);
-            string value = input ?? string.Empty;
-
-            if (validate(value))
-            {
-                return value;
-            }
-
-            Warn("Invalid input");
-        }
-    }
-
-    public static void PromptReturnToMenu(string message, Action onReturn)
-    {
-        string? input = Prompt(message);
+        string? input = Prompt(prompt);
         if (input == "1")
         {
             onReturn();
@@ -107,6 +58,22 @@ public static class MenuHelpers
         }
 
         Warn("Invalid input");
-        PromptReturnToMenu(message, onReturn);
     }
+    public static string PromptUntilValid(string prompt, Func<string, bool> validate)
+{
+    string? input;
+    bool error;
+    do
+    {
+        input = Prompt(prompt);
+        error = input != null && validate(input);
+        if (!error) Warn($"Invalid input: {error}");
+        System.Threading.Thread.Sleep(1000);
+        Console.Clear();
+
+    }
+    while (!error);
+
+    return input ?? string.Empty;
+}
 }

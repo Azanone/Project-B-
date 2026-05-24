@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 public static class AdminProductManagement
 {
     private static readonly AdminLogic _adminLogic = new();
@@ -7,279 +11,351 @@ public static class AdminProductManagement
         while (true)
         {
             Console.Clear();
-            ShowProducts.ShowAll();
-            MenuHelpers.Announce("--- PRODUCT MANAGEMENT ---");
-            MenuHelpers.Confirm("Enter 1 to view all products");
-            MenuHelpers.Confirm("Enter 2 to add a product");
-            MenuHelpers.Confirm("Enter 3 to edit a product");
-            MenuHelpers.Confirm("Enter 4 to remove a product");
-            MenuHelpers.Confirm("Enter 5 to return to Admin Menu");
+            List<string> options = new List<string>
+            {
+                "View all products",
+                "Add a product",
+                "Edit a product",
+                "Remove a product",
+                "Return to Admin Menu"
+            };
 
-            string? input = MenuHelpers.Prompt("");
-            if (input == "1")
+            MenuNavigation menu = new MenuNavigation(options, "--- PRODUCT MANAGEMENT ---");
+            int selection = menu.Start();
+
+            switch (selection)
             {
-                ShowProducts.ShowAll();
-                MenuHelpers.Prompt("Press Enter to continue");
-            }
-            else if (input == "2")
-            {
-                AddProductFlow();
-            }
-            else if (input == "3")
-            {
-                EditProductFlow();
-            }
-            else if (input == "4")
-            {
-                RemoveProductFlow();
-            }
-            else if (input == "5")
-            {
-                AdminMenu.Start();
-                return;
-            }
-            else
-            {
-                MenuHelpers.Warn("Invalid input");
+                case 0:
+                    AdminInformationOverview.ShowProducts();
+                    break;
+                case 1:
+                    AddProductFlow();
+                    break;
+                case 2:
+                    EditProductFlow();
+                    break;
+                case 3:
+                    RemoveProductFlow();
+                    break;
+                case 4:
+                    AdminMenu.Start();
+                    return;
             }
         }
     }
 
     private static void AddProductFlow()
     {
-        string name = PromptRequiredText("Product name:", "Product name is required.");
-        string price = PromptValidDecimal("Price:", "Price must be a valid non-negative number.");
-        string brand = PromptRequiredText("Brand:", "Brand is required.");
-        string ingredients = PromptRequiredText("Ingredients:", "Ingredients are required.");
-
         List<CategoryModel> categories = _adminLogic.GetCategories();
-        string? categoryId = PromptValidCategoryId(categories);
-        if (categoryId == null)
-        {
-            return;
-        }
-        string stock = PromptValidNonNegativeWholeNumber("Stock:", "Stock must be zero or a positive whole number.");
-
-        var result = _adminLogic.AddProduct(name, price, brand, ingredients, categoryId, stock);
-        if (result.Success)
-        {
-            MenuHelpers.Confirm(result.Message);
-            return;
-        }
-
-        MenuHelpers.Error(result.Message);
-    }
-
-    private static string PromptRequiredText(string prompt, string errorMessage)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (!string.IsNullOrWhiteSpace(input))
-            {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error(errorMessage);
-        }
-    }
-
-    private static string PromptValidDecimal(string prompt, string errorMessage)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (!string.IsNullOrWhiteSpace(input)
-                && decimal.TryParse(input, out decimal number)
-                && number >= 0)
-            {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error(errorMessage);
-        }
-    }
-
-    private static string PromptValidNonNegativeWholeNumber(string prompt, string errorMessage)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (!string.IsNullOrWhiteSpace(input)
-                && long.TryParse(input, out long number)
-                && number >= 0)
-            {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error(errorMessage);
-        }
-    }
-
-    private static string? PromptValidCategoryId(List<CategoryModel> categories)
-    {
         if (categories.Count == 0)
         {
             MenuHelpers.Error("No categories found. Cannot add product without a category.");
-            return null;
+            return;
         }
 
-        MenuHelpers.Announce("Available categories:");
-        foreach (var category in categories)
+        List<string> labels = new List<string>
         {
-            MenuHelpers.Confirm($"{category.CategoryID} - {category.Name}");
-        }
+            "Product Name",
+            "Price (EUR)",
+            "Brand",
+            "Ingredients",
+            "Category ID",
+            "Stock",
+            "Minimum Age",
+            "Confirm and Save Product",
+            "Cancel"
+        };
+
+        List<bool> requiresInput = new List<bool>
+        {
+            true,  // Product Name
+            true,  // Price
+            true,  // Brand
+            true,  // Ingredients
+            true,  // Category ID
+            true,  // Stock
+            true,  // Minimum Age
+            false, // Confirm button
+            false  // Cancel button
+        };
 
         while (true)
         {
-            string? categoryInput = MenuHelpers.Prompt("Choose category ID:");
-            if (long.TryParse(categoryInput, out long categoryId)
-                && categories.Any(c => c.CategoryID == categoryId))
+            MenuNavigation menu = new MenuNavigation(labels, requiresInput, "--- ADD NEW PRODUCT ---");
+
+            Console.Clear();
+            MenuHelpers.Announce("Available Categories for Reference:");
+            foreach (var category in categories)
             {
-                return categoryId.ToString();
+                Console.WriteLine($"  [{category.CategoryID}] {category.Name}");
+            }
+            Console.WriteLine("\nUse UP/DOWN arrows to navigate fields, type text directly, and press Enter on an action option.\n");
+
+            int selection = menu.Start();
+            List<string> values = menu.GetValues();
+
+            if (selection == 8)
+            {
+                return;
             }
 
-            MenuHelpers.Error("Invalid category ID. Choose one from the list above.");
+            if (selection == 7)
+            {
+                string name = values[0].Trim();
+                string priceInput = values[1].Trim();
+                string brand = values[2].Trim();
+                string ingredients = values[3].Trim();
+                string categoryInput = values[4].Trim();
+                string stockInput = values[5].Trim();
+                string minAgeInput = values[6].Trim();
+
+                if (string.IsNullOrWhiteSpace(name) ||
+                    string.IsNullOrWhiteSpace(priceInput) ||
+                    string.IsNullOrWhiteSpace(brand) ||
+                    string.IsNullOrWhiteSpace(ingredients) ||
+                    string.IsNullOrWhiteSpace(categoryInput) ||
+                    string.IsNullOrWhiteSpace(stockInput) ||
+                    string.IsNullOrWhiteSpace(minAgeInput))
+                {
+                    MenuHelpers.Error("All required fields must be filled out before submitting.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!decimal.TryParse(priceInput, out decimal price) || price < 0)
+                {
+                    MenuHelpers.Error("Price must be a valid non-negative number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(categoryInput, out long categoryId) || !categories.Any(c => c.CategoryID == categoryId))
+                {
+                    MenuHelpers.Error("Invalid Category ID. Please pick an existing ID from the reference list.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(stockInput, out long stock) || stock < 0)
+                {
+                    MenuHelpers.Error("Stock must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(minAgeInput, out long minAge) || minAge < 0)
+                {
+                    MenuHelpers.Error("Minimum age must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                var result = _adminLogic.AddProduct(name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
+                if (result.Success)
+                {
+                    MenuHelpers.Confirm(result.Message);
+                    return;
+                }
+
+                MenuHelpers.Error(result.Message);
+                MenuHelpers.Prompt("Press Enter to return to editing.");
+            }
         }
     }
 
     private static void EditProductFlow()
     {
-        string? productId = MenuHelpers.Prompt("Product ID to edit:");
-        if (!long.TryParse(productId, out long parsedId) || parsedId <= 0)
+        List<ProductModel> products = _adminLogic.GetProducts();
+        if (products == null || products.Count == 0)
         {
-            MenuHelpers.Error("Product ID must be a positive number.");
+            MenuHelpers.Error("No products available to edit.");
+            MenuHelpers.Prompt("Press Enter to continue.");
             return;
         }
 
-        ProductModel? existingProduct = _adminLogic.GetProductById(parsedId);
-        if (existingProduct == null)
+        List<string> productOptions = products.Select(p => $"[ID: {p.ProductID}] {p.Name} - €{p.Price}").ToList();
+        productOptions.Add("Cancel and Return");
+
+        MenuNavigation selectionMenu = new MenuNavigation(productOptions, "--- SELECT A PRODUCT TO EDIT ---");
+        int chosenIndex = selectionMenu.Start();
+
+        if (chosenIndex == productOptions.Count - 1)
         {
-            MenuHelpers.Error($"No product found with ID {parsedId}.");
             return;
         }
 
-        MenuHelpers.Announce($"Editing {existingProduct.Name} (ID: {existingProduct.ProductID})");
-        string name = PromptOptionalText($"New product name (Enter to keep: {existingProduct.Name}):", existingProduct.Name);
-        string price = PromptOptionalDecimal($"New price (Enter to keep: {existingProduct.Price}):", existingProduct.Price.ToString(), "Price must be a valid non-negative number.");
-        string brand = PromptOptionalText($"New brand (Enter to keep: {existingProduct.Brand}):", existingProduct.Brand);
-        string ingredients = PromptOptionalText($"New ingredients (Enter to keep: {existingProduct.Ingredients}):", existingProduct.Ingredients);
-        string stock = PromptOptionalNonNegativeWholeNumber($"New stock (Enter to keep: {existingProduct.Stock}):", existingProduct.Stock.ToString(), "Stock must be zero or a positive whole number.");
-
+        ProductModel existingProduct = products[chosenIndex];
+        string productId = existingProduct.ProductID.ToString();
         List<CategoryModel> categories = _adminLogic.GetCategories();
-        string categoryId = PromptValidCategoryIdForEdit(categories, existingProduct.CategoryID);
 
-        var result = _adminLogic.UpdateProduct(productId!, name, price, brand, ingredients, categoryId, stock);
-        if (result.Success)
+        List<string> labels = new List<string>
         {
-            MenuHelpers.Confirm(result.Message);
-            return;
-        }
+            "Product Name",
+            "Price (EUR)",
+            "Brand",
+            "Ingredients",
+            "Category ID",
+            "Stock",
+            "Minimum Age",
+            "Save Changes",
+            "Cancel"
+        };
 
-        MenuHelpers.Error(result.Message);
+        List<bool> requiresInput = new List<bool>
+        {
+            true,  // Product Name
+            true,  // Price
+            true,  // Brand
+            true,  // Ingredients
+            true,  // Category ID
+            true,  // Stock
+            true,  // Minimum Age
+            false, // Save button
+            false  // Cancel button
+        };
+
+        while (true)
+        {
+            MenuNavigation menu = new MenuNavigation(labels, requiresInput, $"--- EDITING PRODUCT: {existingProduct.Name} (ID: {existingProduct.ProductID}) ---");
+
+            List<string> menuValues = menu.GetValues();
+            if (string.IsNullOrEmpty(menuValues[0]) && string.IsNullOrEmpty(menuValues[1]))
+            {
+                menuValues[0] = existingProduct.Name;
+                menuValues[1] = existingProduct.Price.ToString();
+                menuValues[2] = existingProduct.Brand;
+                menuValues[3] = existingProduct.Ingredients;
+                menuValues[4] = existingProduct.CategoryID.ToString();
+                menuValues[5] = existingProduct.Stock.ToString();
+                menuValues[6] = existingProduct.MinAge.ToString();
+            }
+
+            Console.Clear();
+            MenuHelpers.Announce("Available Categories for Reference:");
+            foreach (var category in categories)
+            {
+                string marker = category.CategoryID == existingProduct.CategoryID ? " (current)" : "";
+                Console.WriteLine($"  [{category.CategoryID}] {category.Name}{marker}");
+            }
+            Console.WriteLine("\nModify any text field directly, then press Enter on 'Save Changes' to update.\n");
+
+            int selection = menu.Start();
+            List<string> values = menu.GetValues();
+
+            if (selection == 8)
+            {
+                return;
+            }
+
+            if (selection == 7)
+            {
+                string name = values[0].Trim();
+                string priceInput = values[1].Trim();
+                string brand = values[2].Trim();
+                string ingredients = values[3].Trim();
+                string categoryInput = values[4].Trim();
+                string stockInput = values[5].Trim();
+                string minAgeInput = values[6].Trim();
+
+                if (string.IsNullOrWhiteSpace(name) ||
+                    string.IsNullOrWhiteSpace(priceInput) ||
+                    string.IsNullOrWhiteSpace(brand) ||
+                    string.IsNullOrWhiteSpace(ingredients) ||
+                    string.IsNullOrWhiteSpace(categoryInput) ||
+                    string.IsNullOrWhiteSpace(stockInput) ||
+                    string.IsNullOrWhiteSpace(minAgeInput))
+                {
+                    MenuHelpers.Error("Fields cannot be left entirely blank.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!decimal.TryParse(priceInput, out decimal price) || price < 0)
+                {
+                    MenuHelpers.Error("Price must be a valid non-negative number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(categoryInput, out long categoryId) || !categories.Any(c => c.CategoryID == categoryId))
+                {
+                    MenuHelpers.Error("Invalid Category ID. Please pick an existing ID from the reference list.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(stockInput, out long stock) || stock < 0)
+                {
+                    MenuHelpers.Error("Stock must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                if (!long.TryParse(minAgeInput, out long minAge) || minAge < 0)
+                {
+                    MenuHelpers.Error("Minimum age must be zero or a positive whole number.");
+                    MenuHelpers.Prompt("Press Enter to return to editing.");
+                    continue;
+                }
+
+                var result = _adminLogic.UpdateProduct(productId, name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
+                if (result.Success)
+                {
+                    MenuHelpers.Confirm(result.Message);
+                    return;
+                }
+
+                MenuHelpers.Error(result.Message);
+                MenuHelpers.Prompt("Press Enter to return to editing.");
+            }
+        }
     }
 
     private static void RemoveProductFlow()
     {
-        string? productId = MenuHelpers.Prompt("Product ID to remove:");
-        var result = _adminLogic.RemoveProduct(productId ?? string.Empty);
-        if (result.Success)
+        List<ProductModel> products = _adminLogic.GetProducts();
+        if (products == null || products.Count == 0)
         {
-            MenuHelpers.Confirm(result.Message);
+            MenuHelpers.Error("No products available to remove.");
+            MenuHelpers.Prompt("Press Enter to continue.");
             return;
         }
 
-        MenuHelpers.Error(result.Message);
-    }
+        List<string> productOptions = products.Select(p => $"[ID: {p.ProductID}] {p.Name} - €{p.Price}").ToList();
+        productOptions.Add("Cancel and Return");
 
-    private static string PromptOptionalText(string prompt, string currentValue)
-    {
-        while (true)
+        MenuNavigation selectionMenu = new MenuNavigation(productOptions, "--- SELECT A PRODUCT TO REMOVE ---");
+        int chosenIndex = selectionMenu.Start();
+
+        if (chosenIndex == productOptions.Count - 1)
         {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return currentValue;
-            }
-
-            string trimmed = input.Trim();
-            if (!string.IsNullOrWhiteSpace(trimmed))
-            {
-                return trimmed;
-            }
-
-            MenuHelpers.Error("Invalid input.");
-        }
-    }
-
-    private static string PromptOptionalDecimal(string prompt, string currentValue, string errorMessage)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return currentValue;
-            }
-
-            if (decimal.TryParse(input, out decimal number) && number >= 0)
-            {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error(errorMessage);
-        }
-    }
-
-    private static string PromptOptionalNonNegativeWholeNumber(string prompt, string currentValue, string errorMessage)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return currentValue;
-            }
-
-            if (long.TryParse(input, out long number) && number >= 0)
-            {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error(errorMessage);
-        }
-    }
-
-    private static string PromptValidCategoryIdForEdit(List<CategoryModel> categories, long currentCategoryId)
-    {
-        if (categories.Count == 0)
-        {
-            MenuHelpers.Warn("No categories found. Keeping current category.");
-            return currentCategoryId.ToString();
+            return;
         }
 
-        MenuHelpers.Announce("Available categories:");
-        foreach (var category in categories)
+        ProductModel targetProduct = products[chosenIndex];
+        string productId = targetProduct.ProductID.ToString();
+
+        List<string> options = new List<string>
         {
-            string currentMarker = category.CategoryID == currentCategoryId ? " (current)" : string.Empty;
-            MenuHelpers.Confirm($"{category.CategoryID} - {category.Name}{currentMarker}");
-        }
+            "No, Keep Product",
+            "Yes, Permanently Remove Product"
+        };
 
-        while (true)
+        MenuNavigation confirmationMenu = new MenuNavigation(options, $"Are you completely sure you want to remove {targetProduct.Name} (ID: {productId})?");
+        int selection = confirmationMenu.Start();
+
+        if (selection == 1)
         {
-            string? categoryInput = MenuHelpers.Prompt($"Choose category ID (Enter to keep: {currentCategoryId}):");
-            if (string.IsNullOrWhiteSpace(categoryInput))
+            var result = _adminLogic.RemoveProduct(productId);
+            if (result.Success)
             {
-                return currentCategoryId.ToString();
+                MenuHelpers.Confirm(result.Message);
             }
-
-            if (long.TryParse(categoryInput, out long categoryId)
-                && categories.Any(c => c.CategoryID == categoryId))
+            else
             {
-                return categoryId.ToString();
+                MenuHelpers.Error(result.Message);
+                MenuHelpers.Prompt("Press Enter to continue.");
             }
-
-            MenuHelpers.Error("Invalid category ID. Choose one from the list above or press Enter to keep the current value.");
         }
     }
 }

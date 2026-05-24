@@ -3,66 +3,74 @@ public static class ShowWishlist
     public static void Start()
     {
         AccountModel? account = AccountsLogic.CurrentAccount;
-        WishlistLogic WLlogic = new(account.UserId);
+        if (account == null)
+        {
+            Console.WriteLine("Error: Not logged in.");
+            return;
+        }
+        WishlistLogic WLlogic = new WishlistLogic(account.Id);
+        
         Console.Clear();
-        MenuHelpers.Confirm("Enter 1 View Wishlist");
-        MenuHelpers.Confirm("Enter 2 Add product");
-        MenuHelpers.Confirm("Enter 3 Remove product");
-        MenuHelpers.Confirm("Enter 4 Clear wishlist");
-        MenuHelpers.Confirm("Enter 5 Transfer wishlist to cart");
-        MenuHelpers.Confirm("Enter 6 Return to main menu");
 
-        string? input = MenuHelpers.Prompt("Choose option");
+        List<string> options = new List<string>
+        {
+            "View Wishlist",
+            "Add product",
+            "Remove product",
+            "Clear wishlist",
+            "Transfer wishlist to cart",
+            "Return to main menu"
+        };
 
-        if (input == "1")
+        MenuNavigation menu = new MenuNavigation(options, "--- Wishlist Options  ---");
+        int selection = menu.Start();
+
+        switch (selection)
         {
-            List<ProductModel> wishlist = WLlogic.GetWishlist();
-            foreach (var p in wishlist)
-            {
-                MenuHelpers.Announce($"{p.ProductID}: {p.Name} - {p.Price}");
-            }
-            MenuHelpers.Pause();
-            Start();
-        }
-        else if (input == "2")
-        {
-            ShowProducts.ShowAll();
-            int id = MenuHelpers.PromptInt("Enter Product ID to add");
-            bool success = WLlogic.AddProduct(id);
-            if (success) MenuHelpers.Confirm("Product added!");
-            else MenuHelpers.Error("Invalid ID or already in wishlist.");
-            MenuHelpers.Pause();
-            Start();
-        }
-        else if (input == "3")
-        {
-            List<ProductModel> wishlist = WLlogic.GetWishlist();
-            foreach (var p in wishlist)
-            {
-                MenuHelpers.Announce($"{p.ProductID}: {p.Name} - {p.Price}");
-            }
-            int id = MenuHelpers.PromptInt("Enter Product ID to remove");
-            MenuHelpers.Confirm(WLlogic.RemoveProduct(id));
-            MenuHelpers.Pause();
-            Start();
-        }
-        else if (input == "4")
-        {
-            WLlogic.ClearWishlist();
-            MenuHelpers.Confirm("Wishlist cleared.");
-            MenuHelpers.Pause();
-            Start();
-        }
-        else if (input == "5")
-        {
-            WLlogic.TransferToCart();
-            MenuHelpers.Confirm("Items moved to cart.");
-            MenuHelpers.Pause();
-            Start();
-        }
-        else if (input == "6")
-        {
-            Dashboard.Start();
+            case 0:
+                List<ProductModel> wishlist = WLlogic.GetWishlist();
+                foreach (var p in wishlist)
+                {
+                    MenuHelpers.Announce($"{p.ProductID}: {p.Name} - {p.Price}");
+                }
+                MenuHelpers.Pause();
+                Start();
+                break;
+            case 1:
+                AdminInformationOverview.ShowProducts();
+                int addId = MenuHelpers.PromptInt("Enter Product ID to add");
+                bool success = WLlogic.AddProduct(addId);
+                if (success) MenuHelpers.Confirm("Product added!");
+                else MenuHelpers.Error("Invalid ID or already in wishlist.");
+                MenuHelpers.Pause();
+                Start();
+                break;
+            case 2:
+                List<ProductModel> currentWishlist = WLlogic.GetWishlist();
+                foreach (var p in currentWishlist)
+                {
+                    MenuHelpers.Announce($"{p.ProductID}: {p.Name} - {p.Price}");
+                }
+                int removeId = MenuHelpers.PromptInt("Enter Product ID to remove");
+                MenuHelpers.Confirm(WLlogic.RemoveProduct(removeId));
+                MenuHelpers.Pause();
+                Start();
+                break;
+            case 3:
+                WLlogic.ClearWishlist();
+                MenuHelpers.Confirm("Wishlist cleared.");
+                MenuHelpers.Pause();
+                Start();
+                break;
+            case 4:
+                WLlogic.TransferToCart();
+                MenuHelpers.Confirm("Items moved to cart.");
+                MenuHelpers.Pause();
+                Start();
+                break;
+            case 5:
+                Dashboard.Start();
+                break;
         }
     }
 }

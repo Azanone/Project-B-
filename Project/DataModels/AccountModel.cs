@@ -1,13 +1,9 @@
-﻿public class AccountModel
+﻿using System;
+
+public class AccountModel
 {
 
-    public int UserId { get; set; }
-
-    public long Id
-    {
-        get => UserId;
-        set => UserId = (int)value;
-    }
+    public Int64 Id { get; set; }
 
     public String Role { get; set; } = "User";
 
@@ -22,59 +18,20 @@
     public string Postcode { get; set; } = string.Empty;
 
     public string HouseNumber { get; set; }
-
+    public string Birthdate { get; set; }
     public string phoneNumber { get; set; } = string.Empty;
-    public DateTime? BirthDate { get; set; } = null;
-    public int Age {
-        get
-        {
-            if (BirthDate == null)
-            {
-                return 0;
-            }
-            DateTime today = DateTime.Today;
-            int age = today.Year - BirthDate.Value.Year;
-            if (BirthDate.Value.Date > today.AddYears(-age)) age--;
-            return age;
-        }
-    }
+    public string TwoFactorSecret { get; set; } = string.Empty;
 
 
     public AccountModel()
     {
     }
 
-    public AccountModel(int UserId, string email, string password, string fullname)
-        : this(UserId, string.Empty, email, password, fullname, string.Empty, "0", string.Empty)
+    public AccountModel(string email, string password, string fullname)
+        : this(string.Empty, email, password, fullname, string.Empty, string.Empty, string.Empty, string.Empty)
     {
     }
-
-    public AccountModel(Int64 id, string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, DateTime? birthDate = null)
-    {
-        UserId = (int)id;
-        Username = username;
-        EmailAddress = email;
-        Password = password;
-        FullName = fullname;
-        Postcode = postcode;
-        HouseNumber = houseNumber;
-        this.phoneNumber = phoneNumber;
-        BirthDate = birthDate;
-        Role = "User";
-    }
-    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, DateTime? birthDate = null)
-    {
-        Username = username;
-        EmailAddress = email;
-        Password = password;
-        FullName = fullname;
-        Postcode = postcode;
-        HouseNumber = houseNumber;
-        this.phoneNumber = phoneNumber;
-        BirthDate = birthDate;
-        Role = "User";
-    }
-    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber)
+    public AccountModel(string username, string email, string password, string fullname, string postcode, string houseNumber, string phoneNumber, string bdate)
     {
         Username = username;
         EmailAddress = email;
@@ -84,10 +41,8 @@
         HouseNumber = houseNumber;
         this.phoneNumber = phoneNumber;
         Role = "User";
+        Birthdate = bdate;
     }
 
 
 }
-
-
-

@@ -21,12 +21,13 @@ public sealed class AdminProductManagementTests
         string ingredients = "Water, Salt";
         const string price = "12.50";
         const string stock = "5";
+        const string minAge = "18";
 
         ProductModel? createdProduct = null;
 
         try
         {
-            (bool success, string message) = _logic.AddProduct(uniqueName, price, brand, ingredients, category.CategoryID.ToString(), stock);
+            (bool success, string message) = _logic.AddProduct(uniqueName, price, brand, ingredients, category.CategoryID.ToString(), stock, minAge);
 
             Assert.IsTrue(success, message);
 
@@ -39,6 +40,7 @@ public sealed class AdminProductManagementTests
             Assert.AreEqual(category.CategoryID, createdProduct.CategoryID);
             Assert.AreEqual(12.50m, createdProduct.Price);
             Assert.AreEqual(5, createdProduct.Stock);
+            Assert.AreEqual(18, createdProduct.MinAge);
         }
         finally
         {
