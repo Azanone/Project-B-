@@ -1,7 +1,9 @@
 ﻿
 
 //This class is not static so later on we can use inheritance and interfaces
+using System.Net;
 using System.Net.Mail;
+using System.Security.Cryptography;
 
 public class AccountsLogic
 {
@@ -28,7 +30,7 @@ public class AccountsLogic
 
 
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
-        if (acc != null && acc.Password == password)
+        if (acc != null && Project.Logic.PasswordSecurityLogic.VerifyPassword(password, acc.Password))
         {
             CurrentAccount = acc;
             return acc;
@@ -157,11 +159,36 @@ public class AccountsLogic
 
     public bool ValidatePassword(string password)
     {
-        if (password.Length < 7)
+        if (string.IsNullOrWhiteSpace(password))
         {
-            MenuHelpers.Error("Password must be at least 7 characters");
+            MenuHelpers.Error("Password cannot be empty");
             return false;
         }
+
+        if (password.Length < 7)
+        {
+            MenuHelpers.Error("Password must be more than 6 characters");
+            return false;
+        }
+
+        if (!password.Any(char.IsUpper))
+        {
+            MenuHelpers.Error("Password must contain at least one uppercase letter");
+            return false;
+        }
+
+        if (!password.Any(char.IsDigit))
+        {
+            MenuHelpers.Error("Password must contain at least one digit");
+            return false;
+        }
+
+        if (!password.Any(char.IsPunctuation) && !password.Any(char.IsSymbol))
+        {
+            MenuHelpers.Error("Password must contain at least one sign or symbol");
+            return false;
+        }
+
         return true;
     }
 
@@ -191,9 +218,62 @@ public class AccountsLogic
 
     public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), password, username, string.Empty, string.Empty, phoneNumber, bdate);
+        string hashedPassword = Project.Logic.PasswordSecurityLogic.HashPassword(password);
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), hashedPassword, username, string.Empty, string.Empty, phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
+    }
+
+    public string GenerateVerificationCode()
+    {
+        return RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+    }
+
+    public void SendVerificationEmail(string email, string verificationCode)
+    {
+        string smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? string.Empty;
+        string smtpPortText = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587";
+        string smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? string.Empty;
+        string smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? string.Empty;
+        string fromAddress = Environment.GetEnvironmentVariable("SMTP_FROM") ?? smtpUser;
+
+        if (string.IsNullOrWhiteSpace(smtpHost) && fromAddress.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
+        {
+            smtpHost = "smtp.gmail.com";
+        }
+
+        if (string.IsNullOrWhiteSpace(smtpUser))
+        {
+            smtpUser = fromAddress;
+        }
+
+        if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(fromAddress))
+        {
+            throw new InvalidOperationException("Email verification is not configured. Set SMTP_FROM, and for non-Gmail accounts also set SMTP_HOST. If your mail server requires authentication, set SMTP_USER and SMTP_PASSWORD too.");
+        }
+
+        if (!int.TryParse(smtpPortText, out int smtpPort))
+        {
+            smtpPort = 587;
+        }
+
+        using var client = new SmtpClient(smtpHost, smtpPort)
+        {
+            EnableSsl = true
+        };
+
+        if (!string.IsNullOrWhiteSpace(smtpUser))
+        {
+            client.Credentials = new NetworkCredential(smtpUser, smtpPassword);
+        }
+
+        using var message = new MailMessage(fromAddress, email)
+        {
+            Subject = "Your verification code",
+            Body = $"Your verification code is: {verificationCode}\n\nEnter this 6-digit code to complete your registration."
+        };
+
+        client.Send(message);
     }
 }
 

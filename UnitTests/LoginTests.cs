@@ -43,7 +43,7 @@ public sealed class LoginTests
         Assert.AreEqual("User", result.Role);
         Assert.AreEqual(_username, result.Username);
         Assert.AreEqual(_email, result.EmailAddress);
-        Assert.AreEqual(Password, result.Password);
+        Assert.IsTrue(Project.Logic.PasswordSecurityLogic.VerifyPassword(Password, result.Password));
     }
 
     [DataTestMethod]
