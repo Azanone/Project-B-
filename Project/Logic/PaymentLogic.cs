@@ -80,7 +80,7 @@ public class PaymentLogic
 
     public decimal? CalculateChange(decimal total, decimal tendered)
     {
-        if (tendered <= total)
+        if (tendered < total)
         {
             return null;
         }
