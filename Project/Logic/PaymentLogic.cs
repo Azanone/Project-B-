@@ -17,7 +17,7 @@ public class PaymentLogic
         {
             return null;
         }
-        return Methods[choice];
+        return Methods[choice - 1];
     }
 
     public bool ValidateCardNumber(string number)
