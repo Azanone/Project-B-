@@ -27,7 +27,7 @@ public class PaymentLogic
             return false;
         }
         string digits = number.Replace(" ", "");
-        return digits.Length <= 16 && digits.All(char.IsDigit);
+        return digits.Length == 16 && digits.All(char.IsDigit);
     }
 
     public bool ValidateCvv(string cvv)
