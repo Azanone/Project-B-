@@ -1,5 +1,6 @@
 using Project.Logic;
- 
+using Project.Models;
+
 public class PurchaseShoppingCart
 {
  
@@ -67,6 +68,8 @@ public class PurchaseShoppingCart
             {
                 validinput = true;
 
+                int userId = ReceiptLogic.GetCurrentUserId();
+
                 var ageCheck = shoppingCartLogic.CheckAgeRestriction();
                 if (!ageCheck.Allowed)
                 {
@@ -75,9 +78,24 @@ public class PurchaseShoppingCart
                     return;
                 }
 
-                bool purchaseSucces = shoppingCartLogic.CompletePurchase(ReceiptLogic.GetCurrentUserId());//Belasting word nog niet gerekend bij de transactie, het is niet te zien op de bon
+                var cartItems = shoppingCartLogic.GetAllItems();
+                if (cartItems.Count == 0)
+                {
+                    MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
+                    return;
+                }
+                decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
+
+                string? paymentMethod = PaymentCheckout.Start(total);
+                if (paymentMethod == null)
+                {
+                    MenuHelpers.Warn("Checkout cancelled, no payment made.");
+                    return;
+                }
+
+                bool purchaseSucces = shoppingCartLogic.CompletePurchase(userId, paymentMethod);
                 if (purchaseSucces)
-                    MenuHelpers.Announce("Thank you for your purchase!");
+                    PrintReceipt(cartItems, total, paymentMethod);
                 else
                     MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
             }
@@ -86,5 +104,43 @@ public class PurchaseShoppingCart
                 MenuHelpers.Warn("Invalid Input");
             }
         }
+    }
+
+    private static void PrintReceipt(List<ShoppingCartItem> items, decimal subtotal, string paymentMethod)
+    {
+        decimal vat = subtotal * 0.21m;
+
+        Console.Clear();
+        Console.WriteLine(@"  ___________________________________________");
+        Console.WriteLine(@" /                                           \");
+        Console.WriteLine(@"|   *************************************** |");
+        Console.WriteLine(@"\_  * BabylonMarkt                        * |");
+        Console.WriteLine(@"  | *************************************** |");
+        Console.WriteLine($"  |  Date: {DateTime.Now:dd-MM-yyyy}                       |");
+        Console.WriteLine($"  |  Paid with: {paymentMethod,-25}   |");
+        Console.WriteLine(@"  | --------------------------------------- |");
+        Console.WriteLine($"  |  {"ITEM",-27}{"PRICE",-11} |");
+        Console.WriteLine(@"  | ---------------------------------------  |");
+
+        foreach (ShoppingCartItem item in items)
+        {
+            string name = item.Product.Name.Length > 25 ? item.Product.Name.Substring(0, 25) : item.Product.Name;
+            string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
+            decimal lineTotal = item.Product.Price * item.Quantity;
+            Console.WriteLine($"  |  {name,-27}{qtyLabel + lineTotal.ToString("F2") + " EUR",-11}  |");
+        }
+
+        Console.WriteLine(@"  | ---------------------------------------  |");
+        Console.WriteLine($"  |  {"SUBTOTAL:",-27}{subtotal.ToString("F2") + " EUR",-11}  |");
+        Console.WriteLine($"  |  {"TAX (VAT):",-27}{vat.ToString("F2") + " EUR",-11}  |");
+        Console.WriteLine(@"  | ---------------------------------------  |");
+        Console.WriteLine($"  |  {"TOTAL:",-27}{(subtotal + vat).ToString("F2") + " EUR",-11}  |");
+        Console.WriteLine(@"  | ---------------------------------------  |");
+        Console.WriteLine(@"  |         THANK YOU FOR VISITING!           |");
+        Console.WriteLine(@"  | __________________________________________|___");
+        Console.WriteLine(@"  | /                                            /");
+        Console.WriteLine(@"  \_/___________________________________________/");
+
+        MenuHelpers.Pause();
     }
 }
