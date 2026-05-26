@@ -166,24 +166,34 @@ public class AccountsLogic
 
     public bool ValidatePhonenumber(string field)
     {
-        if (string.IsNullOrWhiteSpace(field)) return false;
+        if (string.IsNullOrWhiteSpace(field))
+        {
+            return false;
+            Console.WriteLine("isnull");
+        }
+        
 
         try
         {
             if (field.Length == 10 && field.StartsWith("06"))
             {
+                Console.WriteLine("1");
                 return field.All(char.IsDigit);
             }
 
             if (field.Length == 12 && field.StartsWith("+316"))
             {
+                Console.WriteLine("2");
                 return field.Substring(1).All(char.IsDigit);
             }
+            MenuHelpers.Error($"Validation error: Invalid phone number");
+                Console.WriteLine("3");
             return false;
         }
         catch (Exception e)
         {
             MenuHelpers.Error($"Validation error: {e.Message}");
+                Console.WriteLine("4");
             return false;
         }
     }

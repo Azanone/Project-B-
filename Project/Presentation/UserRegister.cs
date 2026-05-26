@@ -22,51 +22,56 @@ static class UserRegister
             true,
             true
         };
+        bool registrationSuccessful = false;
 
         MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
-        form.Start();
-        List<string> results = form.GetValues();
+        while (!registrationSuccessful)
+        {
+            form.Start();
+            List<string> results = form.GetValues();
 
-        string username = results[0];
-        string email = results[1];
-        string password = results[2];
-        string phoneNumber = results[3];
-        string bDate = results[4];
 
-        bool isValid = true;
+            string username = results[0];
+            string email = results[1];
+            string password = results[2];
+            string phoneNumber = results[3];
+            string bDate = results[4];
 
-        if (!AL.ValidateUsername(username))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateEmail(email))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidatePassword(password))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidatePhonenumber(phoneNumber))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateBirthday(bDate))
-        {
-            isValid = false;
-        }
+            bool isValid = true;
 
-        if (isValid)
-        {
-            AL.Register(username, email, password, phoneNumber, bDate);
-            MenuHelpers.Confirm($"Successfully registered as {username}");
-            System.Threading.Thread.Sleep(1000);
-            Menu.Start();
-        }
-        else
-        {
-            MenuHelpers.Prompt("Press Enter to try again");
-            UserRegister.Start();
+            if (!AL.ValidateUsername(username))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidateEmail(email))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePassword(password))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePhonenumber(phoneNumber))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidateBirthday(bDate))
+            {
+                isValid = false;
+            }
+
+            if (isValid)
+            {
+                AL.Register(username, email, password, phoneNumber, bDate);
+                MenuHelpers.Confirm($"Successfully registered as {username}");
+                System.Threading.Thread.Sleep(1000);
+                registrationSuccessful = true;
+                Menu.Start();
+            }
+            else
+            {
+                MenuHelpers.Pause();
+            }
         }
     }
 }

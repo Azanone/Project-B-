@@ -201,4 +201,4 @@ private void DrawUnselectedLine(string label, int index)
             values[selectedIndex] = values[selectedIndex] + inputChar;
         }
     }
-} 
+}
