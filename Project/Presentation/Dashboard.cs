@@ -37,7 +37,6 @@ static class Dashboard
         }
         else
         {
-            options.Add("Checkout and pay");
             options.Add("Wishlist");
             options.Add("Show purchase history");
             options.Add("Logout");
@@ -100,15 +99,12 @@ static class Dashboard
                     WaitForContinue();
                     break;
                 case 6:
-                    PurchaseShoppingCart.PurchaseChoice();
-                    break;
-                case 7:
                     ShowWishlist.Start();
                     break;
-                case 8:
+                case 7:
                     ShowPurchaseHistory();
                     break;
-                case 9:
+                case 8:
                     AccountsLogic.Logout();
                     Menu.Start();
                     return;

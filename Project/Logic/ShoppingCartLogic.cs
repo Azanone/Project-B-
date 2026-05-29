@@ -121,21 +121,21 @@ public class ShoppingCartLogic
     }
  
  
-    public bool CompletePurchase(int userId, string paymentMethod)
+    public bool CompletePurchase(int userId)
     {
         _cartAccess.Connection.Open();
         using var transaction = _cartAccess.Connection.BeginTransaction();
-
+ 
         try
-        {
+        {            
             decimal totalAmount = GetTotal(userId);
             if(totalAmount != 0)
             {
                 decimal vat = totalAmount * 0.21m;
                 var cartItems = _cartAccess.GetAll(userId);
-
-
-                int purchaseId = _cartAccess.CreatePurchase(userId,totalAmount,vat,paymentMethod,transaction);
+ 
+ 
+                int purchaseId = _cartAccess.CreatePurchase(userId,totalAmount,vat,transaction);
  
                 foreach (var item in cartItems)//loop maakt PurchaseItems
                 {

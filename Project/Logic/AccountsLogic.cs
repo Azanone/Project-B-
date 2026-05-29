@@ -66,6 +66,7 @@ public class AccountsLogic
         throw new FormatException("Invalid date format");
     }
 
+    // Returns age in whole years from a stored dd-MM-yyyy birthdate, or null when missing/invalid.
     public int? CalculateAge(string? birthdate)
     {
         if (string.IsNullOrWhiteSpace(birthdate))
