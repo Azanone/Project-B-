@@ -62,7 +62,7 @@ public class ShoppingCartAccess
         _connection.Execute(insertItemSql, new { CartId = cartId.Value, ProductId = productId, Quantity = quantity });
     }
  
-    public void UpdateCart(ShoppingListModel cart)
+    public void UpdateCart(ShoppingCartItem cart)
     {
         string sql = $"UPDATE CART_ITEM SET Quantity=@Quantity WHERE CartItemID=@CartItemId";
  

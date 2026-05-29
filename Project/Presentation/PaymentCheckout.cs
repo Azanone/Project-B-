@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using Project.Logic;
 
 public static class PaymentCheckout
 {
@@ -8,27 +11,25 @@ public static class PaymentCheckout
     public static string? Start(decimal total)
     {
         List<string> methods = _logic.GetPaymentMethods();
-        int cancelOption = methods.Count + 1;
+        
+        List<string> options = new List<string>(methods);
+        options.Add("Cancel");
 
         while (true)
         {
             Console.Clear();
-            MenuHelpers.Announce("--- SELECT PAYMENT METHOD ---");
-            MenuHelpers.Confirm($"Amount due: {total} EUR\n");
+            string headerTitle = $"--- SELECT PAYMENT METHOD ---\nAmount due: {total} EUR";
+            MenuNavigation menu = new MenuNavigation(options, headerTitle);
+            int selection = menu.Start();
 
-            for (int i = 0; i < methods.Count; i++)
-            {
-                MenuHelpers.Confirm($"{i + 1}. {methods[i]}");
-            }
-            MenuHelpers.Confirm($"{cancelOption}. Cancel");
-
-            string input = MenuHelpers.Prompt("Choose a payment method:") ?? string.Empty;
-            if (input.Trim() == cancelOption.ToString())
+            if (selection == options.Count - 1)
             {
                 return null;
             }
 
-            string? method = _logic.SelectMethod(input.Trim());
+            string backendSelectionString = (selection + 1).ToString();
+            string? method = _logic.SelectMethod(backendSelectionString);
+            
             if (method == null)
             {
                 MenuHelpers.Error("Invalid payment method selection.");
@@ -59,6 +60,7 @@ public static class PaymentCheckout
 
     private static bool HandleCard()
     {
+        Console.Clear();
         string number = MenuHelpers.Prompt("Card number (16 digits):") ?? string.Empty;
         if (!_logic.ValidateCardNumber(number.Trim()))
         {
@@ -85,6 +87,7 @@ public static class PaymentCheckout
 
     private static bool HandlePayPal()
     {
+        Console.Clear();
         string email = MenuHelpers.Prompt("PayPal email:") ?? string.Empty;
         if (!_logic.ValidatePayPalEmail(email.Trim()))
         {
@@ -96,6 +99,7 @@ public static class PaymentCheckout
 
     private static bool HandleCash(decimal total)
     {
+        Console.Clear();
         string tenderedInput = MenuHelpers.Prompt("Cash tendered (EUR):") ?? string.Empty;
         if (!decimal.TryParse(tenderedInput.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal tendered))
         {
@@ -116,20 +120,20 @@ public static class PaymentCheckout
 
     private static bool HandleIdeal()
     {
-        MenuHelpers.Announce("Select your bank:");
-        for (int i = 0; i < IdealBanks.Length; i++)
-        {
-            MenuHelpers.Confirm($"{i + 1}. {IdealBanks[i]}");
-        }
+        Console.Clear();
+        List<string> bankOptions = new List<string>(IdealBanks);
+        bankOptions.Add("Cancel payment validation");
 
-        string input = MenuHelpers.Prompt("Bank:") ?? string.Empty;
-        if (!int.TryParse(input.Trim(), out int choice) || choice < 1 || choice > IdealBanks.Length)
+        MenuNavigation bankMenu = new MenuNavigation(bankOptions, "--- SELECT YOUR BANK ---");
+        int bankSelection = bankMenu.Start();
+
+        if (bankSelection == bankOptions.Count - 1)
         {
-            MenuHelpers.Error("Invalid bank selection.");
+            MenuHelpers.Error("iDEAL authentication aborted.");
             return false;
         }
 
-        MenuHelpers.Confirm($"Redirecting to {IdealBanks[choice - 1]}...");
+        MenuHelpers.Confirm($"Redirecting to {IdealBanks[bankSelection]}...");
         return true;
     }
 }

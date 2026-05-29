@@ -31,6 +31,45 @@ public static class MenuHelpers
         Console.ResetColor();
         return Console.ReadLine();
      }
+    public static string PromptSecret(string input)
+    {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(input);
+        Console.ResetColor();
+
+        string value = string.Empty;
+        ConsoleKeyInfo keyInfo;
+        while (true)
+        {
+            keyInfo = Console.ReadKey(true);
+            if (keyInfo.Key == ConsoleKey.Enter)
+            {
+                Console.WriteLine();
+                break;
+            }
+
+            if (keyInfo.Key == ConsoleKey.Backspace)
+            {
+                if (value.Length > 0)
+                {
+                    value = value.Substring(0, value.Length - 1);
+                    if (Console.CursorLeft > 0)
+                    {
+                        Console.Write("\b \b");
+                    }
+                }
+                continue;
+            }
+
+            if (!char.IsControl(keyInfo.KeyChar))
+            {
+                value += keyInfo.KeyChar;
+                Console.Write("*");
+            }
+        }
+
+        return value;
+    }
     public static int PromptInt(string strin)
     {
         Console.ForegroundColor = ConsoleColor.White;
@@ -47,6 +86,17 @@ public static class MenuHelpers
      public static void Pause()
     {
         Prompt("Press Enter to continue");
+    }
+    public static void PromptReturnToMenu(string prompt, Action onReturn)
+    {
+        string? input = Prompt(prompt);
+        if (input == "1")
+        {
+            onReturn();
+            return;
+        }
+
+        Warn("Invalid input");
     }
     public static string PromptUntilValid(string prompt, Func<string, bool> validate)
 {

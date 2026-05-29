@@ -1,41 +1,33 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Project.Logic;
 using Project.Models;
 
 public class PurchaseShoppingCart
 {
- 
- 
-    static private ShoppingCartLogic shoppingCartLogic = new();
+    private static ShoppingCartLogic shoppingCartLogic = new();
    
     public static decimal ShowShoppingCart()
     {
         Console.Clear();
-        var account = AccountsLogic.CurrentAccount;
- 
-        if (account == null)
-        {
-            MenuHelpers.Warn("You must be logged in.");
-            MenuHelpers.Pause();
-            return 0;
-        }
- 
         MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
- 
+
         var items = shoppingCartLogic.GetAllItems();
- 
+
         if (items.Count == 0)
         {
             MenuHelpers.Warn("Shopping list is empty");
             MenuHelpers.Pause();
             return 0;
         }
- 
+
         decimal total = 0;
         for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
             total += item.Product.Price * item.Quantity;
- 
+
             MenuHelpers.Confirm(
                 $"{i + 1}. {item.Product.Name} | " +
                 $"Category: {item.Product.Category} | " +
@@ -44,7 +36,7 @@ public class PurchaseShoppingCart
                 $"Price: {item.Product.Price} EUR"
             );
         }
- 
+
         MenuHelpers.Announce($"Total: {total} EUR");
         MenuHelpers.Pause();
         return total;
@@ -52,57 +44,62 @@ public class PurchaseShoppingCart
  
     public static void PurchaseChoice()
     {
- 
-        bool validinput = false;
-        while (!validinput)
+        ShowShoppingCart();
+        var account = AccountsLogic.CurrentAccount;
+
+        if (account != null)
         {
-            ShowShoppingCart();
-            MenuHelpers.Confirm($"\nEnter 1 to return\nEnter 2 to continue to checkout");
-            string? userChoiceInput = Console.ReadLine();
-            string userChoice = userChoiceInput ?? string.Empty;
-            if(userChoice  == "1")
+            var ageCheck = shoppingCartLogic.CheckAgeRestriction();
+            if (!ageCheck.Allowed)
             {
-                validinput = true;
+                MenuHelpers.Warn($"Age restriction: you must be at least {ageCheck.RequiredAge} years old to buy '{ageCheck.ProductName}'. Purchase blocked.");
+                MenuHelpers.Pause();
+                return;
             }
-            else if(userChoice == "2")
+        }
+        else
+        {
+            var items = shoppingCartLogic.GetAllItems();
+            bool hasAgeRestrictedItem = items.Any(i => i.Product.MinAge > 0);
+            
+            if (hasAgeRestrictedItem)
             {
-                validinput = true;
-
-                int userId = ReceiptLogic.GetCurrentUserId();
-
-                var ageCheck = shoppingCartLogic.CheckAgeRestriction();
-                if (!ageCheck.Allowed)
+                string input = MenuHelpers.Prompt("Your cart contains age-restricted items. Are you 18 or older? (yes/no):") ?? string.Empty;
+                if (!input.Trim().Equals("yes", StringComparison.OrdinalIgnoreCase))
                 {
-                    MenuHelpers.Warn($"Age restriction: you must be at least {ageCheck.RequiredAge} years old to buy '{ageCheck.ProductName}'. Purchase blocked.");
+                    MenuHelpers.Warn("Purchase blocked due to age restriction policies.");
                     MenuHelpers.Pause();
                     return;
                 }
-
-                var cartItems = shoppingCartLogic.GetAllItems();
-                if (cartItems.Count == 0)
-                {
-                    MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
-                    return;
-                }
-                decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
-
-                string? paymentMethod = PaymentCheckout.Start(total);
-                if (paymentMethod == null)
-                {
-                    MenuHelpers.Warn("Checkout cancelled, no payment made.");
-                    return;
-                }
-
-                bool purchaseSucces = shoppingCartLogic.CompletePurchase(userId, paymentMethod);
-                if (purchaseSucces)
-                    PrintReceipt(cartItems, total, paymentMethod);
-                else
-                    MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
             }
-            else
-            {
-                MenuHelpers.Warn("Invalid Input");
-            }
+        }
+
+        var cartItems = shoppingCartLogic.GetAllItems();
+        if (cartItems.Count == 0)
+        {
+            MenuHelpers.Warn("Purchase failed, your shopping cart is empty.");
+            return;
+        }
+        
+        decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
+
+        string? paymentMethod = PaymentCheckout.Start(total);
+        if (paymentMethod == null)
+        {
+            MenuHelpers.Warn("Checkout cancelled, no payment made.");
+            return;
+        }
+
+        int userId = account != null ? (int)account.Id : -1;
+
+        bool purchaseSuccess = shoppingCartLogic.CompletePurchase(userId, paymentMethod);
+        if (purchaseSuccess)
+        {
+            PrintReceipt(cartItems, total, paymentMethod);
+        }
+        else
+        {
+            MenuHelpers.Warn("Purchase failed, transaction processing error.");
         }
     }
 
