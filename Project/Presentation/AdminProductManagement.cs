@@ -62,6 +62,12 @@ public static class AdminProductManagement
             "Category ID",
             "Stock",
             "Minimum Age",
+            "Calories (kcal per 100g)",
+            "Fats (g per 100g)",
+            "Carbs (g per 100g)",
+            "Fiber (g per 100g)",
+            "Protein (g per 100g)",
+            "Salt (g per 100g)",
             "Confirm and Save Product",
             "Cancel"
         };
@@ -75,6 +81,12 @@ public static class AdminProductManagement
             true,  // Category ID
             true,  // Stock
             true,  // Minimum Age
+            true,  // Calories
+            true,  // Fats
+            true,  // Carbs
+            true,  // Fiber
+            true,  // Protein
+            true,  // Salt
             false, // Confirm button
             false  // Cancel button
         };
@@ -94,12 +106,12 @@ public static class AdminProductManagement
             int selection = menu.Start();
             List<string> values = menu.GetValues();
 
-            if (selection == 8)
+            if (selection == 14)
             {
                 return;
             }
 
-            if (selection == 7)
+            if (selection == 13)
             {
                 string name = values[0].Trim();
                 string priceInput = values[1].Trim();
@@ -108,6 +120,12 @@ public static class AdminProductManagement
                 string categoryInput = values[4].Trim();
                 string stockInput = values[5].Trim();
                 string minAgeInput = values[6].Trim();
+                string caloriesInput = values[7].Trim();
+                string fatsInput = values[8].Trim();
+                string carbsInput = values[9].Trim();
+                string fiberInput = values[10].Trim();
+                string proteinInput = values[11].Trim();
+                string saltInput = values[12].Trim();
 
                 if (string.IsNullOrWhiteSpace(name) ||
                     string.IsNullOrWhiteSpace(priceInput) ||
@@ -115,7 +133,13 @@ public static class AdminProductManagement
                     string.IsNullOrWhiteSpace(ingredients) ||
                     string.IsNullOrWhiteSpace(categoryInput) ||
                     string.IsNullOrWhiteSpace(stockInput) ||
-                    string.IsNullOrWhiteSpace(minAgeInput))
+                    string.IsNullOrWhiteSpace(minAgeInput) ||
+                    string.IsNullOrWhiteSpace(caloriesInput) ||
+                    string.IsNullOrWhiteSpace(fatsInput) ||
+                    string.IsNullOrWhiteSpace(carbsInput) ||
+                    string.IsNullOrWhiteSpace(fiberInput) ||
+                    string.IsNullOrWhiteSpace(proteinInput) ||
+                    string.IsNullOrWhiteSpace(saltInput))
                 {
                     MenuHelpers.Error("All required fields must be filled out before submitting.");
                     MenuHelpers.Prompt("Press Enter to return to editing.");
@@ -150,7 +174,7 @@ public static class AdminProductManagement
                     continue;
                 }
 
-                var result = _adminLogic.AddProduct(name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
+                var result = _adminLogic.AddProduct(name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput, caloriesInput, fatsInput, carbsInput, fiberInput, proteinInput, saltInput);
                 if (result.Success)
                 {
                     MenuHelpers.Confirm(result.Message);
@@ -197,6 +221,12 @@ public static class AdminProductManagement
             "Category ID",
             "Stock",
             "Minimum Age",
+            "Calories (kcal per 100g)",
+            "Fats (g per 100g)",
+            "Carbs (g per 100g)",
+            "Fiber (g per 100g)",
+            "Protein (g per 100g)",
+            "Salt (g per 100g)",
             "Save Changes",
             "Cancel"
         };
@@ -210,6 +240,12 @@ public static class AdminProductManagement
             true,  // Category ID
             true,  // Stock
             true,  // Minimum Age
+            true,  // Calories
+            true,  // Fats
+            true,  // Carbs
+            true,  // Fiber
+            true,  // Protein
+            true,  // Salt
             false, // Save button
             false  // Cancel button
         };
@@ -228,6 +264,12 @@ public static class AdminProductManagement
                 menuValues[4] = existingProduct.CategoryID.ToString();
                 menuValues[5] = existingProduct.Stock.ToString();
                 menuValues[6] = existingProduct.MinAge.ToString();
+                menuValues[7] = existingProduct.Calories.ToString();
+                menuValues[8] = existingProduct.Fats.ToString();
+                menuValues[9] = existingProduct.Carbs.ToString();
+                menuValues[10] = existingProduct.Fiber.ToString();
+                menuValues[11] = existingProduct.Protein.ToString();
+                menuValues[12] = existingProduct.Salt.ToString();
             }
 
             Console.Clear();
@@ -242,12 +284,12 @@ public static class AdminProductManagement
             int selection = menu.Start();
             List<string> values = menu.GetValues();
 
-            if (selection == 8)
+            if (selection == 14)
             {
                 return;
             }
 
-            if (selection == 7)
+            if (selection == 13)
             {
                 string name = values[0].Trim();
                 string priceInput = values[1].Trim();
@@ -256,6 +298,12 @@ public static class AdminProductManagement
                 string categoryInput = values[4].Trim();
                 string stockInput = values[5].Trim();
                 string minAgeInput = values[6].Trim();
+                string caloriesInput = values[7].Trim();
+                string fatsInput = values[8].Trim();
+                string carbsInput = values[9].Trim();
+                string fiberInput = values[10].Trim();
+                string proteinInput = values[11].Trim();
+                string saltInput = values[12].Trim();
 
                 if (string.IsNullOrWhiteSpace(name) ||
                     string.IsNullOrWhiteSpace(priceInput) ||
@@ -263,7 +311,13 @@ public static class AdminProductManagement
                     string.IsNullOrWhiteSpace(ingredients) ||
                     string.IsNullOrWhiteSpace(categoryInput) ||
                     string.IsNullOrWhiteSpace(stockInput) ||
-                    string.IsNullOrWhiteSpace(minAgeInput))
+                    string.IsNullOrWhiteSpace(minAgeInput) ||
+                    string.IsNullOrWhiteSpace(caloriesInput) ||
+                    string.IsNullOrWhiteSpace(fatsInput) ||
+                    string.IsNullOrWhiteSpace(carbsInput) ||
+                    string.IsNullOrWhiteSpace(fiberInput) ||
+                    string.IsNullOrWhiteSpace(proteinInput) ||
+                    string.IsNullOrWhiteSpace(saltInput))
                 {
                     MenuHelpers.Error("Fields cannot be left entirely blank.");
                     MenuHelpers.Prompt("Press Enter to return to editing.");
@@ -298,7 +352,7 @@ public static class AdminProductManagement
                     continue;
                 }
 
-                var result = _adminLogic.UpdateProduct(productId, name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput);
+                var result = _adminLogic.UpdateProduct(productId, name, priceInput, brand, ingredients, categoryInput, stockInput, minAgeInput, caloriesInput, fatsInput, carbsInput, fiberInput, proteinInput, saltInput);
                 if (result.Success)
                 {
                     MenuHelpers.Confirm(result.Message);
