@@ -91,10 +91,10 @@ public static class AdminProductManagement
             false  // Cancel button
         };
 
+        MenuNavigation menu = new MenuNavigation(labels, requiresInput, "--- ADD NEW PRODUCT ---");
+
         while (true)
         {
-            MenuNavigation menu = new MenuNavigation(labels, requiresInput, "--- ADD NEW PRODUCT ---");
-
             Console.Clear();
             MenuHelpers.Announce("Available Categories for Reference:");
             foreach (var category in categories)
@@ -250,10 +250,10 @@ public static class AdminProductManagement
             false  // Cancel button
         };
 
+        MenuNavigation menu = new MenuNavigation(labels, requiresInput, $"--- EDITING PRODUCT: {existingProduct.Name} (ID: {existingProduct.ProductID}) ---");
+
         while (true)
         {
-            MenuNavigation menu = new MenuNavigation(labels, requiresInput, $"--- EDITING PRODUCT: {existingProduct.Name} (ID: {existingProduct.ProductID}) ---");
-
             List<string> menuValues = menu.GetValues();
             if (string.IsNullOrEmpty(menuValues[0]) && string.IsNullOrEmpty(menuValues[1]))
             {
