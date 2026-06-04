@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 static class UserRegister
 {
     public static void Start()
@@ -11,7 +14,9 @@ static class UserRegister
             "Email",
             "Password",
             "Phone number",
-            "Birthdate"
+            "Birthdate",
+            "Register",
+            "Return"
         };
 
         List<bool> requiresInput = new List<bool>
@@ -20,53 +25,95 @@ static class UserRegister
             true,
             true,
             true,
-            true
+            true,
+            false,
+            false
         };
 
         MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
-        form.Start();
-        List<string> results = form.GetValues();
 
-        string username = results[0];
-        string email = results[1];
-        string password = results[2];
-        string phoneNumber = results[3];
-        string bDate = results[4];
+        while (true)
+        {
+            int selection = form.Start();
+            if (selection == 6)
+            {
+                Menu.Start();
+                return;
+            }
+            List<string> results = form.GetValues();
 
-        bool isValid = true;
+            string username = results[0].Trim();
+            string email = results[1].Trim();
+            string password = results[2].Trim();
+            string phoneNumber = results[3].Trim();
+            string bDate = results[4].Trim();
 
-        if (!AL.ValidateUsername(username))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateEmail(email))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidatePassword(password))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidatePhonenumber(phoneNumber))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateBirthday(bDate))
-        {
-            isValid = false;
-        }
+            bool isValid = true;
 
-        if (isValid)
-        {
+            if (!AL.ValidateUsername(username))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidateEmail(email))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePassword(password))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePhonenumber(phoneNumber))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidateBirthday(bDate))
+            {
+                isValid = false;
+            }
+
+            if (!isValid)
+            {
+                MenuHelpers.Pause();
+                continue;
+            }
+
+            Console.Clear();
+            string confirmEmail = MenuHelpers.Prompt("Confirm email") ?? string.Empty;
+            if (!string.Equals(confirmEmail.Trim(), email, StringComparison.OrdinalIgnoreCase))
+            {
+                MenuHelpers.Error("Email addresses do not match.");
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
+            }
+
+            string verificationCode = AL.GenerateVerificationCode();
+
+            try
+            {
+                AL.SendVerificationEmail(email, verificationCode);
+            }
+            catch (Exception ex)
+            {
+                MenuHelpers.Error(ex.Message);
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
+            }
+
+            MenuHelpers.Confirm("A verification code has been sent to your email.");
+            string enteredCode = MenuHelpers.Prompt("Enter the 6-digit verification code") ?? string.Empty;
+
+            if (!string.Equals(enteredCode.Trim(), verificationCode, StringComparison.Ordinal))
+            {
+                MenuHelpers.Error("Email verification failed. Incorrect code.");
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
+            }
+
             AL.Register(username, email, password, phoneNumber, bDate);
             MenuHelpers.Confirm($"Successfully registered as {username}");
             System.Threading.Thread.Sleep(1000);
             Menu.Start();
-        }
-        else
-        {
-            MenuHelpers.Prompt("Press Enter to try again");
-            UserRegister.Start();
+            return;
         }
     }
 }

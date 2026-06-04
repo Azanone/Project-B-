@@ -52,7 +52,7 @@ public static class AdminUserManagement
         MenuHelpers.Announce("--- CURRENT USERS ---");
         foreach (AccountModel user in users)
         {
-            MenuHelpers.Confirm($"ID: {user.UserId} | Username: {user.Username} | Name: {user.FullName} | Email: {user.EmailAddress} | Role: {user.Role}");
+            MenuHelpers.Confirm($"ID: {user.Id} | Username: {user.Username} | Name: {user.FullName} | Email: {user.EmailAddress} | Role: {user.Role}");
         }
 
         Console.WriteLine();

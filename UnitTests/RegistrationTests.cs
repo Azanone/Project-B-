@@ -27,7 +27,8 @@ public sealed class RegistrationTests
             Assert.IsNotNull(storedByEmail);
             Assert.AreEqual(username, storedByUsername.Username);
             Assert.AreEqual(email, storedByUsername.EmailAddress);
-            Assert.AreEqual(password, storedByUsername.Password);
+            Assert.AreNotEqual(password, storedByUsername.Password);
+            Assert.IsTrue(Project.Logic.PasswordSecurityLogic.VerifyPassword(password, storedByUsername.Password));
             Assert.AreEqual(phoneNumber, storedByUsername.phoneNumber);
             Assert.AreEqual(username, storedByUsername.FullName);
             Assert.AreEqual(username, storedByEmail.Username);

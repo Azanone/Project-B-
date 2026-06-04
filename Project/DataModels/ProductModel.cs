@@ -9,6 +9,12 @@ public class ProductModel
     public string Category {get; set;}
     public Int64 Stock {get; set;}
     public Int64 MinAge {get; set;}
+    public Int64 Calories {get; set;}
+    public double Fats {get; set;}
+    public double Carbs {get; set;}
+    public double Fiber {get; set;}
+    public double Protein {get; set;}
+    public double Salt {get; set;}
 
     public ProductModel(Int64 productid, string name, Decimal price, string brand, string ingredients, Int64 categoryid, Int64 stock)
     {

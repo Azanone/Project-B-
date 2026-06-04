@@ -52,7 +52,7 @@ public class AdminLogic
             }
 
             AccountModel? currentAccount = AccountsLogic.CurrentAccount;
-            if (currentAccount != null && currentAccount.UserId == userId && normalizedRole.Equals("User", StringComparison.OrdinalIgnoreCase))
+            if (currentAccount != null && currentAccount.Id == userId && normalizedRole.Equals("User", StringComparison.OrdinalIgnoreCase))
             {
                 return (false, "You cannot remove your own Admin role.");
             }
@@ -84,7 +84,7 @@ public class AdminLogic
             }
 
             AccountModel? currentAccount = AccountsLogic.CurrentAccount;
-            if (currentAccount != null && currentAccount.UserId == userId)
+            if (currentAccount != null && currentAccount.Id == userId)
             {
                 return (false, "You cannot remove your own account.");
             }
@@ -105,9 +105,9 @@ public class AdminLogic
         return _productAccess.GetCategories();
     }
 
-    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput)
+    public (bool Success, string Message) AddProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput, string caloriesInput, string fatsInput, string carbsInput, string fiberInput, string proteinInput, string saltInput)
     {
-        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, out ProductModel? product, out string errorMessage))
+        if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, caloriesInput, fatsInput, carbsInput, fiberInput, proteinInput, saltInput, out ProductModel? product, out string errorMessage))
         {
             return (false, errorMessage);
         }
@@ -123,7 +123,7 @@ public class AdminLogic
         }
     }
 
-    public (bool Success, string Message) UpdateProduct(string productIdInput, string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput)
+    public (bool Success, string Message) UpdateProduct(string productIdInput, string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput, string caloriesInput, string fatsInput, string carbsInput, string fiberInput, string proteinInput, string saltInput)
     {
         if (!long.TryParse(productIdInput, out Int64 productId) || productId <= 0)
         {
@@ -137,7 +137,7 @@ public class AdminLogic
                 return (false, $"No product found with ID {productId}.");
             }
 
-            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, out ProductModel? product, out string errorMessage))
+            if (!TryBuildProduct(name, priceInput, brand, ingredients, categoryIdInput, stockInput, minAgeInput, caloriesInput, fatsInput, carbsInput, fiberInput, proteinInput, saltInput, out ProductModel? product, out string errorMessage))
             {
                 return (false, errorMessage);
             }
@@ -174,7 +174,7 @@ public class AdminLogic
         }
     }
 
-    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput, out ProductModel? product, out string errorMessage)
+    private bool TryBuildProduct(string name, string priceInput, string brand, string ingredients, string categoryIdInput, string stockInput, string minAgeInput, string caloriesInput, string fatsInput, string carbsInput, string fiberInput, string proteinInput, string saltInput, out ProductModel? product, out string errorMessage)
     {
         product = null;
         errorMessage = string.Empty;
@@ -234,6 +234,42 @@ public class AdminLogic
             return false;
         }
 
+        if (!long.TryParse(caloriesInput, out long calories) || calories < 0)
+        {
+            errorMessage = "Calories must be zero or a positive number.";
+            return false;
+        }
+
+        if (!TryParsePrice(fatsInput, out decimal fats) || fats < 0)
+        {
+            errorMessage = "Fats must be zero or a positive number.";
+            return false;
+        }
+
+        if (!TryParsePrice(carbsInput, out decimal carbs) || carbs < 0)
+        {
+            errorMessage = "Carbs must be zero or a positive number.";
+            return false;
+        }
+
+        if (!TryParsePrice(fiberInput, out decimal fiber) || fiber < 0)
+        {
+            errorMessage = "Fiber must be zero or a positive number.";
+            return false;
+        }
+
+        if (!TryParsePrice(proteinInput, out decimal protein) || protein < 0)
+        {
+            errorMessage = "Protein must be zero or a positive number.";
+            return false;
+        }
+
+        if (!TryParsePrice(saltInput, out decimal salt) || salt < 0)
+        {
+            errorMessage = "Salt must be zero or a positive number.";
+            return false;
+        }
+
         product = new ProductModel
         {
             Name = name.Trim(),
@@ -242,7 +278,13 @@ public class AdminLogic
             Ingredients = ingredients.Trim(),
             CategoryID = (int)categoryId,
             Stock = (int)stock,
-            MinAge = minAge
+            MinAge = minAge,
+            Calories = calories,
+            Fats = (double)fats,
+            Carbs = (double)carbs,
+            Fiber = (double)fiber,
+            Protein = (double)protein,
+            Salt = (double)salt
         };
 
         return true;

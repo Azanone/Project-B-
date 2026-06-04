@@ -24,13 +24,13 @@ public class ProductAccess
 
     public long Write(ProductModel product)
     {
-        string sql = "INSERT INTO Product (Name, Price, Brand, Ingredients, CategoryID, Stock, MinAge) VALUES (@Name, @Price, @Brand, @Ingredients, @CategoryID, @Stock, @MinAge); SELECT last_insert_rowid();";
+        string sql = "INSERT INTO Product (Name, Price, Brand, Ingredients, CategoryID, Stock, MinAge, Calories, Fats, Carbs, Fiber, Protein, Salt) VALUES (@Name, @Price, @Brand, @Ingredients, @CategoryID, @Stock, @MinAge, @Calories, @Fats, @Carbs, @Fiber, @Protein, @Salt); SELECT last_insert_rowid();";
         return _connection.ExecuteScalar<long>(sql, product);
     }
 
     public bool Update(ProductModel product)
     {
-        string sql = "UPDATE Product SET Name = @Name, Price = @Price, Brand = @Brand, Ingredients = @Ingredients, CategoryID = @CategoryID, Stock = @Stock, MinAge = @MinAge WHERE ProductID = @ProductID";
+        string sql = "UPDATE Product SET Name = @Name, Price = @Price, Brand = @Brand, Ingredients = @Ingredients, CategoryID = @CategoryID, Stock = @Stock, MinAge = @MinAge, Calories = @Calories, Fats = @Fats, Carbs = @Carbs, Fiber = @Fiber, Protein = @Protein, Salt = @Salt WHERE ProductID = @ProductID";
         int changedRows = _connection.Execute(sql, product);
         return changedRows > 0;
     }

@@ -56,16 +56,43 @@ public static class AdminInformationOverview
     }
 
     private static void ShowStock()
+{
+    Console.Clear();
+    var list = _productLogic.GetProducts();
+    
+    var lowStockProducts = list.Where(item => item.Stock <= 5).ToList();
+
+    if (!lowStockProducts.Any())
     {
-        Console.Clear();
-        var list = _productLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: {item.Name}| Stock: {(item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK")}");
-        }
+        MenuHelpers.Announce("--- ALL PRODUCTS HAVE SUFFICIENT STOCK ---");
         MenuHelpers.Prompt("Press Enter to continue");
+        return;
     }
+
+    List<string> options = new List<string>();
+    foreach (var item in lowStockProducts)
+    {
+        string stockLabel = item.Stock > 0 ? item.Stock.ToString() : "OUT OF STOCK";
+        options.Add($"ID: {item.ProductID} | {item.Name} (Current Stock: {stockLabel}) -> Select to Restock (+15)");
+    }
+    options.Add("Back to Management Menu");
+
+    MenuNavigation menu = new MenuNavigation(options, "--- LOW STOCK ALERT (5 OR LESS) ---");
+    int selection = menu.Start();
+
+    if (selection == options.Count - 1)
+    {
+        return;
+    }
+
+    var selectedProduct = lowStockProducts[selection];
+    int newStockValue = (int)selectedProduct.Stock + 15;
+    
+    _productLogic.OrderProductByID((int)selectedProduct.ProductID, newStockValue);
+
+    MenuHelpers.Confirm($"Successfully restocked {selectedProduct.Name}. New stock database value set to: {newStockValue}");
+    MenuHelpers.Prompt("Press Enter to continue");
+}
 
     private static void ShowReceipts()
     {
