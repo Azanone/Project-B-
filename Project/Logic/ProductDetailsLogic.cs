@@ -1,6 +1,6 @@
 public class ProductDetailsLogic
 {
-    private static readonly Dictionary<string, string> CategoryLocations = new()
+    private static readonly Dictionary<string, string> CategoryLocations = new(StringComparer.OrdinalIgnoreCase)
     {
         { "Bakery",            "Bakery aisle (top-left)" },
         { "Dairy",             "Dairy aisle (top-center)" },
