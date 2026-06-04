@@ -14,7 +14,9 @@ static class UserRegister
             "Email",
             "Password",
             "Phone number",
-            "Birthdate"
+            "Birthdate",
+            "Register",
+            "Return"
         };
 
         List<bool> requiresInput = new List<bool>
@@ -23,14 +25,21 @@ static class UserRegister
             true,
             true,
             true,
-            true
+            true,
+            false,
+            false
         };
-        
+
         MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
 
         while (true)
         {
-            form.Start();
+            int selection = form.Start();
+            if (selection == 6)
+            {
+                Menu.Start();
+                return;
+            }
             List<string> results = form.GetValues();
 
             string username = results[0].Trim();
