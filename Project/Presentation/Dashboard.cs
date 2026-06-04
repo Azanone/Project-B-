@@ -34,6 +34,7 @@ static class Dashboard
             if (account == null)
             {
                 options.Add("Checkout and pay");
+                options.Add("Show product details");
                 options.Add("Login");
             }
             else
@@ -41,6 +42,7 @@ static class Dashboard
                 options.Add("Checkout and pay");
                 options.Add("Wishlist");
                 options.Add("Show purchase history");
+                options.Add("Show product details");
                 // options.Add("Two-Factor Authentication (2FA) Settings");
                 options.Add("Logout");
             }
@@ -76,6 +78,9 @@ static class Dashboard
                         PurchaseShoppingCart.PurchaseChoice();
                         break;
                     case 7:
+                        ProductDetailsView.Start();
+                        break;
+                    case 8:
                         Menu.Start();
                         return;
                 }
@@ -117,6 +122,9 @@ static class Dashboard
                     //     ManageTwoFactor();
                     //     break;
                     case 9:
+                        ProductDetailsView.Start();
+                        break;
+                    case 10:
                         AccountsLogic.Logout();
                         Menu.Start();
                         return;
@@ -164,11 +172,18 @@ static class Dashboard
         List<string> options = new List<string>();
         foreach (var item in products)
         {
-            options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+            options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR     [Product details →]");
         }
         options.Add("Back to Dashboard");
 
-        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---");
+        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD (Right arrow: details) ---");
+        menu.OnRightArrow = idx =>
+        {
+            if (idx >= 0 && idx < products.Count)
+            {
+                ProductDetailsView.Show(products[idx]);
+            }
+        };
         int selection = menu.Start();
 
         if (selection == options.Count - 1)

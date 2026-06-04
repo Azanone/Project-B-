@@ -14,6 +14,29 @@ public class ProductDetailsLogic
         { "Fresh Produce",     "Fresh Produce section (bottom-left)" }
     };
 
+    private static readonly Dictionary<string, string> CategoryHighlightTokens = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Bakery",            "BAKERY" },
+        { "Dairy",             "DAIRY" },
+        { "Frozen",            "FROZEN" },
+        { "Deli",              " Deli " },
+        { "Canned & Dry Food", "Dry Food" },
+        { "Dry Goods",         "Dry Food" },
+        { "Beverages",         "rage" },
+        { "Snacks & Goods",    "Snacks" },
+        { "Goods",             "Snacks" },
+        { "Fresh Produce",     "FRESH PRODUCE" }
+    };
+
+    public string? GetHighlightToken(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return null;
+        }
+        return CategoryHighlightTokens.TryGetValue(category, out string? token) ? token : null;
+    }
+
     public string? GetLocationLabel(string category)
     {
         if (string.IsNullOrWhiteSpace(category))

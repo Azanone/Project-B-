@@ -5,6 +5,7 @@ public class MenuNavigation
     private List<bool> requiresInput;
     private int selectedIndex;
     private string Title;
+    public Action<int>? OnRightArrow;
 
     public MenuNavigation(List<string> menuLabels, List<bool> menuRequiresInput, string title)
     {
@@ -151,6 +152,10 @@ private void DrawUnselectedLine(string label, int index)
         else if (key == ConsoleKey.Enter)
         {
             return false;
+        }
+        else if (key == ConsoleKey.RightArrow && OnRightArrow != null)
+        {
+            OnRightArrow(selectedIndex);
         }
         else if (key == ConsoleKey.Backspace)
         {
