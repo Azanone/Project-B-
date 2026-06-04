@@ -9,11 +9,9 @@ public static class ShowOffers
 
     static public void ShowAll()
     {
-        var list = offerLogic.GetOffers();
-        MenuHelpers.Announce("--- ALL OFFERS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"ID: {item.OfferID}| Description: {item.Description}| Begin-Date: {item.StartDate}| End-Date: {item.EndDate}| Price: {item.RegularPrice} EUR |Discount: {item.DiscountPercentage}%| Discount-price: {item.DiscountPrice} EUR ");
-        }
+        Display.List(
+            offerLogic.GetOffers(),
+            item => $"ID: {item.OfferID}| Description: {item.Description}| Begin-Date: {item.StartDate}| End-Date: {item.EndDate}| Price: {item.RegularPrice} EUR |Discount: {item.DiscountPercentage}%| Discount-price: {item.DiscountPrice} EUR ",
+            "--- ALL OFFERS ---");
     }
 }

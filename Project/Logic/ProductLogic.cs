@@ -16,10 +16,14 @@ public class ProductLogic
     {
         _dataAccess.UpdateStock(productID,amount);
     }
-    public void OrderProductByName(string productName, int amount)
+    public bool OrderProductByName(string productName, int amount)
     {
         int productID = _dataAccess.IDSearchByName(productName);
+        if (productID == 0)
+        {
+            return false;
+        }
         _dataAccess.UpdateStock(productID,amount);
-
+        return true;
     }
 }

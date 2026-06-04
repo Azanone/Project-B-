@@ -30,7 +30,7 @@ public class AccountsLogic
 
 
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
-        if (acc != null && Project.Logic.PasswordSecurityLogic.VerifyPassword(password, acc.Password))
+    if (acc != null && Project.Logic.PasswordSecurityLogic.VerifyPassword(password, acc.Password))
         {
             CurrentAccount = acc;
             return acc;
@@ -218,8 +218,8 @@ public class AccountsLogic
 
     public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        string hashedPassword = Project.Logic.PasswordSecurityLogic.HashPassword(password);
-        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), hashedPassword, username, string.Empty, string.Empty, phoneNumber, bdate);
+    string hashedPassword = Project.Logic.PasswordSecurityLogic.HashPassword(password);
+    AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), hashedPassword, username, string.Empty, string.Empty, phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
     }

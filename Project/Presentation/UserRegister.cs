@@ -5,10 +5,58 @@ static class UserRegister
         AccountsLogic AL = new AccountsLogic();
         Console.Clear();
 
-        string username = PromptUntilValid("Username", AL.ValidateUsername);
-        string email = PromptUntilValid("Email", AL.ValidateEmail);
-        string confirmEmail = PromptMatchingEmail("Confirm email", email);
+        List<string> labels = new List<string>
+        {
+            "Username",
+            "Email",
+            "Phone number",
+            "Birthdate"
+        };
 
+        List<bool> requiresInput = new List<bool>
+        {
+            true,
+            true,
+            true,
+            true
+        };
+
+        MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
+        form.Start();
+        List<string> results = form.GetValues();
+
+        string username = results[0];
+        string email = results[1];
+        string phoneNumber = results[2];
+        string bDate = results[3];
+
+        bool isValid = true;
+
+        if (!AL.ValidateUsername(username))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidateEmail(email))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidatePhonenumber(phoneNumber))
+        {
+            isValid = false;
+        }
+        else if (!AL.ValidateBirthday(bDate))
+        {
+            isValid = false;
+        }
+
+        if (!isValid)
+        {
+            MenuHelpers.Prompt("Press Enter to try again");
+            UserRegister.Start();
+            return;
+        }
+
+        string confirmEmail = PromptMatchingEmail("Confirm email", email);
         _ = confirmEmail;
 
         string verificationCode = AL.GenerateVerificationCode();
@@ -37,8 +85,6 @@ static class UserRegister
         }
 
         string password = PromptPasswordWithConfirmation(AL);
-        string phoneNumber = PromptUntilValid("Phone number", AL.ValidatePhonenumber);
-        string bDate = PromptUntilValid("Birthdate (dd-MM-yyyy)", AL.ValidateBirthday);
 
         AL.Register(username, email, password, phoneNumber, bDate);
         MenuHelpers.Confirm($"Successfully registered as {username}");
