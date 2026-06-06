@@ -3,6 +3,7 @@ public class MenuNavigation
     private List<string> labels;
     private List<string> values;
     private List<bool> requiresInput;
+    private List<int> quantities;
     private int selectedIndex;
     private string Title;
 
@@ -17,6 +18,12 @@ public class MenuNavigation
         {
             values.Add("");
             i = i + 1;
+        }
+        quantities = new List<int>();
+
+        for (int j = 0;j<labels.Count;j++)
+        {
+            quantities.Add(0);
         }
         selectedIndex = 0;
         Title = title;
@@ -160,6 +167,14 @@ private void DrawUnselectedLine(string label, int index)
         {
             HandleCharacterInput(keyInfo.KeyChar);
         }
+        else if (key == ConsoleKey.LeftArrow)
+        {
+            DecreaseQuantity();
+        }
+        else if(key == ConsoleKey.RightArrow)
+        {
+            IncreaseQuantity();
+        }
 
         return true;
     }
@@ -180,6 +195,19 @@ private void DrawUnselectedLine(string label, int index)
         {
             selectedIndex = 0;
         }
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (quantities[selectedIndex]>0)
+        {
+            quantities[selectedIndex]--;
+        }
+    }
+
+    private void IncreaseQuantity()
+    {
+       quantities[selectedIndex]++;
     }
 
     private void HandleBackspace()
