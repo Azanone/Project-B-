@@ -3,7 +3,7 @@ public class MenuNavigation
     private List<string> labels;
     private List<string> values;
     private List<bool> requiresInput;
-    private List<int> quantities;
+    private int currentquantities;
     private int selectedIndex;
     private string Title;
 
@@ -19,12 +19,7 @@ public class MenuNavigation
             values.Add("");
             i = i + 1;
         }
-        quantities = new List<int>();
-
-        for (int j = 0;j<labels.Count;j++)
-        {
-            quantities.Add(0);
-        }
+        currentquantities = 0;
         selectedIndex = 0;
         Title = title;
     }
@@ -41,8 +36,14 @@ public class MenuNavigation
             values.Add("");
             i = i + 1;
         }
+        currentquantities = 0;
         Title = title;
         selectedIndex = 0;
+    }
+
+    public int GetQuantity()
+    {
+        return currentquantities;
     }
 
     public int Start()
@@ -59,6 +60,8 @@ public class MenuNavigation
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
             running = HandleInput(keyInfo);
         }
+
+        currentquantities = 0;//reset aantal naar 0 bij menu verlaten
         return selectedIndex;
     }
 
@@ -120,9 +123,18 @@ public class MenuNavigation
         Console.ResetColor();
     }
     else
-    {
-        MenuHelpers.Announce($"   {label}");
-    }
+        Console.ForegroundColor = ConsoleColor.Blue;
+        
+        if (index == selectedIndex && index != labels.Count -1)
+        {
+            Console.Write($"   {label} | Qty: {currentquantities}");
+        }
+        else
+        {
+            MenuHelpers.Announce($"   {label}");
+        }
+    Console.WriteLine();
+    Console.ResetColor();
 }
 
 private void DrawUnselectedLine(string label, int index)
@@ -197,17 +209,29 @@ private void DrawUnselectedLine(string label, int index)
         }
     }
 
+    
     private void DecreaseQuantity()
     {
-        if (quantities[selectedIndex]>0)
+
+        if (selectedIndex == labels.Count - 1) // laatste idex is return to Dashboard dus geen quantity nodig
         {
-            quantities[selectedIndex]--;
+            return;
+        }
+        
+        if (currentquantities>0)
+        {
+            currentquantities--;
         }
     }
 
     private void IncreaseQuantity()
     {
-       quantities[selectedIndex]++;
+
+        if (selectedIndex == labels.Count - 1) // laatste idex is return to Dashboard dus geen quantity nodig
+        {
+            return;
+        }
+       currentquantities++;
     }
 
     private void HandleBackspace()

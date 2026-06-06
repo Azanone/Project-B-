@@ -170,6 +170,7 @@ static class Dashboard
 
         MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---");
         int selection = menu.Start();
+        int quantity = menu.GetQuantity();
 
         if (selection == options.Count - 1)
         {
@@ -184,8 +185,20 @@ static class Dashboard
             WaitForContinue();
             return;
         }
+        if (quantity <= 0)
+        {
+            MenuHelpers.Warn("Please slect a quantity greater than 0");
+            WaitForContinue();
+            return;
+        }
+        if(quantity > selectedProduct.Stock )
+        {
+            MenuHelpers.Warn($"Amount selected too high. Only {selectedProduct.Stock} items in stock");
+            WaitForContinue();
+            return;
+        }
 
-        var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
+        var cartItem = new ShoppingCartItem(selectedProduct, quantity, selectedProduct.Price);
         ShoppingCart.AddItem(cartItem);
 
         MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
