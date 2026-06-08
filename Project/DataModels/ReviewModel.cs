@@ -1,6 +1,4 @@
-﻿namespace Project.Models;
-
-public class ReviewModel
+﻿public class ReviewModel
 {
     public int ReviewId { get; set; }
     public int ProductId { get; set; }

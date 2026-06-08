@@ -1,6 +1,3 @@
-using Project.Logic;
-using Project.Models;
-
 public static class ProductDetailsView
 {
     private static readonly ProductLogic _productLogic = new();
