@@ -13,6 +13,12 @@ public class ReviewAccess
         string sql = @"SELECT ReviewID, ProductID, Review, Rating FROM REVIEW";
         return _connection.Query<ReviewModel>(sql).ToList();
     }
+
+    public List<ReviewModel> GetReviewsByProduct(int productId)
+    {
+        string sql = @"SELECT ReviewID, ProductID, Review, Rating FROM REVIEW WHERE ProductID = @productId";
+        return _connection.Query<ReviewModel>(sql, new { productId }).ToList();
+    }
     
     public void AddReview(int productId, string review, double starRating)
     {
