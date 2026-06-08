@@ -168,7 +168,7 @@ static class Dashboard
         }
         options.Add("Back to Dashboard");
 
-        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---");
+        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---", true);
         int selection = menu.Start();
         int quantity = menu.GetQuantity();
 
@@ -187,7 +187,7 @@ static class Dashboard
         }
         if (quantity <= 0)
         {
-            MenuHelpers.Warn("Please slect a quantity greater than 0");
+            MenuHelpers.Warn("Please select a quantity greater than 0");
             WaitForContinue();
             return;
         }
@@ -206,31 +206,31 @@ static class Dashboard
     }
 
     private static void ShowShoppingCart()
-{
-    Console.Clear();
-    MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
-
-    var items = ShoppingCart.GetAllItems();
-    if (items.Count == 0)
     {
-        MenuHelpers.Warn("Shopping CART is empty");
+        Console.Clear();
+        MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
+
+        var items = ShoppingCart.GetAllItems();
+        if (items.Count == 0)
+        {
+            MenuHelpers.Warn("Shopping CART is empty");
+            WaitForContinue();
+            return;
+        }
+
+        decimal total = 0;
+        for (int i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
+            decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
+            total += lineTotal;
+
+            MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
+        }
+
+        MenuHelpers.Announce($"Total (preview): {total} EUR");
         WaitForContinue();
-        return;
     }
-
-    decimal total = 0;
-    for (int i = 0; i < items.Count; i++)
-    {
-        var item = items[i];
-        decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
-        total += lineTotal;
-
-        MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
-    }
-
-    MenuHelpers.Announce($"Total (preview): {total} EUR");
-    WaitForContinue();
-}
 
     private static void ShowLayout()
     {

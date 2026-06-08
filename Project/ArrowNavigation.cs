@@ -6,6 +6,7 @@ public class MenuNavigation
     private int currentquantities;
     private int selectedIndex;
     private string Title;
+    private bool QuantityManipulation;
 
     public MenuNavigation(List<string> menuLabels, List<bool> menuRequiresInput, string title)
     {
@@ -22,6 +23,7 @@ public class MenuNavigation
         currentquantities = 0;
         selectedIndex = 0;
         Title = title;
+        QuantityManipulation = false;
     }
 
     public MenuNavigation(List<string> menuLabels,  string title)
@@ -39,6 +41,25 @@ public class MenuNavigation
         currentquantities = 0;
         Title = title;
         selectedIndex = 0;
+        QuantityManipulation = false;
+    }
+
+    public MenuNavigation(List<string> menuLabels,  string title, bool quantitymanipulation)
+    {
+        labels = menuLabels;
+        requiresInput = null;
+        values = new List<string>();
+        
+        int i = 0;
+        while (i < labels.Count)
+        {
+            values.Add("");
+            i = i + 1;
+        }
+        currentquantities = 0;
+        Title = title;
+        selectedIndex = 0;
+        QuantityManipulation = quantitymanipulation;
     }
 
     public int GetQuantity()
@@ -61,7 +82,7 @@ public class MenuNavigation
             running = HandleInput(keyInfo);
         }
 
-        currentquantities = 0;//reset aantal naar 0 bij menu verlaten
+        //currentquantities = 0;//reset aantal naar 0 bij menu verlaten
         return selectedIndex;
     }
 
@@ -123,16 +144,19 @@ public class MenuNavigation
         Console.ResetColor();
     }
     else
+    {
         Console.ForegroundColor = ConsoleColor.Blue;
-        
-        if (index == selectedIndex && index != labels.Count -1)
-        {
-            Console.Write($"   {label} | Qty: {currentquantities}");
-        }
-        else
-        {
-            MenuHelpers.Announce($"   {label}");
-        }
+    }
+    
+    
+    if (QuantityManipulation && index == selectedIndex && index != labels.Count -1)
+    {
+        Console.Write($"   {label} | Qty: {currentquantities}");
+    }
+    else
+    {
+        MenuHelpers.Announce($"   {label}");
+    }
     Console.WriteLine();
     Console.ResetColor();
 }
@@ -179,11 +203,11 @@ private void DrawUnselectedLine(string label, int index)
         {
             HandleCharacterInput(keyInfo.KeyChar);
         }
-        else if (key == ConsoleKey.LeftArrow)
+        else if (QuantityManipulation == true && key == ConsoleKey.LeftArrow)
         {
             DecreaseQuantity();
         }
-        else if(key == ConsoleKey.RightArrow)
+        else if(QuantityManipulation == true && key == ConsoleKey.RightArrow)
         {
             IncreaseQuantity();
         }
