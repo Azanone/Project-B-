@@ -1,7 +1,11 @@
+using Project.Logic;
+using Project.Models;
+
 public static class ProductDetailsView
 {
     private static readonly ProductLogic _productLogic = new();
     private static readonly ProductDetailsLogic _logic = new();
+    private static readonly ReviewLogic _reviewLogic = new();
 
     public static void Start()
     {
@@ -57,9 +61,12 @@ public static class ProductDetailsView
             {
                 "Location",
                 "Ingredients and nutrition",
+                "Reviews",
                 "Back"
             };
-            MenuNavigation menu = new MenuNavigation(options, $"--- {product.Name} ---");
+            var rating = _reviewLogic.GetRating(product.ProductID);
+            string title = $"--- {product.Name} ---  {rating.Stars} {rating.Average:F1} ({rating.Count})";
+            MenuNavigation menu = new MenuNavigation(options, title);
             int sel = menu.Start();
 
             if (sel == 0)
@@ -69,6 +76,10 @@ public static class ProductDetailsView
             else if (sel == 1)
             {
                 ShowIngredients(product);
+            }
+            else if (sel == 2)
+            {
+                ShowReviews(product);
             }
             else
             {
@@ -134,6 +145,48 @@ public static class ProductDetailsView
         }
 
         MenuHelpers.Pause();
+    }
+
+    private static void ShowReviews(ProductModel product)
+    {
+        while (true)
+        {
+            Console.Clear();
+            var rating = _reviewLogic.GetRating(product.ProductID);
+            MenuHelpers.Announce($"--- REVIEWS FOR {product.Name} ---");
+
+            if (rating.Count == 0)
+            {
+                MenuHelpers.Warn("No reviews yet. Be the first to leave one!");
+            }
+            else
+            {
+                MenuHelpers.Confirm($"Average: {rating.Stars} {rating.Average:F1} ({rating.Count} review(s))\n");
+                foreach (ReviewModel r in _reviewLogic.GetReviews(product.ProductID))
+                {
+                    MenuHelpers.Confirm($"{_reviewLogic.BuildStars(r.Rating)} {r.Rating:F1}  -  {r.Review}");
+                }
+            }
+
+            List<string> options = new()
+            {
+                "Add a review",
+                "Back"
+            };
+            MenuNavigation menu = new MenuNavigation(options, "\n--- REVIEW OPTIONS ---");
+            int sel = menu.Start();
+
+            if (sel == 0)
+            {
+                Console.Clear();
+                _reviewLogic.AddReview(product);
+                MenuHelpers.Pause();
+            }
+            else
+            {
+                return;
+            }
+        }
     }
 
     private static void ShowIngredients(ProductModel product)
