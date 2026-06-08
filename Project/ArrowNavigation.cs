@@ -151,13 +151,12 @@ public class MenuNavigation
     
     if (QuantityManipulation && index == selectedIndex && index != labels.Count -1)
     {
-        Console.Write($"   {label} | Qty: {currentquantities}");
+        Console.WriteLine($"   {label} | Qty: {currentquantities}");
     }
     else
     {
         MenuHelpers.Announce($"   {label}");
     }
-    Console.WriteLine();
     Console.ResetColor();
 }
 
