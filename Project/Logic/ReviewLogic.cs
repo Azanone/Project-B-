@@ -70,7 +70,7 @@ public class ReviewLogic
 
         } while (rating < 0 || rating > 5);
         
-        reviewAccess.AddReview(product.ProductID, review, rating);
+        reviewAccess.AddReview((int)product.ProductID, review, rating);
         Console.WriteLine("Review toegevoegd!");
         
     }

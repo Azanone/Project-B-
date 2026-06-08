@@ -1,35 +1,32 @@
-﻿
-
-//This class is not static so later on we can use inheritance and interfaces
-
-using System.ComponentModel;
+﻿//This class is not static so later on we can use inheritance and interfaces
+using System;
+using System.Linq;
+using System.Net;
 using System.Net.Mail;
-using Project.Logic;
-using Project.Presentation;
+using System.Security.Cryptography;
 
 public class AccountsLogic
 {
 
-    //Static properties are shared across all instances of the class
-    //This can be used to get the current logged in account from anywhere in the program
-    //private set, so this can only be set by the class itself
     public static AccountModel? CurrentAccount { get; private set; }
     private AccountsAccess _access = new();
 
     public AccountsLogic()
     {
-        // Could do something here
 
     }
 
     public AccountModel? CheckLogin(string identifier, string password)
     {
 
-        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password)) return null;
-        
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
+
+
         AccountModel? acc = _access.GetByIdentifier(identifier.ToLower());
-        
-        if (acc != null && PasswordSecurityLogic.VerifyPassword(password, acc.Password))
+        if (acc != null && Project.Logic.PasswordSecurityLogic.VerifyPassword(password, acc.Password))
         {
             CurrentAccount = acc;
             return acc;
@@ -46,89 +43,97 @@ public class AccountsLogic
     {
         CurrentAccount = null;
     }
-    
-    public bool ValidateFirstName(string firstname)
-    {
-        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length < 3)
-        {
-            MenuHelpers.Error("First name must be at least 3 characters long");
-            return false;
-        }
 
-        if (string.IsNullOrWhiteSpace(firstname) || firstname.Length > 32)
+    public void UpdateAccount(AccountModel updatedAccount)
+    {
+        _access.Write(updatedAccount);
+        if (CurrentAccount != null && CurrentAccount.Id == updatedAccount.Id)
         {
-            MenuHelpers.Error("First name can't be longer than 32 characters");
+            CurrentAccount = updatedAccount;
+        }
+    }
+
+    public DateTime ParseBirthday(string birthdayInput)
+    {
+        string[] parts = birthdayInput.Split('-');
+        if (parts.Length == 3
+            && int.TryParse(parts[0], out int day)
+            && int.TryParse(parts[1], out int month)
+            && int.TryParse(parts[2], out int year))
+        {
+            try
+            {
+                return new DateTime(year, month, day);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+            }
+        }
+        throw new FormatException("Invalid date format");
+    }
+
+    // Returns age in whole years from a stored dd-MM-yyyy birthdate, or null when missing/invalid.
+    public int? CalculateAge(string? birthdate)
+    {
+        if (string.IsNullOrWhiteSpace(birthdate))
+        {
+            return null;
+        }
+        DateTime dob;
+        try
+        {
+            dob = ParseBirthday(birthdate);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+        DateTime today = DateTime.Today;
+        int age = today.Year - dob.Year;
+        if (dob.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        return age;
+    }
+
+   public bool ValidateBirthday(string birthdayInput)
+    {
+        if (string.IsNullOrWhiteSpace(birthdayInput))
+        {
+            MenuHelpers.Error("Birthday cannot be empty");
             return false;
         }
-        
+        DateTime birthday;
+        try
+        {
+            birthday = ParseBirthday(birthdayInput);
+        }
+        catch (FormatException)
+        {
+            MenuHelpers.Error("Invalid date format (use dd-MM-yyyy)");
+            return false;
+        }
+        if (birthday > DateTime.Today)
+        {
+            MenuHelpers.Error("Birthday cannot be in the future");
+            return false;
+        }
         return true;
     }
-    
-    public bool ValidateLastName(string lastname)
+
+    public bool ValidateUsername(string username)
     {
-        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length < 3)
+        if (string.IsNullOrWhiteSpace(username) || username.Length < 3)
         {
-            MenuHelpers.Error("Last name must be at least 3 characters long");
+            MenuHelpers.Error("Username must be at least 3 characters long");
             return false;
         }
-        
-        if (string.IsNullOrWhiteSpace(lastname) || lastname.Length > 32)
-        {
-            MenuHelpers.Error("Last name can't be longer than 32 characters");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    public string CreateUsername(string firstname, string lastname)
-    {
-        if (firstname.Contains(" "))
-        {
-            firstname = firstname.Replace(" ", "");
-        }
-        
-        if (lastname.Contains(" "))
-        {
-            lastname = lastname.Replace(" ", "");
-        }
-        
-        firstname = char.ToUpper(firstname[0]) + firstname.Substring(1).ToLower();
-        lastname = char.ToUpper(lastname[0]) + lastname.Substring(1).ToLower();
-        
-        string username =  $"{firstname} {lastname}";
-        
-        if (IdentifierExists(username.ToLower())) 
+        if (IdentifierExists(username.ToLower()))
         {
             MenuHelpers.Error($"Username {username} already exists");
-        }
-        
-        return username;
-    }
-
-    public bool ValidateBirthDate(string input)
-    {
-        if (!DateTime.TryParse(input, out DateTime birthDate))
-        {
-            MenuHelpers.Error("Invalid date format");
             return false;
         }
-
-        int age = DateTime.Today.Year - birthDate.Year;
-        if (birthDate > DateTime.Today.AddYears(-age)) age--;
-
-        if (age < 5)
-        {
-            MenuHelpers.Error("You must be older than 4 years old");
-            return false;
-        }
-
-        if (age > 120)
-        {
-            MenuHelpers.Error("Enter valid birthdate");
-            return false;
-        }
-
         return true;
     }
 
@@ -158,17 +163,46 @@ public class AccountsLogic
 
     public bool ValidatePassword(string password)
     {
-        if (password.Length < 7)
+        if (string.IsNullOrWhiteSpace(password))
         {
-            MenuHelpers.Error("Password must be at least 7 characters");
+            MenuHelpers.Error("Password cannot be empty");
             return false;
         }
+
+        if (password.Length < 7)
+        {
+            MenuHelpers.Error("Password must be more than 6 characters");
+            return false;
+        }
+
+        if (!password.Any(char.IsUpper))
+        {
+            MenuHelpers.Error("Password must contain at least one uppercase letter");
+            return false;
+        }
+
+        if (!password.Any(char.IsDigit))
+        {
+            MenuHelpers.Error("Password must contain at least one digit");
+            return false;
+        }
+
+        if (!password.Any(char.IsPunctuation) && !password.Any(char.IsSymbol))
+        {
+            MenuHelpers.Error("Password must contain at least one sign or symbol");
+            return false;
+        }
+
         return true;
     }
 
     public bool ValidatePhonenumber(string field)
     {
-        if (string.IsNullOrWhiteSpace(field)) return false;
+        if (string.IsNullOrWhiteSpace(field))
+        {
+            return false;
+        }
+        
 
         try
         {
@@ -181,6 +215,7 @@ public class AccountsLogic
             {
                 return field.Substring(1).All(char.IsDigit);
             }
+            MenuHelpers.Error($"Validation error: Invalid phone number");
             return false;
         }
         catch (Exception e)
@@ -190,26 +225,63 @@ public class AccountsLogic
         }
     }
 
-    public void Register(
-        string username,
-        string email,
-        string password,
-        string phoneNumber,
-        DateTime birthDate)
+    public void Register(string username, string email, string password, string phoneNumber, string bdate)
     {
-        string hashedPassword = PasswordSecurityLogic.HashPassword(password);
-
-        AccountModel newAccount = new AccountModel(
-            username.ToLower(),
-            email.ToLower(),
-            hashedPassword,
-            username,
-            string.Empty,
-            "0",
-            phoneNumber,
-            birthDate);
-
+        string hashedPassword = Project.Logic.PasswordSecurityLogic.HashPassword(password);
+        AccountModel newAccount = new AccountModel(username.ToLower(), email.ToLower(), hashedPassword, username, string.Empty, string.Empty, phoneNumber, bdate);
         _access.Write(newAccount);
         CurrentAccount = newAccount;
+    }
+
+    public string GenerateVerificationCode()
+    {
+        return RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+    }
+
+    public void SendVerificationEmail(string email, string verificationCode)
+    {
+        string smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? string.Empty;
+        string smtpPortText = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587";
+        string smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? string.Empty;
+        string smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? string.Empty;
+        string fromAddress = Environment.GetEnvironmentVariable("SMTP_FROM") ?? smtpUser;
+
+        if (string.IsNullOrWhiteSpace(smtpHost) && fromAddress.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
+        {
+            smtpHost = "smtp.gmail.com";
+        }
+
+        if (string.IsNullOrWhiteSpace(smtpUser))
+        {
+            smtpUser = fromAddress;
+        }
+
+        if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(fromAddress))
+        {
+            throw new InvalidOperationException("Email verification is not configured. Set SMTP_FROM, and for non-Gmail accounts also set SMTP_HOST. If your mail server requires authentication, set SMTP_USER and SMTP_PASSWORD too.");
+        }
+
+        if (!int.TryParse(smtpPortText, out int smtpPort))
+        {
+            smtpPort = 587;
+        }
+
+        using var client = new SmtpClient(smtpHost, smtpPort)
+        {
+            EnableSsl = true
+        };
+
+        if (!string.IsNullOrWhiteSpace(smtpUser))
+        {
+            client.Credentials = new NetworkCredential(smtpUser, smtpPassword);
+        }
+
+        using var message = new MailMessage(fromAddress, email)
+        {
+            Subject = "Your verification code",
+            Body = $"Your verification code is: {verificationCode}\n\nEnter this 6-digit code to complete your registration."
+        };
+
+        client.Send(message);
     }
 }

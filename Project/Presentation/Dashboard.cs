@@ -8,7 +8,6 @@ static class Dashboard
     private static readonly OfferLogic OfferLogic = new();
     private static readonly AccountsLogic AccountsLogic = new();
     public static readonly ShoppingCartLogic ShoppingCart = new();
-    private static readonly ShoppingCartLogic Wishlist = new();
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
@@ -17,245 +16,254 @@ static class Dashboard
         {
             Console.Clear();
             AccountModel? account = AccountsLogic.CurrentAccount;
+            string userGreeting = "Welcome guest";
+            if (account != null)
+            {
+                userGreeting = "Welcome back " + account.FullName;
+            }
 
-            MenuHelpers.Announce("Welcome back " + account.FullName);
-            
-            MenuHelpers.Confirm("Enter 1 to see all products");
-            MenuHelpers.Confirm("Enter 2 to see all offers");
-            MenuHelpers.Confirm("Enter 3 to see store layout");
-            MenuHelpers.Confirm("Enter 4 to add a product to shopping list");
-            MenuHelpers.Confirm("Enter 5 to view shopping cart and total");
-            MenuHelpers.Confirm("Enter 6 to clear shopping cart");
-            MenuHelpers.Confirm("Enter 7 to Wishlist");
-            MenuHelpers.Confirm("Enter 8 to show purchase history");
-            MenuHelpers.Confirm("Enter 9 to logout");
+            List<string> options = new List<string>
+            {
+                "See all products",
+                "See all offers",
+                "See store layout",
+                "Add a product to shopping cart",
+                "View shopping cart and total",
+                "Clear shopping cart"
+            };
 
-            string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
-            if (input == "1")
+            if (account == null)
             {
-                Console.Clear();
-                ShowProducts.ShowAll();
-            }
-            else if (input == "2")
-            {
-                Console.Clear();
-                ShowOffers.ShowAll();
-                MenuHelpers.Pause();
-            }
-            else if (input == "3")
-            {
-                ShowLayout.Start();
-            }
-            else if (input == "4")
-            {
-                AddProductToShoppingCart();
-            }
-            else if (input == "5")
-            {
-                ShowShoppingCart();
-            }
-            else if (input == "6")
-            {
-                if (account == null)
-                {
-                    MenuHelpers.Warn("You must be logged in.");
-                    MenuHelpers.Pause();
-                    continue;
-                }
-
-                ShoppingCart.ClearCurrentCart();
-                MenuHelpers.Confirm("Shopping list cleared");
-                MenuHelpers.Pause();
-            }
-            else if (input == "7")
-            {
-                ShowWishlist.Start();
-            }
-            else if (input == "8")
-            {
-                ShowPurchaseHistory();
-            }
-            else if (input == "9")
-            {
-                AccountsLogic.Logout();
-                Menu.Start();
-                return;
+                options.Add("Checkout and pay");
+                options.Add("Show product details");
+                options.Add("Login");
             }
             else
             {
-                MenuHelpers.Warn("Invalid input");
-                MenuHelpers.Pause();
+                options.Add("Checkout and pay");
+                options.Add("Wishlist");
+                options.Add("Show purchase history");
+                options.Add("Show product details");
+                // options.Add("Two-Factor Authentication (2FA) Settings");
+                options.Add("Logout");
+            }
+
+            MenuNavigation menu = new MenuNavigation(options, userGreeting);
+            int selection = menu.Start();
+
+            if (account == null)
+            {
+                switch (selection)
+                {
+                    case 0:
+                        ShowProducts();
+                        break;
+                    case 1:
+                        ShowOffers();
+                        break;
+                    case 2:
+                        ShowLayout();
+                        break;
+                    case 3:
+                        AddProductToShoppingCart();
+                        break;
+                    case 4:
+                        ShowShoppingCart();
+                        break;
+                    case 5:
+                        ShoppingCart.GetAllItems().Clear();
+                        MenuHelpers.Confirm("Shopping cart cleared");
+                        WaitForContinue();
+                        break;
+                    case 6:
+                        PurchaseShoppingCart.PurchaseChoice();
+                        break;
+                    case 7:
+                        ProductDetailsView.Start();
+                        break;
+                    case 8:
+                        Menu.Start();
+                        return;
+                }
+            }
+            else
+            {
+                switch (selection)
+                {
+                    case 0:
+                        ShowProducts();
+                        break;
+                    case 1:
+                        ShowOffers();
+                        break;
+                    case 2:
+                        ShowLayout();
+                        break;
+                    case 3:
+                        AddProductToShoppingCart();
+                        break;
+                    case 4:
+                        ShowShoppingCart();
+                        break;
+                    case 5:
+                        ShoppingCart.GetAllItems().Clear();
+                        MenuHelpers.Confirm("Shopping cart cleared");
+                        WaitForContinue();
+                        break;
+                    case 6:
+                        PurchaseShoppingCart.PurchaseChoice();
+                        break;
+                    case 7:
+                        ShowWishlist.Start();
+                        break;
+                    case 8:
+                        ShowPurchaseHistory();
+                        break;
+                    // case 9:
+                    //     ManageTwoFactor();
+                    //     break;
+                    case 9:
+                        ProductDetailsView.Start();
+                        break;
+                    case 10:
+                        AccountsLogic.Logout();
+                        Menu.Start();
+                        return;
+                }
             }
         }
+    }
+
+    private static void ShowProducts()
+    {
+        Console.Clear();
+        var list = ProductLogic.GetProducts();
+        MenuHelpers.Announce("--- ALL PRODUCTS ---");
+        foreach (var item in list)
+        {
+            MenuHelpers.Confirm($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+        }
+        WaitForContinue();
+    }
+
+    private static void ShowOffers()
+    {
+        Console.Clear();
+        var list = OfferLogic.GetOffers();
+        MenuHelpers.Announce("--- ALL OFFERS ---");
+        foreach (var item in list)
+        {
+            MenuHelpers.Confirm($"ID: {item.OfferID} | Description: {item.Description} | Begin: {item.StartDate} | End: {item.EndDate} | Price: {item.RegularPrice} EUR | Discount: {item.DiscountPercentage}% | Discount-price: {item.DiscountPrice} EUR");
+        }
+        WaitForContinue();
     }
 
     private static void AddProductToShoppingCart()
     {
         Console.Clear();
+        var products = ProductLogic.GetProducts();
 
-        var account = AccountsLogic.CurrentAccount;
-
-        if (account == null)
+        if (products == null || !products.Any())
         {
-            MenuHelpers.Warn("You must be logged in.");
-            MenuHelpers.Pause();
+            MenuHelpers.Warn("No products available");
+            WaitForContinue();
             return;
         }
 
-        var products = ProductLogic.GetProducts();
-        MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
-
+        List<string> options = new List<string>();
         foreach (var item in products)
         {
-            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}");
+            options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR     [Product details →]");
         }
+        options.Add("Back to Dashboard");
 
-        string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
-
-        if (!int.TryParse(rawId, out int productId))
+        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD (Right arrow: details) ---");
+        menu.OnRightArrow = idx =>
         {
-            MenuHelpers.Warn("Invalid product ID");
-            MenuHelpers.Pause();
+            if (idx >= 0 && idx < products.Count)
+            {
+                ProductDetailsView.Show(products[idx]);
+            }
+        };
+        int selection = menu.Start();
+
+        if (selection == options.Count - 1)
+        {
             return;
         }
 
-        ProductModel? selectedProduct =
-            products.FirstOrDefault(p => p.ProductID == productId);
-
-        if (selectedProduct == null)
-        {
-            MenuHelpers.Warn("Product not found");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        if (selectedProduct.MinAge > 0 && account != null && !ProductLogic.IsOldEnoughForProduct(selectedProduct, account.Age))
-        {
-            MenuHelpers.Warn($"You must be {selectedProduct.MinAge}+ to purchase {selectedProduct.Name}");
-            MenuHelpers.Pause();
-            return;
-        }
+        ProductModel selectedProduct = products[selection];
 
         if (selectedProduct.Stock <= 0)
         {
             MenuHelpers.Warn("Selected product is out of stock");
-            MenuHelpers.Pause();
+            WaitForContinue();
             return;
         }
 
-        // var shoppingItem = new ShoppingListModel(
-        //     selectedProduct.Name,
-        //     selectedProduct.Category,
-        //     selectedProduct.Price,
-        //     selectedProduct.Brand,
-        //     selectedProduct.Ingredients
-        // );
-
-        var cartItem = new ShoppingCartItem(selectedProduct, 1);
+        var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
         ShoppingCart.AddItem(cartItem);
 
-        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
-
-        MenuHelpers.Pause();
-    }
-    
-    private static void RemoveItemFromCart()
-    {
-        Console.Clear();
-
-        var account = AccountsLogic.CurrentAccount;
-
-        if (account == null)
-        {
-            MenuHelpers.Warn("Account not found");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        var cartItems = ShoppingCart.GetAllItems();
-
-        if (!cartItems.Any())
-        {
-            MenuHelpers.Warn("Cart is empty");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        MenuHelpers.Announce("--- REMOVE PRODUCT FROM SHOPPING LIST ---");
-
-        foreach (var item in cartItems)
-        {
-            MenuHelpers.Confirm(
-                $"ID: {item.CartItemId} | {item.Product.Name} | Qty: {item.Quantity}"
-            );
-        }
-
-        string rawId = MenuHelpers.Prompt("Enter item ID") ?? "";
-
-        if (!int.TryParse(rawId, out int cartItemId))
-        {
-            MenuHelpers.Warn("Invalid ID");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        var itemToRemove = cartItems.FirstOrDefault(item => item.CartItemId == cartItemId);
-        if (itemToRemove == null)
-        {
-            MenuHelpers.Warn("Item not found");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        ShoppingCart.RemoveItem(itemToRemove);
-
-        MenuHelpers.Confirm("Item removed");
-        MenuHelpers.Pause();
+        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
+        WaitForContinue();
     }
 
     private static void ShowShoppingCart()
+{
+    Console.Clear();
+    MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
+
+    var items = ShoppingCart.GetAllItems();
+    if (items.Count == 0)
+    {
+        MenuHelpers.Warn("Shopping CART is empty");
+        WaitForContinue();
+        return;
+    }
+
+    decimal total = 0;
+    for (int i = 0; i < items.Count; i++)
+    {
+        var item = items[i];
+        decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
+        total += lineTotal;
+
+        MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
+    }
+
+    MenuHelpers.Announce($"Total (preview): {total} EUR");
+    WaitForContinue();
+}
+
+    private static void ShowLayout()
     {
         Console.Clear();
-        var account = AccountsLogic.CurrentAccount;
-
-        if (account == null)
-        {
-            MenuHelpers.Warn("You must be logged in.");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
-
-        var items = ShoppingCart.GetAllItems();
-
-        if (items.Count == 0)
-        {
-            MenuHelpers.Warn("Shopping list is empty");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        decimal total = 0;
-        for (int i = 0; i < items.Count; i++)
-        {
-            var item = items[i];
-            total += item.Product.Price * item.Quantity;
-
-            MenuHelpers.Confirm(
-                $"{i + 1}. {item.Product.Name} | " +
-                $"Category: {item.Product.Category} | " +
-                $"Brand: {item.Product.Brand} | " +
-                $"Qty: {item.Quantity} | " +
-                $"Price: {item.Product.Price} EUR"
-            );
-        }
-
-        MenuHelpers.Announce($"Total: {total} EUR");
-        MenuHelpers.Pause();
+        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
+║              ║                  ║                   ║
+║   BAKERY     ║    DAIRY         ║     FROZEN        ║
+║              ║                  ║                   ║
+╠══════════════╩══════════════════╣                   ║
+║                                 ╚═══════════════════╣
+║  ┌───────┐ ┌──────────┐ ┌─────┐ ┌_________┐         ║
+║  │       │ │ Canned & │ │Beve-│ │ Snacks  │         ║
+║  │ Deli  │ │ Dry Food │ │rage │ │ And     │         ║
+║  │       │ │          │ │     │ │ Goods   │         ║
+║  └───────┘ └──────────┘ └─────┘ └_________┘         ║
+╠════════════════════╦════════════════════════════════╣
+║                    ║                                ║
+║   FRESH PRODUCE    ║    CASHOUT /                   ║
+║                    ║    CUSTOMER SERVICE            ║
+║                    ║                                ║
+╚════════════════════╝        ↑           ╚═══════════╝
+                      ENTRANCE / EXIT");
+        WaitForContinue();
     }
-    
+
+    private static void WaitForContinue()
+    {
+        MenuHelpers.Prompt("Press Enter to continue");
+    }
+
     private static void ShowPurchaseHistory()
     {
         Console.Clear();
@@ -263,17 +271,17 @@ static class Dashboard
         if (account == null)
         {
             MenuHelpers.Warn("You must be logged in to view purchase history");
-            MenuHelpers.Pause();
+            WaitForContinue();
             return;
         }
 
-        var receipts = ReceiptLogic.GetPurchasesByAccountID(account.UserId);
+        var receipts = ReceiptLogic.GetPurchasesByAccountID((int)account.Id);
         MenuHelpers.Announce("--- YOUR PURCHASE HISTORY ---");
 
         if (receipts.Count == 0)
         {
             MenuHelpers.Warn("No purchases found");
-            MenuHelpers.Pause();
+            WaitForContinue();
             return;
         }
 
@@ -295,6 +303,82 @@ static class Dashboard
             Console.WriteLine();
         }
 
-        MenuHelpers.Pause();
+        WaitForContinue();
     }
+
+    // private static void ManageTwoFactor()
+    // {
+    //     Console.Clear();
+    //     AccountModel? account = AccountsLogic.CurrentAccount;
+    //     if (account == null)
+    //     {
+    //         return;
+    //     }
+
+    //     TwoFactorService tfaService = new();
+    //     bool isCurrentlyEnabled = !string.IsNullOrWhiteSpace(account.TwoFactorSecret);
+
+    //     List<string> options = new List<string>();
+    //     string title = "--- TWO-FACTOR AUTHENTICATION ---";
+
+    //     if (!isCurrentlyEnabled)
+    //     {
+    //         options.Add("Setup / Enable Google Authenticator");
+    //     }
+    //     else
+    //     {
+    //         options.Add("Disable Google Authenticator");
+    //     }
+    //     options.Add("Back to Dashboard");
+
+    //     MenuNavigation subMenu = new MenuNavigation(options, title);
+    //     int selection = subMenu.Start();
+
+    //     if (selection == options.Count - 1)
+    //     {
+    //         return;
+    //     }
+
+    //     if (!isCurrentlyEnabled && selection == 0)
+    //     {
+    //         Console.Clear();
+    //         var setup = tfaService.EnableTwoFactor(account.EmailAddress);
+
+    //         MenuHelpers.Announce("1. Install Google Authenticator on your mobile device.");
+    //         MenuHelpers.Announce("2. Add an account manually using this shared secret key:");
+    //         MenuHelpers.Confirm($"   Key: {setup.Base32Secret}");
+    //         Console.WriteLine();
+
+    //         string verificationCode = MenuHelpers.Prompt("Enter the 6-digit code shown on your app to verify setup") ?? string.Empty;
+
+    //         if (tfaService.VerifyToken(setup.Base32Secret, verificationCode.Trim()))
+    //         {
+    //             account.TwoFactorSecret = setup.Base32Secret;
+    //             AccountsLogic.UpdateAccount(account);
+    //             MenuHelpers.Confirm("Two-Factor Authentication successfully enabled!");
+    //         }
+    //         else
+    //         {
+    //             MenuHelpers.Error("Verification failed. Invalid code. 2FA configuration aborted.");
+    //         }
+    //         WaitForContinue();
+    //     }
+    //     else if (isCurrentlyEnabled && selection == 0)
+    //     {
+    //         Console.Clear();
+    //         string verificationCode = MenuHelpers.Prompt("Enter your current 6-digit code to confirm removal") ?? string.Empty;
+
+    //         if (tfaService.VerifyToken(account.TwoFactorSecret, verificationCode.Trim()))
+    //         {
+    //             account.TwoFactorSecret = string.Empty;
+    //             AccountsLogic.UpdateAccount(account);
+    //             MenuHelpers.Confirm("Two-Factor Authentication has been completely disabled.");
+    //         }
+    //         else
+    //         {
+    //             MenuHelpers.Error("Verification failed. Incorrect code. 2FA remains active.");
+    //         }
+    //         WaitForContinue();
+    //     }
+    // }
 }
