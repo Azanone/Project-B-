@@ -24,6 +24,12 @@ public static class MenuHelpers
         Console.WriteLine(input);
         Console.ResetColor();
     }
+    public static void GOLD(string input)
+    {
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine(input);
+        Console.ResetColor();
+    }
     public static string? Prompt(string input)
     {
         Console.ForegroundColor = ConsoleColor.White;

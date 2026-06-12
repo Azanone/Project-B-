@@ -1,5 +1,10 @@
-static class Menu
+ using Microsoft.Data.Sqlite;
+using Dapper;
+using Project.Models;
+ class Menu
 {
+
+
     static public void Start()
     {
         Console.Clear();
@@ -29,5 +34,21 @@ static class Menu
                 Dashboard.Start();
                 break;
         }
+    }
+
+    private readonly SqliteConnection _connection = DBconnection._c;
+
+    public void ClearGuestCart()
+    {
+        
+        string sql = @"
+        DELETE FROM CART_ITEM
+        WHERE CartId IN
+        (
+            SELECT CartId
+            FROM CART
+            WHERE UserId = -1
+        )";
+        _connection.Execute(sql);
     }
 }

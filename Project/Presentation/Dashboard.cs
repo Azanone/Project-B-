@@ -23,118 +23,35 @@ static class Dashboard
 
             List<string> options = new List<string>
             {
-                "See all products",
-                "See all offers",
-                "See store layout",
-                "Add a product to shopping cart",
-                "View shopping cart and total",
-                "Clear shopping cart"
+                "Products",
+                "Offers",
+                "Layout",
+                "View cart",
+                "Profile"
             };
-
-            if (account == null)
-            {
-                options.Add("Checkout and pay");
-                options.Add("Login");
-            }
-            else
-            {
-                options.Add("Checkout and pay");
-                options.Add("Wishlist");
-                options.Add("Show purchase history");
-                // options.Add("Two-Factor Authentication (2FA) Settings");
-                options.Add("Logout");
-            }
 
             MenuNavigation menu = new MenuNavigation(options, userGreeting);
             int selection = menu.Start();
 
-            if (account == null)
+            switch (selection)
             {
-                switch (selection)
-                {
-                    case 0:
-                        ShowProducts();
-                        break;
-                    case 1:
-                        ShowOffers();
-                        break;
-                    case 2:
-                        ShowLayout();
-                        break;
-                    case 3:
-                        AddProductToShoppingCart();
-                        break;
-                    case 4:
-                        ShowShoppingCart();
-                        break;
-                    case 5:
-                        ShoppingCart.GetAllItems().Clear();
-                        MenuHelpers.Confirm("Shopping cart cleared");
-                        WaitForContinue();
-                        break;
-                    case 6:
-                        PurchaseShoppingCart.PurchaseChoice();
-                        break;
-                    case 7:
-                        Menu.Start();
-                        return;
-                }
-            }
-            else
-            {
-                switch (selection)
-                {
-                    case 0:
-                        ShowProducts();
-                        break;
-                    case 1:
-                        ShowOffers();
-                        break;
-                    case 2:
-                        ShowLayout();
-                        break;
-                    case 3:
-                        AddProductToShoppingCart();
-                        break;
-                    case 4:
-                        ShowShoppingCart();
-                        break;
-                    case 5:
-                        ShoppingCart.GetAllItems().Clear();
-                        MenuHelpers.Confirm("Shopping cart cleared");
-                        WaitForContinue();
-                        break;
-                    case 6:
-                        PurchaseShoppingCart.PurchaseChoice();
-                        break;
-                    case 7:
-                        ShowWishlist.Start();
-                        break;
-                    case 8:
-                        ShowPurchaseHistory();
-                        break;
-                    // case 9:
-                    //     ManageTwoFactor();
-                    //     break;
-                    case 9:
-                        AccountsLogic.Logout();
-                        Menu.Start();
-                        return;
-                }
+                case 0:
+                    AddProductToShoppingCart();
+                    break;
+                case 1:
+                    ShowOffers();
+                    break;
+                case 2:
+                    ShowLayout();
+                    break;
+                case 3:
+                    ShowShoppingCart();
+                    break;
+                case 4:
+                    ShowProfileMenu();
+                    break;
             }
         }
-    }
-
-    private static void ShowProducts()
-    {
-        Console.Clear();
-        var list = ProductLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
-        }
-        WaitForContinue();
     }
 
     private static void ShowOffers()
@@ -150,86 +67,205 @@ static class Dashboard
     }
 
     private static void AddProductToShoppingCart()
-    {
-        Console.Clear();
-        var products = ProductLogic.GetProducts();
+{
+    Console.Clear();
+    var products = ProductLogic.GetProducts();
+    var offers = OfferLogic.GetOffers();
 
-        if (products == null || !products.Any())
+    if (products == null || !products.Any())
+    {
+        MenuHelpers.Warn("No products available");
+        WaitForContinue();
+        return;
+    }
+
+    List<string> options = new List<string>();
+    foreach (var item in products)
+    {
+        OfferModel offer = null;
+        var productOfferMap = OfferLogic.GetProductToOfferMapping();
+        DateTime today = DateTime.Today;
+
+        if (productOfferMap.TryGetValue((int) item.ProductID, out int offerId))
         {
-            MenuHelpers.Warn("No products available");
-            WaitForContinue();
-            return;
+            offer = offers.FirstOrDefault(o => o.OfferID == offerId && 
+                                               today >= o.StartDate.Date && 
+                                               today <= o.EndDate.Date);
         }
 
-        List<string> options = new List<string>();
-        foreach (var item in products)
+        if (offer != null)
+        {
+            options.Add($"discount! Name: {item.Name} | Category: {item.Category} | Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)");
+        }
+        else
         {
             options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
         }
-        options.Add("Back to Dashboard");
+    }
+    options.Add("Cancel");
 
-        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---", true);
-        int selection = menu.Start();
-        int quantity = menu.GetQuantity();
+    MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---", true);
+    int selection = menu.Start();
+    int quantity = menu.GetQuantity();
 
-        if (selection == options.Count - 1)
-        {
-            return;
-        }
-
-        ProductModel selectedProduct = products[selection];
-
-        if (selectedProduct.Stock <= 0)
-        {
-            MenuHelpers.Warn("Selected product is out of stock");
-            WaitForContinue();
-            return;
-        }
-        if (quantity <= 0)
-        {
-            MenuHelpers.Warn("Please select a quantity greater than 0");
-            WaitForContinue();
-            return;
-        }
-        if(quantity > selectedProduct.Stock )
-        {
-            MenuHelpers.Warn($"Amount selected too high. Only {selectedProduct.Stock} items in stock");
-            WaitForContinue();
-            return;
-        }
-
-        var cartItem = new ShoppingCartItem(selectedProduct, quantity, selectedProduct.Price);
-        ShoppingCart.AddItem(cartItem);
-
-        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
-        WaitForContinue();
+    if (selection == options.Count - 1)
+    {
+        return;
     }
 
-    private static void ShowShoppingCart()
+    ProductModel selectedProduct = products[selection];
+
+    if (selectedProduct.Stock <= 0)
     {
-        Console.Clear();
-        MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
-
-        var items = ShoppingCart.GetAllItems();
-        if (items.Count == 0)
-        {
-            MenuHelpers.Warn("Shopping CART is empty");
-            WaitForContinue();
-            return;
-        }
-
-        decimal total = 0;
-        for (int i = 0; i < items.Count; i++)
-        {
-            var item = items[i];
-            decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
-            total += lineTotal;
-
-            MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
-        }
-
-        MenuHelpers.Announce($"Total (preview): {total} EUR");
+        MenuHelpers.Warn("Selected product is out of stock");
         WaitForContinue();
+        return;
+    }
+    if (quantity <= 0)
+    {
+        MenuHelpers.Warn("Please select a quantity greater than 0");
+        WaitForContinue();
+        return;
+    }
+    if (quantity > selectedProduct.Stock)
+    {
+        MenuHelpers.Warn($"Amount selected too high. Only {selectedProduct.Stock} items in stock");
+        WaitForContinue();
+        return;
+    }
+
+    OfferModel finalOffer = null;
+    var finalMap = OfferLogic.GetProductToOfferMapping();
+    DateTime currentDay = DateTime.Today;
+    if (finalMap.TryGetValue((int) selectedProduct.ProductID, out int finalOfferId))
+    {
+        finalOffer = offers.FirstOrDefault(o => o.OfferID == finalOfferId && 
+                                           currentDay >= o.StartDate.Date && 
+                                           currentDay <= o.EndDate.Date);
+    }
+
+    decimal finalPrice = finalOffer != null ? (decimal)finalOffer.DiscountPrice : selectedProduct.Price;
+
+    var cartItem = new ShoppingCartItem(selectedProduct, quantity, finalPrice);
+    ShoppingCart.AddItem(cartItem);
+
+    MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
+    WaitForContinue();
+}    private static void ShowShoppingCart()
+    {
+        while (true)
+        {
+            Console.Clear();
+            MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
+
+            var items = ShoppingCart.GetAllItems();
+            if (items.Count == 0)
+            {
+                MenuHelpers.Warn("Shopping CART is empty");
+                WaitForContinue();
+                return;
+            }
+
+            decimal total = 0;
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
+                total += lineTotal;
+
+                MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
+            }
+
+            MenuHelpers.Announce($"Total (preview): {total} EUR");
+            Console.WriteLine();
+
+            List<string> options = new List<string>
+            {
+                "Checkout and pay",
+                "Clear shopping cart",
+                "Back to Dashboard"
+            };
+
+            MenuNavigation cartMenu = new MenuNavigation(options, "--- CART OPTIONS ---");
+            int selection = cartMenu.Start();
+
+            if (selection == 0)
+            {
+                PurchaseShoppingCart.PurchaseChoice();
+                break;
+            }
+            else if (selection == 1)
+            {
+                ShoppingCart.GetAllItems().Clear();
+                MenuHelpers.Confirm("Shopping cart cleared");
+                WaitForContinue();
+                break;
+            }
+            else if (selection == 2)
+            {
+                break;
+            }
+        }
+    }
+
+    private static void ShowProfileMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AccountModel? account = AccountsLogic.CurrentAccount;
+
+            List<string> options = new List<string>();
+            if (account == null)
+            {
+                options.Add("Login");
+                options.Add("Back to Dashboard");
+            }
+            else
+            {
+                options.Add("Wishlist");
+                options.Add("Show purchase history");
+                options.Add("Logout");
+                options.Add("Back to Dashboard");
+            }
+
+            MenuNavigation profileMenu = new MenuNavigation(options, "--- PROFILE ---");
+            int selection = profileMenu.Start();
+
+            if (account == null)
+            {
+                if (selection == 0)
+                {
+                    Menu.Start();
+                    return;
+                }
+                else if (selection == 1)
+                {
+                    break;
+                }
+            }
+            else
+            {
+                if (selection == 0)
+                {
+                    ShowWishlist.Start();
+                }
+                else if (selection == 1)
+                {
+                    ShowPurchaseHistory();
+                }
+                else if (selection == 2)
+                {
+                    AccountsLogic.Logout();
+                    Menu.Start();
+                    return;
+                }
+                else if (selection == 3)
+                {
+                    break;
+                }
+            }
+        }
     }
 
     private static void ShowLayout()
@@ -252,7 +288,7 @@ static class Dashboard
 ║                    ║    CUSTOMER SERVICE            ║
 ║                    ║                                ║
 ╚════════════════════╝        ↑           ╚═══════════╝
-                      ENTRANCE / EXIT");
+                       ENTRANCE / EXIT");
         WaitForContinue();
     }
 
@@ -302,80 +338,4 @@ static class Dashboard
 
         WaitForContinue();
     }
-
-    // private static void ManageTwoFactor()
-    // {
-    //     Console.Clear();
-    //     AccountModel? account = AccountsLogic.CurrentAccount;
-    //     if (account == null)
-    //     {
-    //         return;
-    //     }
-
-    //     TwoFactorService tfaService = new();
-    //     bool isCurrentlyEnabled = !string.IsNullOrWhiteSpace(account.TwoFactorSecret);
-
-    //     List<string> options = new List<string>();
-    //     string title = "--- TWO-FACTOR AUTHENTICATION ---";
-
-    //     if (!isCurrentlyEnabled)
-    //     {
-    //         options.Add("Setup / Enable Google Authenticator");
-    //     }
-    //     else
-    //     {
-    //         options.Add("Disable Google Authenticator");
-    //     }
-    //     options.Add("Back to Dashboard");
-
-    //     MenuNavigation subMenu = new MenuNavigation(options, title);
-    //     int selection = subMenu.Start();
-
-    //     if (selection == options.Count - 1)
-    //     {
-    //         return;
-    //     }
-
-    //     if (!isCurrentlyEnabled && selection == 0)
-    //     {
-    //         Console.Clear();
-    //         var setup = tfaService.EnableTwoFactor(account.EmailAddress);
-
-    //         MenuHelpers.Announce("1. Install Google Authenticator on your mobile device.");
-    //         MenuHelpers.Announce("2. Add an account manually using this shared secret key:");
-    //         MenuHelpers.Confirm($"   Key: {setup.Base32Secret}");
-    //         Console.WriteLine();
-
-    //         string verificationCode = MenuHelpers.Prompt("Enter the 6-digit code shown on your app to verify setup") ?? string.Empty;
-
-    //         if (tfaService.VerifyToken(setup.Base32Secret, verificationCode.Trim()))
-    //         {
-    //             account.TwoFactorSecret = setup.Base32Secret;
-    //             AccountsLogic.UpdateAccount(account);
-    //             MenuHelpers.Confirm("Two-Factor Authentication successfully enabled!");
-    //         }
-    //         else
-    //         {
-    //             MenuHelpers.Error("Verification failed. Invalid code. 2FA configuration aborted.");
-    //         }
-    //         WaitForContinue();
-    //     }
-    //     else if (isCurrentlyEnabled && selection == 0)
-    //     {
-    //         Console.Clear();
-    //         string verificationCode = MenuHelpers.Prompt("Enter your current 6-digit code to confirm removal") ?? string.Empty;
-
-    //         if (tfaService.VerifyToken(account.TwoFactorSecret, verificationCode.Trim()))
-    //         {
-    //             account.TwoFactorSecret = string.Empty;
-    //             AccountsLogic.UpdateAccount(account);
-    //             MenuHelpers.Confirm("Two-Factor Authentication has been completely disabled.");
-    //         }
-    //         else
-    //         {
-    //             MenuHelpers.Error("Verification failed. Incorrect code. 2FA remains active.");
-    //         }
-    //         WaitForContinue();
-    //     }
-    // }
 }
