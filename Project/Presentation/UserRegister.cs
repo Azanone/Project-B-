@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 static class UserRegister
 {
     public static void Start()
@@ -9,6 +12,7 @@ static class UserRegister
         {
             "Username",
             "Email",
+            "Password",
             "Phone number",
             "Birthdate"
         };
@@ -18,129 +22,89 @@ static class UserRegister
             true,
             true,
             true,
+            true,
             true
         };
-
+        
         MenuNavigation form = new MenuNavigation(labels, requiresInput, "Register your account");
-        form.Start();
-        List<string> results = form.GetValues();
 
-        string username = results[0];
-        string email = results[1];
-        string phoneNumber = results[2];
-        string bDate = results[3];
-
-        bool isValid = true;
-
-        if (!AL.ValidateUsername(username))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateEmail(email))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidatePhonenumber(phoneNumber))
-        {
-            isValid = false;
-        }
-        else if (!AL.ValidateBirthday(bDate))
-        {
-            isValid = false;
-        }
-
-        if (!isValid)
-        {
-            MenuHelpers.Prompt("Press Enter to try again");
-            UserRegister.Start();
-            return;
-        }
-
-        string confirmEmail = PromptMatchingEmail("Confirm email", email);
-        _ = confirmEmail;
-
-        string verificationCode = AL.GenerateVerificationCode();
-
-        try
-        {
-            AL.SendVerificationEmail(email, verificationCode);
-        }
-        catch (Exception ex)
-        {
-            MenuHelpers.Error(ex.Message);
-            MenuHelpers.Prompt("Press Enter to try again");
-            UserRegister.Start();
-            return;
-        }
-
-        MenuHelpers.Confirm("A verification code has been sent to your email.");
-
-        string enteredCode = PromptUntilValid("Enter the 6-digit verification code", code => code == verificationCode);
-        if (!string.Equals(enteredCode, verificationCode, StringComparison.Ordinal))
-        {
-            MenuHelpers.Error("Email verification failed.");
-            MenuHelpers.Prompt("Press Enter to try again");
-            UserRegister.Start();
-            return;
-        }
-
-        string password = PromptPasswordWithConfirmation(AL);
-
-        AL.Register(username, email, password, phoneNumber, bDate);
-        MenuHelpers.Confirm($"Successfully registered as {username}");
-        System.Threading.Thread.Sleep(1000);
-        Menu.Start();
-    }
-
-    private static string PromptUntilValid(string prompt, Func<string, bool> validate)
-    {
         while (true)
         {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (!string.IsNullOrWhiteSpace(input))
+            form.Start();
+            List<string> results = form.GetValues();
+
+            string username = results[0].Trim();
+            string email = results[1].Trim();
+            string password = results[2].Trim();
+            string phoneNumber = results[3].Trim();
+            string bDate = results[4].Trim();
+
+            bool isValid = true;
+
+            if (!AL.ValidateUsername(username))
             {
-                string value = input.Trim();
-                if (validate(value))
-                {
-                    return value;
-                }
+                isValid = false;
+            }
+            else if (!AL.ValidateEmail(email))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePassword(password))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidatePhonenumber(phoneNumber))
+            {
+                isValid = false;
+            }
+            else if (!AL.ValidateBirthday(bDate))
+            {
+                isValid = false;
             }
 
-            MenuHelpers.Warn("Input is required.");
-        }
-    }
-
-    private static string PromptMatchingEmail(string prompt, string email)
-    {
-        while (true)
-        {
-            string? input = MenuHelpers.Prompt(prompt);
-            if (!string.IsNullOrWhiteSpace(input) && string.Equals(input.Trim(), email, StringComparison.OrdinalIgnoreCase))
+            if (!isValid)
             {
-                return input.Trim();
-            }
-
-            MenuHelpers.Error("Email addresses do not match.");
-        }
-    }
-
-    private static string PromptPasswordWithConfirmation(AccountsLogic accountsLogic)
-    {
-        while (true)
-        {
-            string password = MenuHelpers.PromptSecret("Password");
-            if (!accountsLogic.ValidatePassword(password))
-            {
+                MenuHelpers.Pause();
                 continue;
             }
 
-            string confirmPassword = MenuHelpers.PromptSecret("Confirm password");
-            if (string.Equals(password, confirmPassword, StringComparison.Ordinal))
+            Console.Clear();
+            string confirmEmail = MenuHelpers.Prompt("Confirm email") ?? string.Empty;
+            if (!string.Equals(confirmEmail.Trim(), email, StringComparison.OrdinalIgnoreCase))
             {
-                return password;
+                MenuHelpers.Error("Email addresses do not match.");
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
             }
 
-            MenuHelpers.Error("Passwords do not match.");
+            string verificationCode = AL.GenerateVerificationCode();
+
+            try
+            {
+                AL.SendVerificationEmail(email, verificationCode);
+            }
+            catch (Exception ex)
+            {
+                MenuHelpers.Error(ex.Message);
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
+            }
+
+            MenuHelpers.Confirm("A verification code has been sent to your email.");
+            string enteredCode = MenuHelpers.Prompt("Enter the 6-digit verification code") ?? string.Empty;
+
+            if (!string.Equals(enteredCode.Trim(), verificationCode, StringComparison.Ordinal))
+            {
+                MenuHelpers.Error("Email verification failed. Incorrect code.");
+                MenuHelpers.Prompt("Press Enter to try again");
+                continue;
+            }
+
+            AL.Register(username, email, password, phoneNumber, bDate);
+            MenuHelpers.Confirm($"Successfully registered as {username}");
+            System.Threading.Thread.Sleep(1000);
+            Menu.Start();
+            return;
         }
     }
 }

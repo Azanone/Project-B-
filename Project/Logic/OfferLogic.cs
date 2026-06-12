@@ -6,4 +6,10 @@ public class OfferLogic
         var allOffers = _dataAccess.GetAll();
         return allOffers;
     }
+
+    public Dictionary<int, int> GetProductToOfferMapping()
+    {
+        
+        return _dataAccess.GetProductToOfferMapping();
+    }
 }

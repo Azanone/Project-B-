@@ -1,6 +1,5 @@
-﻿
-
-//This class is not static so later on we can use inheritance and interfaces
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -8,15 +7,11 @@ using System.Security.Cryptography;
 public class AccountsLogic
 {
 
-    //Static properties are shared across all instances of the class
-    //This can be used to get the current logged in account from anywhere in the program
-    //private set, so this can only be set by the class itself
     public static AccountModel? CurrentAccount { get; private set; }
     private AccountsAccess _access = new();
 
     public AccountsLogic()
     {
-        // Could do something here
 
     }
 
@@ -48,6 +43,15 @@ public class AccountsLogic
         CurrentAccount = null;
     }
 
+    public void UpdateAccount(AccountModel updatedAccount)
+    {
+        _access.Write(updatedAccount);
+        if (CurrentAccount != null && CurrentAccount.Id == updatedAccount.Id)
+        {
+            CurrentAccount = updatedAccount;
+        }
+    }
+
     public DateTime ParseBirthday(string birthdayInput)
     {
         string[] parts = birthdayInput.Split('-');
@@ -62,7 +66,6 @@ public class AccountsLogic
             }
             catch (ArgumentOutOfRangeException)
             {
-                // fall through to format error
             }
         }
         throw new FormatException("Invalid date format");
@@ -194,7 +197,11 @@ public class AccountsLogic
 
     public bool ValidatePhonenumber(string field)
     {
-        if (string.IsNullOrWhiteSpace(field)) return false;
+        if (string.IsNullOrWhiteSpace(field))
+        {
+            return false;
+        }
+        
 
         try
         {
@@ -207,6 +214,7 @@ public class AccountsLogic
             {
                 return field.Substring(1).All(char.IsDigit);
             }
+            MenuHelpers.Error($"Validation error: Invalid phone number");
             return false;
         }
         catch (Exception e)
@@ -276,7 +284,3 @@ public class AccountsLogic
         client.Send(message);
     }
 }
-
-
-
-

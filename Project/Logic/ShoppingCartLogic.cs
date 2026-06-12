@@ -5,16 +5,14 @@ public class ShoppingCartLogic
 {
     private readonly ShoppingCartAccess _cartAccess = new();
  
-    private static int GetCurrentUserId()
+    private int GetCurrentUserId()
+{
+    if (AccountsLogic.CurrentAccount == null)
     {
-        AccountModel? account = AccountsLogic.CurrentAccount;
-        if (account == null)
-        {
-            throw new InvalidOperationException("User must be logged in.");
-        }
- 
-        return (int) account.Id;
+        return -1;
     }
+    return (int)AccountsLogic.CurrentAccount.Id;
+}
  
     public void AddItem(int userId, int productId, int quantity)
     {
@@ -85,28 +83,36 @@ public class ShoppingCartLogic
     }
  
      public (bool Allowed, int RequiredAge, string ProductName) CheckAgeRestriction()
+{
+    int userId = AccountsLogic.CurrentAccount != null ? (int)AccountsLogic.CurrentAccount.Id : -1;
+    var items = _cartAccess.GetAll(userId);
+    
+    var restricted = items
+        .Where(i => i.Product != null && i.Product.MinAge > 0)
+        .OrderByDescending(i => i.Product.MinAge)
+        .FirstOrDefault();
+
+    if (restricted == null)
     {
-        var items = _cartAccess.GetAll(GetCurrentUserId());
-        var restricted = items
-            .Where(i => i.Product != null && i.Product.MinAge > 0)
-            .OrderByDescending(i => i.Product.MinAge)
-            .FirstOrDefault();
-
-        if (restricted == null)
-        {
-            return (true, 0, string.Empty);
-        }
-
-        int required = (int)restricted.Product.MinAge;
-        int? age = new AccountsLogic().CalculateAge(AccountsLogic.CurrentAccount?.Birthdate);
-
-        if (age == null || age < required)
-        {
-            return (false, required, restricted.Product.Name);
-        }
-
-        return (true, required, string.Empty);
+        return (true, 0, string.Empty);
     }
+
+    int required = (int)restricted.Product.MinAge;
+    
+    if (AccountsLogic.CurrentAccount == null)
+    {
+        return (false, required, restricted.Product.Name);
+    }
+
+    int? age = new AccountsLogic().CalculateAge(AccountsLogic.CurrentAccount.Birthdate);
+
+    if (age == null || age < required)
+    {
+        return (false, required, restricted.Product.Name);
+    }
+
+    return (true, required, string.Empty);
+}
 
     public decimal GetTotal(int userId)
     {

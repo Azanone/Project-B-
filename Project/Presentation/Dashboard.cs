@@ -10,47 +10,33 @@ static class Dashboard
     private static readonly ReceiptLogic ReceiptLogic = new();
 
     public static void Start()
-{
-    while (true)
     {
-        Console.Clear();
-        AccountModel? account = AccountsLogic.CurrentAccount;
-        string userGreeting = "Welcome guest";
-        if (account != null)
+        while (true)
         {
-            userGreeting = "Welcome back " + account.FullName;
-        }
+            Console.Clear();
+            AccountModel? account = AccountsLogic.CurrentAccount;
+            string userGreeting = "Welcome guest";
+            if (account != null)
+            {
+                userGreeting = "Welcome back " + account.FullName;
+            }
 
-        List<string> options = new List<string>
-        {
-            "See all products",
-            "See all offers",
-            "See store layout",
-            "Add a product to shopping list",
-            "View shopping list and total",
-            "Clear shopping cart"
-        };
+            List<string> options = new List<string>
+            {
+                "Products",
+                "Offers",
+                "Layout",
+                "View cart",
+                "Profile"
+            };
 
-        if (account == null)
-        {
-            options.Add("Login");
-        }
-        else
-        {
-            options.Add("Wishlist");
-            options.Add("Show purchase history");
-            options.Add("Logout");
-        }
+            MenuNavigation menu = new MenuNavigation(options, userGreeting);
+            int selection = menu.Start();
 
-        MenuNavigation menu = new MenuNavigation(options, userGreeting);
-        int selection = menu.Start();
-
-        if (account == null)
-        {
             switch (selection)
             {
                 case 0:
-                    ShowProducts();
+                    AddProductToShoppingCart();
                     break;
                 case 1:
                     ShowOffers();
@@ -59,70 +45,13 @@ static class Dashboard
                     ShowLayout();
                     break;
                 case 3:
-                    AddProductToShoppingList();
+                    ShowShoppingCart();
                     break;
                 case 4:
-                    ShowShoppingList();
+                    ShowProfileMenu();
                     break;
-                case 5:
-                    ShoppingCart.GetAllItems().Clear();
-                    MenuHelpers.Confirm("Shopping list cleared");
-                    WaitForContinue();
-                    break;
-                case 6:
-                    Menu.Start();
-                    return;
             }
         }
-        else
-        {
-            switch (selection)
-            {
-                case 0:
-                    ShowProducts();
-                    break;
-                case 1:
-                    ShowOffers();
-                    break;
-                case 2:
-                    ShowLayout();
-                    break;
-                case 3:
-                    AddProductToShoppingList();
-                    break;
-                case 4:
-                    ShowShoppingList();
-                    break;
-                case 5:
-                    ShoppingCart.GetAllItems().Clear();
-                    MenuHelpers.Confirm("Shopping list cleared");
-                    WaitForContinue();
-                    break;
-                case 6:
-                    ShowWishlist.Start();
-                    break;
-                case 7:
-                    ShowPurchaseHistory();
-                    break;
-                case 8:
-                    AccountsLogic.Logout();
-                    Menu.Start();
-                    return;
-            }
-        }
-    }
-}
-
-    private static void ShowProducts()
-    {
-        Console.Clear();
-        var list = ProductLogic.GetProducts();
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        foreach (var item in list)
-        {
-            MenuHelpers.Confirm($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
-        }
-        WaitForContinue();
     }
 
     private static void ShowOffers()
@@ -137,69 +66,206 @@ static class Dashboard
         WaitForContinue();
     }
 
-    private static void AddProductToShoppingList()
+    private static void AddProductToShoppingCart()
+{
+    Console.Clear();
+    var products = ProductLogic.GetProducts();
+    var offers = OfferLogic.GetOffers();
+
+    if (products == null || !products.Any())
     {
-        Console.Clear();
-        var products = ProductLogic.GetProducts();
-        MenuHelpers.Announce("--- ADD PRODUCT TO SHOPPING LIST ---");
-        foreach (var item in products)
-        {
-            MenuHelpers.Confirm($"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
-        }
-
-        string rawId = MenuHelpers.Prompt("Enter product ID") ?? string.Empty;
-        if (!long.TryParse(rawId, out long productId))
-        {
-            MenuHelpers.Warn("Invalid product ID");
-            WaitForContinue();
-            return;
-        }
-
-        ProductModel? selectedProduct = products.FirstOrDefault(p => p.ProductID == productId);
-        if (selectedProduct == null)
-        {
-            MenuHelpers.Warn("Product not found");
-            WaitForContinue();
-            return;
-        }
-
-        if (selectedProduct.Stock <= 0)
-        {
-            MenuHelpers.Warn("Selected product is out of stock");
-            WaitForContinue();
-            return;
-        }
-
-        var cartItem = new ShoppingCartItem(selectedProduct, 1, selectedProduct.Price);
-        ShoppingCart.AddItem(cartItem);
-
-        MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping list");
+        MenuHelpers.Warn("No products available");
         WaitForContinue();
+        return;
     }
 
-    private static void ShowShoppingList()
+    List<string> options = new List<string>();
+    foreach (var item in products)
     {
-        Console.Clear();
-        MenuHelpers.Announce("--- YOUR SHOPPING LIST ---");
+        OfferModel offer = null;
+        var productOfferMap = OfferLogic.GetProductToOfferMapping();
+        DateTime today = DateTime.Today;
 
-        var items = ShoppingCart.GetAllItems();
-        if (items.Count == 0)
+        if (productOfferMap.TryGetValue((int) item.ProductID, out int offerId))
         {
-            MenuHelpers.Warn("Shopping list is empty");
-            WaitForContinue();
-            return;
+            offer = offers.FirstOrDefault(o => o.OfferID == offerId && 
+                                               today >= o.StartDate.Date && 
+                                               today <= o.EndDate.Date);
         }
 
-        decimal total = 0;
-        for (int i = 0; i < items.Count; i++)
+        if (offer != null)
         {
-            var item = items[i];
-            total += (decimal)item.Price * item.Quantity;
-            MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Price} EUR");
+            options.Add($"discount! Name: {item.Name} | Category: {item.Category} | Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)");
         }
+        else
+        {
+            options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+        }
+    }
+    options.Add("Cancel");
 
-        MenuHelpers.Announce($"Total (preview): {total} EUR");
+    MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---", true);
+    int selection = menu.Start();
+    int quantity = menu.GetQuantity();
+
+    if (selection == options.Count - 1)
+    {
+        return;
+    }
+
+    ProductModel selectedProduct = products[selection];
+
+    if (selectedProduct.Stock <= 0)
+    {
+        MenuHelpers.Warn("Selected product is out of stock");
         WaitForContinue();
+        return;
+    }
+    if (quantity <= 0)
+    {
+        MenuHelpers.Warn("Please select a quantity greater than 0");
+        WaitForContinue();
+        return;
+    }
+    if (quantity > selectedProduct.Stock)
+    {
+        MenuHelpers.Warn($"Amount selected too high. Only {selectedProduct.Stock} items in stock");
+        WaitForContinue();
+        return;
+    }
+
+    OfferModel finalOffer = null;
+    var finalMap = OfferLogic.GetProductToOfferMapping();
+    DateTime currentDay = DateTime.Today;
+    if (finalMap.TryGetValue((int) selectedProduct.ProductID, out int finalOfferId))
+    {
+        finalOffer = offers.FirstOrDefault(o => o.OfferID == finalOfferId && 
+                                           currentDay >= o.StartDate.Date && 
+                                           currentDay <= o.EndDate.Date);
+    }
+
+    decimal finalPrice = finalOffer != null ? (decimal)finalOffer.DiscountPrice : selectedProduct.Price;
+
+    var cartItem = new ShoppingCartItem(selectedProduct, quantity, finalPrice);
+    ShoppingCart.AddItem(cartItem);
+
+    MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
+    WaitForContinue();
+}    private static void ShowShoppingCart()
+    {
+        while (true)
+        {
+            Console.Clear();
+            MenuHelpers.Announce("--- YOUR SHOPPING CART ---");
+
+            var items = ShoppingCart.GetAllItems();
+            if (items.Count == 0)
+            {
+                MenuHelpers.Warn("Shopping CART is empty");
+                WaitForContinue();
+                return;
+            }
+
+            decimal total = 0;
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
+                total += lineTotal;
+
+                MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
+            }
+
+            MenuHelpers.Announce($"Total (preview): {total} EUR");
+            Console.WriteLine();
+
+            List<string> options = new List<string>
+            {
+                "Checkout and pay",
+                "Clear shopping cart",
+                "Back to Dashboard"
+            };
+
+            MenuNavigation cartMenu = new MenuNavigation(options, "--- CART OPTIONS ---");
+            int selection = cartMenu.Start();
+
+            if (selection == 0)
+            {
+                PurchaseShoppingCart.PurchaseChoice();
+                break;
+            }
+            else if (selection == 1)
+            {
+                ShoppingCart.GetAllItems().Clear();
+                MenuHelpers.Confirm("Shopping cart cleared");
+                WaitForContinue();
+                break;
+            }
+            else if (selection == 2)
+            {
+                break;
+            }
+        }
+    }
+
+    private static void ShowProfileMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AccountModel? account = AccountsLogic.CurrentAccount;
+
+            List<string> options = new List<string>();
+            if (account == null)
+            {
+                options.Add("Login");
+                options.Add("Back to Dashboard");
+            }
+            else
+            {
+                options.Add("Wishlist");
+                options.Add("Show purchase history");
+                options.Add("Logout");
+                options.Add("Back to Dashboard");
+            }
+
+            MenuNavigation profileMenu = new MenuNavigation(options, "--- PROFILE ---");
+            int selection = profileMenu.Start();
+
+            if (account == null)
+            {
+                if (selection == 0)
+                {
+                    Menu.Start();
+                    return;
+                }
+                else if (selection == 1)
+                {
+                    break;
+                }
+            }
+            else
+            {
+                if (selection == 0)
+                {
+                    ShowWishlist.Start();
+                }
+                else if (selection == 1)
+                {
+                    ShowPurchaseHistory();
+                }
+                else if (selection == 2)
+                {
+                    AccountsLogic.Logout();
+                    Menu.Start();
+                    return;
+                }
+                else if (selection == 3)
+                {
+                    break;
+                }
+            }
+        }
     }
 
     private static void ShowLayout()
@@ -213,8 +279,8 @@ static class Dashboard
 ║                                 ╚═══════════════════╣
 ║  ┌───────┐ ┌──────────┐ ┌─────┐ ┌_________┐         ║
 ║  │       │ │ Canned & │ │Beve-│ │ Snacks  │         ║
-║  │ Deli  │ │ Dry Food │ │rage │ │  And    │         ║
-║  │       │ │          │ │     │ │  Goods  │         ║
+║  │ Deli  │ │ Dry Food │ │rage │ │ And     │         ║
+║  │       │ │          │ │     │ │ Goods   │         ║
 ║  └───────┘ └──────────┘ └─────┘ └_________┘         ║
 ╠════════════════════╦════════════════════════════════╣
 ║                    ║                                ║
@@ -222,7 +288,7 @@ static class Dashboard
 ║                    ║    CUSTOMER SERVICE            ║
 ║                    ║                                ║
 ╚════════════════════╝        ↑           ╚═══════════╝
-                         ENTRANCE / EXIT");
+                       ENTRANCE / EXIT");
         WaitForContinue();
     }
 

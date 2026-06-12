@@ -12,4 +12,10 @@ public class OfferAccess
         return _connection.Query<OfferModel>(sql).ToList();
     }
 
+    public Dictionary<int, int> GetProductToOfferMapping()
+    {
+        string sql = "SELECT ProductID, OfferID FROM PRODUCT_OFFER";
+        return _connection.Query<(int ProductID, int OfferID)>(sql)
+                        .ToDictionary(x => x.ProductID, x => x.OfferID);
+    }
 }
