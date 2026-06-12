@@ -10,6 +10,23 @@ public class ProductAccess
         return _connection.Query<ProductModel>(sql).ToList();
     }
 
+    public List<ProductModel> GetAllByPopularity(long? categoryId = null)
+    {
+        string sql = @"
+SELECT PRODUCT.*, CATEGORY.Name as Category, COALESCE(PURCHASE_COUNTS.PurchaseCount, 0) AS PurchaseCount
+FROM Product
+JOIN Category ON CATEGORY.CategoryID = PRODUCT.CategoryID
+LEFT JOIN (
+    SELECT ProductID, SUM(Quantity) AS PurchaseCount
+    FROM PURCHASE_ITEM
+    GROUP BY ProductID
+) AS PURCHASE_COUNTS ON PURCHASE_COUNTS.ProductID = PRODUCT.ProductID
+WHERE (@CategoryID IS NULL OR PRODUCT.CategoryID = @CategoryID)
+ORDER BY COALESCE(PURCHASE_COUNTS.PurchaseCount, 0) DESC, PRODUCT.Name ASC";
+
+        return _connection.Query<ProductModel>(sql, new { CategoryID = categoryId }).ToList();
+    }
+
     public List<CategoryModel> GetCategories()
     {
         string sql = "SELECT CategoryID, Name FROM Category ORDER BY Name";

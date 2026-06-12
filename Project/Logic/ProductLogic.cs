@@ -7,6 +7,16 @@ public class ProductLogic
         return _dataAccess.GetAll();
     }
 
+    public List<ProductModel> GetProductsByPopularity(long? categoryId = null)
+    {
+        return _dataAccess.GetAllByPopularity(categoryId);
+    }
+
+    public List<CategoryModel> GetCategories()
+    {
+        return _dataAccess.GetCategories();
+    }
+
     public static bool IsOldEnoughForProduct(ProductModel product, int userAge)
     {
         return userAge >= product.MinAge;

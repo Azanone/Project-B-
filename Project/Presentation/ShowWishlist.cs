@@ -56,7 +56,7 @@ public static class ShowWishlist
 
             case 1:
                 Console.Clear();
-                var availableProducts = ProductLogic.GetProducts();
+                var availableProducts = ProductLogic.GetProductsByPopularity();
                 if (availableProducts == null || !availableProducts.Any())
                 {
                     MenuHelpers.Warn("No products available to add.");

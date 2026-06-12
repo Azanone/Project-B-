@@ -9,6 +9,7 @@ public class ProductModel
     public string Category {get; set;}
     public Int64 Stock {get; set;}
     public Int64 MinAge {get; set;}
+    public Int64 PurchaseCount {get; set;}
 
     public ProductModel(Int64 productid, string name, Decimal price, string brand, string ingredients, Int64 categoryid, Int64 stock)
     {

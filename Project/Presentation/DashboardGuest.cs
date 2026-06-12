@@ -46,20 +46,64 @@ static class DashboardGuest
     private static void ShowProducts()
     {
         Console.Clear();
-        var list = ProductLogic.GetProducts();
+        var categoryFilter = PromptProductCategoryFilter();
+        if (categoryFilter.Cancelled)
+        {
+            return;
+        }
+
+        var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
 
         MenuHelpers.Announce("--- ALL PRODUCTS ---");
+        MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
+
+        if (list == null || list.Count == 0)
+        {
+            MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
+            WaitForContinue();
+            return;
+        }
 
         foreach (var item in list)
         {
             string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
 
             MenuHelpers.Confirm(
-                $"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR{ageLabel}"
+                $"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {item.Price} EUR{ageLabel}"
             );
         }
 
         WaitForContinue();
+    }
+
+    private static (bool Cancelled, long? CategoryId, string Label) PromptProductCategoryFilter()
+    {
+        List<CategoryModel> categories = ProductLogic.GetCategories();
+        if (categories.Count == 0)
+        {
+            return (false, null, "All categories");
+        }
+
+        List<string> options = categories.Select(category => category.Name).ToList();
+        options.Add("All categories");
+        options.Add("Cancel");
+
+        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A CATEGORY FILTER ---");
+        int selection = menu.Start();
+
+        if (selection == options.Count - 1)
+        {
+            return (true, null, string.Empty);
+        }
+
+        if (selection == options.Count - 2)
+        {
+            return (false, null, "All categories");
+        }
+
+        CategoryModel selectedCategory = categories[selection];
+        return (false, selectedCategory.CategoryID, selectedCategory.Name);
     }
 
     private static void ShowOffers()

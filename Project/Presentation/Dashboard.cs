@@ -66,18 +66,56 @@ static class Dashboard
         WaitForContinue();
     }
 
+    private static (bool Cancelled, long? CategoryId, string Label) PromptProductCategoryFilter()
+    {
+        List<CategoryModel> categories = ProductLogic.GetCategories();
+        if (categories.Count == 0)
+        {
+            return (false, null, "All categories");
+        }
+
+        List<string> options = categories.Select(category => category.Name).ToList();
+        options.Add("All categories");
+        options.Add("Cancel");
+
+        MenuNavigation menu = new MenuNavigation(options, "--- SELECT A CATEGORY FILTER ---");
+        int selection = menu.Start();
+
+        if (selection == options.Count - 1)
+        {
+            return (true, null, string.Empty);
+        }
+
+        if (selection == options.Count - 2)
+        {
+            return (false, null, "All categories");
+        }
+
+        CategoryModel selectedCategory = categories[selection];
+        return (false, selectedCategory.CategoryID, selectedCategory.Name);
+    }
+
     private static void AddProductToShoppingCart()
 {
     Console.Clear();
-    var products = ProductLogic.GetProducts();
+    var categoryFilter = PromptProductCategoryFilter();
+    if (categoryFilter.Cancelled)
+    {
+        return;
+    }
+
+    var products = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
     var offers = OfferLogic.GetOffers();
 
     if (products == null || !products.Any())
     {
-        MenuHelpers.Warn("No products available");
+        MenuHelpers.Warn($"No products available for {categoryFilter.Label}");
         WaitForContinue();
         return;
     }
+
+    MenuHelpers.Announce("--- ALL PRODUCTS ---");
+    MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
 
     List<string> options = new List<string>();
     foreach (var item in products)
@@ -95,11 +133,13 @@ static class Dashboard
 
         if (offer != null)
         {
-            options.Add($"discount! Name: {item.Name} | Category: {item.Category} | Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)");
+            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+            options.Add($"discount! Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)");
         }
         else
         {
-            options.Add($"Name: {item.Name} | Category: {item.Category} | Price: {item.Price} EUR");
+            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+            options.Add($"Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {item.Price} EUR");
         }
     }
     options.Add("Cancel");
