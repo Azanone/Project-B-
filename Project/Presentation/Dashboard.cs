@@ -1,5 +1,6 @@
 using Project.Logic;
 using Project.Models;
+using Project.Presentation;
 
 static class Dashboard
 {
@@ -36,7 +37,7 @@ static class Dashboard
             switch (selection)
             {
                 case 0:
-                    AddProductToShoppingCart();
+                    ShowProductsMenu();
                     break;
                 case 1:
                     ShowOffers();
@@ -64,6 +65,90 @@ static class Dashboard
             MenuHelpers.Confirm($"ID: {item.OfferID} | Description: {item.Description} | Begin: {item.StartDate} | End: {item.EndDate} | Price: {item.RegularPrice} EUR | Discount: {item.DiscountPercentage}% | Discount-price: {item.DiscountPrice} EUR");
         }
         WaitForContinue();
+    }
+
+    private static void ShowProductsMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            List<string> options = new List<string>
+            {
+                "Browse all products",
+                "Add product to shopping cart",
+                "Show product details",
+                "Leave a review",
+                "Back to Dashboard"
+            };
+
+            MenuNavigation menu = new MenuNavigation(options, "--- PRODUCTS ---");
+            int selection = menu.Start();
+
+            switch (selection)
+            {
+                case 0:
+                    ShowProducts();
+                    break;
+                case 1:
+                    AddProductToShoppingCart();
+                    break;
+                case 2:
+                    ProductDetailsView.Start();
+                    break;
+                case 3:
+                    ProductReviews.Start();
+                    MenuHelpers.Pause();
+                    break;
+                case 4:
+                    return;
+            }
+        }
+    }
+
+    private static void ShowProducts()
+    {
+        Console.Clear();
+        var categoryFilter = PromptProductCategoryFilter();
+        if (categoryFilter.Cancelled)
+        {
+            return;
+        }
+
+        var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
+
+        MenuHelpers.Announce("--- ALL PRODUCTS ---");
+        MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
+
+        if (list == null || list.Count == 0)
+        {
+            MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
+            WaitForContinue();
+            return;
+        }
+
+        List<string> options = new List<string>();
+        foreach (var item in list)
+        {
+            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+            options.Add($"ID: {item.ProductID} | {item.Name} | {item.Category}{popularityLabel} | {item.Price} EUR{ageLabel}  [→ details]");
+        }
+        options.Add("Back");
+
+        MenuNavigation browseMenu = new MenuNavigation(options, "--- BROWSE PRODUCTS (Right arrow: details) ---");
+        browseMenu.OnRightArrow = idx =>
+        {
+            if (idx >= 0 && idx < list.Count)
+            {
+                ProductDetailsView.Show(list[idx]);
+            }
+        };
+        int selection = browseMenu.Start();
+
+        if (selection >= 0 && selection < list.Count)
+        {
+            ProductDetailsView.Show(list[selection]);
+        }
     }
 
     private static (bool Cancelled, long? CategoryId, string Label) PromptProductCategoryFilter()
@@ -144,7 +229,14 @@ static class Dashboard
     }
     options.Add("Cancel");
 
-    MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD ---", true);
+    MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD (←/→: qty, D: details) ---", true);
+    menu.OnRightArrow = idx =>
+    {
+        if (idx >= 0 && idx < products.Count)
+        {
+            ProductDetailsView.Show(products[idx]);
+        }
+    };
     int selection = menu.Start();
     int quantity = menu.GetQuantity();
 
@@ -191,7 +283,9 @@ static class Dashboard
 
     MenuHelpers.Confirm($"Added {selectedProduct.Name} to shopping cart");
     WaitForContinue();
-}    private static void ShowShoppingCart()
+}
+
+    private static void ShowShoppingCart()
     {
         while (true)
         {

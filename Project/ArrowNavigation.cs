@@ -11,6 +11,7 @@ public class MenuNavigation
     private string Title;
     private bool QuantityManipulation;
     private bool is2D;
+    public Action<int>? OnRightArrow;
 
     public MenuNavigation(List<List<string>> menuLabels2D, string title)
     {
@@ -283,13 +284,27 @@ public class MenuNavigation
         {
             HandleCharacterInput(keyInfo.KeyChar);
         }
-        else if (!is2D && QuantityManipulation == true && key == ConsoleKey.LeftArrow)
+        else if (!is2D && QuantityManipulation && key == ConsoleKey.LeftArrow)
         {
             DecreaseQuantity();
         }
-        else if (!is2D && QuantityManipulation == true && key == ConsoleKey.RightArrow)
+        else if (!is2D && QuantityManipulation && key == ConsoleKey.RightArrow)
         {
             IncreaseQuantity();
+        }
+        else if (!is2D && OnRightArrow != null && key == ConsoleKey.RightArrow && !QuantityManipulation)
+        {
+            if (selectedIndex >= 0 && selectedIndex < labels.Count - 1)
+            {
+                OnRightArrow(selectedIndex);
+            }
+        }
+        else if (!is2D && OnRightArrow != null && (key == ConsoleKey.D || keyInfo.KeyChar == 'd' || keyInfo.KeyChar == 'D'))
+        {
+            if (selectedIndex >= 0 && selectedIndex < labels.Count - 1)
+            {
+                OnRightArrow(selectedIndex);
+            }
         }
 
         return true;

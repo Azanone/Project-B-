@@ -4,6 +4,11 @@ static class DBconnection
 {
         public static SqliteConnection _c = new SqliteConnection($"Data Source={ResolveDatabasePath()}");
 
+        static DBconnection()
+        {
+            DatabaseMigration.EnsureSchema();
+        }
+
         private static string ResolveDatabasePath()
         {
             string fileName = Path.Combine("DataSources", "project.db");

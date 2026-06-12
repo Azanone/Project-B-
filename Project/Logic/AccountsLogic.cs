@@ -54,7 +54,7 @@ public class AccountsLogic
 
     public DateTime ParseBirthday(string birthdayInput)
     {
-        string[] parts = birthdayInput.Split('-');
+        string[] parts = birthdayInput.Contains('-') ? birthdayInput.Split('-') : birthdayInput.Split('/');
         if (parts.Length == 3
             && int.TryParse(parts[0], out int day)
             && int.TryParse(parts[1], out int month)
@@ -110,7 +110,7 @@ public class AccountsLogic
         }
         catch (FormatException)
         {
-            MenuHelpers.Error("Invalid date format (use dd-MM-yyyy)");
+            MenuHelpers.Error("Invalid date format (use dd-MM-yyyy or dd/MM/yyyy)");
             return false;
         }
         if (birthday > DateTime.Today)

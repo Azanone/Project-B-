@@ -22,12 +22,18 @@ public sealed class AdminProductManagementTests
         const string price = "12.50";
         const string stock = "5";
         const string minAge = "18";
+        const string calories = "100";
+        const string fats = "1.2";
+        const string carbs = "5.0";
+        const string fiber = "0.5";
+        const string protein = "2.0";
+        const string salt = "0.3";
 
         ProductModel? createdProduct = null;
 
         try
         {
-            (bool success, string message) = _logic.AddProduct(uniqueName, price, brand, ingredients, category.CategoryID.ToString(), stock, minAge);
+            (bool success, string message) = _logic.AddProduct(uniqueName, price, brand, ingredients, category.CategoryID.ToString(), stock, minAge, calories, fats, carbs, fiber, protein, salt);
 
             Assert.IsTrue(success, message);
 
