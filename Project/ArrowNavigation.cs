@@ -12,6 +12,8 @@ public class MenuNavigation
     private bool QuantityManipulation;
     private bool is2D;
     public Action<int>? OnRightArrow;
+    public List<bool>? OfferIndicators;
+    private const int OfferBlinkIntervalMs = 500;
 
     public MenuNavigation(List<List<string>> menuLabels2D, string title)
     {
@@ -93,13 +95,15 @@ public class MenuNavigation
         InitializeRequiresInput();
 
         bool running = true;
+        bool blinkVisible = true;
+        DateTime lastBlink = DateTime.UtcNow;
+        bool offerBlinkEnabled = HasOfferBlink();
+
         while (running)
         {
-            Console.Clear();
-            MenuHelpers.Announce($"{Title}\n");
-            DrawMenu();
-
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            blinkVisible = UpdateBlinkState(ref lastBlink, blinkVisible, offerBlinkEnabled);
+            RenderMenu(blinkVisible);
+            ConsoleKeyInfo keyInfo = ReadKeyWithOfferBlink(ref blinkVisible, ref lastBlink, offerBlinkEnabled);
             running = HandleInput(keyInfo);
         }
 
@@ -111,17 +115,69 @@ public class MenuNavigation
         InitializeRequiresInput();
 
         bool running = true;
+        bool blinkVisible = true;
+        DateTime lastBlink = DateTime.UtcNow;
+        bool offerBlinkEnabled = HasOfferBlink();
+
         while (running)
         {
-            Console.Clear();
-            MenuHelpers.Announce($"{Title}\n");
-            DrawMenu();
-
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            blinkVisible = UpdateBlinkState(ref lastBlink, blinkVisible, offerBlinkEnabled);
+            RenderMenu(blinkVisible);
+            ConsoleKeyInfo keyInfo = ReadKeyWithOfferBlink(ref blinkVisible, ref lastBlink, offerBlinkEnabled);
             running = HandleInput(keyInfo);
         }
 
         return selectedIndex;
+    }
+
+    private bool HasOfferBlink()
+    {
+        return OfferIndicators != null && OfferIndicators.Any(indicator => indicator);
+    }
+
+    private bool UpdateBlinkState(ref DateTime lastBlink, bool blinkVisible, bool offerBlinkEnabled)
+    {
+        if (!offerBlinkEnabled)
+        {
+            return true;
+        }
+
+        if ((DateTime.UtcNow - lastBlink).TotalMilliseconds >= OfferBlinkIntervalMs)
+        {
+            blinkVisible = !blinkVisible;
+            lastBlink = DateTime.UtcNow;
+        }
+
+        return blinkVisible;
+    }
+
+    private void RenderMenu(bool blinkVisible)
+    {
+        Console.Clear();
+        MenuHelpers.Announce($"{Title}\n");
+        DrawMenu(blinkVisible);
+    }
+
+    private ConsoleKeyInfo ReadKeyWithOfferBlink(ref bool blinkVisible, ref DateTime lastBlink, bool offerBlinkEnabled)
+    {
+        if (!offerBlinkEnabled)
+        {
+            return Console.ReadKey(true);
+        }
+
+        while (!Console.KeyAvailable)
+        {
+            bool previousBlink = blinkVisible;
+            blinkVisible = UpdateBlinkState(ref lastBlink, blinkVisible, true);
+            if (blinkVisible != previousBlink)
+            {
+                RenderMenu(blinkVisible);
+            }
+
+            Thread.Sleep(50);
+        }
+
+        return Console.ReadKey(true);
     }
 
     public List<string> GetValues()
@@ -145,7 +201,7 @@ public class MenuNavigation
         }
     }
 
-    private void DrawMenu()
+    private void DrawMenu(bool blinkVisible = true)
     {
         if (is2D)
         {
@@ -178,18 +234,18 @@ public class MenuNavigation
             {
                 if (i == selectedIndex)
                 {
-                    DrawSelectedLine(label, i);
+                    DrawSelectedLine(label, i, blinkVisible);
                 }
                 else
                 {
-                    DrawUnselectedLine(label, i);
+                    DrawUnselectedLine(label, i, blinkVisible);
                 }
                 i = i + 1;
             }
         }
     }
 
-    private void DrawSelectedLine(string label, int index)
+    private void DrawSelectedLine(string label, int index, bool blinkVisible)
     {
         if (requiresInput != null && index < requiresInput.Count && requiresInput[index])
         {
@@ -212,27 +268,11 @@ public class MenuNavigation
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            if (!(QuantityManipulation && index == selectedIndex && index != labels.Count - 1))
-            {
-                MenuHelpers.Announce($"   {label}");
-            }
-            else
-            {
-                if (label.Contains("discount! "))
-                {
-                    MenuHelpers.GOLD($"   {label} | Qty: {currentquantities}");
-                }
-                else
-                {
-                    Console.WriteLine($"   {label} | Qty: {currentquantities}");
-                }
-            }
-            Console.ResetColor();
+            WriteMenuLine(label, index, selected: true, blinkVisible);
         }
     }
 
-    private void DrawUnselectedLine(string label, int index)
+    private void DrawUnselectedLine(string label, int index, bool blinkVisible)
     {
         if (requiresInput != null && index < requiresInput.Count && requiresInput[index])
         {
@@ -246,7 +286,47 @@ public class MenuNavigation
         }
         else
         {
-            Console.WriteLine($"  {label}");
+            WriteMenuLine(label, index, selected: false, blinkVisible);
+        }
+    }
+
+    private void WriteMenuLine(string label, int index, bool selected, bool blinkVisible)
+    {
+        string indent = selected ? "   " : "  ";
+        if (selected)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+        }
+
+        Console.Write(indent + label);
+        AppendOfferBadge(index, blinkVisible, selected);
+
+        if (selected && QuantityManipulation && index != labels.Count - 1)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write($" | Qty: {currentquantities}");
+        }
+
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    private void AppendOfferBadge(int index, bool blinkVisible, bool selected)
+    {
+        if (OfferIndicators == null || index >= OfferIndicators.Count || !OfferIndicators[index] || !blinkVisible)
+        {
+            return;
+        }
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write(" OFFER!");
+        if (selected)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+        }
+        else
+        {
+            Console.ResetColor();
         }
     }
 

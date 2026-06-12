@@ -126,16 +126,27 @@ static class Dashboard
             return;
         }
 
+        var offers = OfferLogic.GetOffers();
+        var productOfferMap = OfferLogic.GetProductToOfferMapping();
         List<string> options = new List<string>();
+        List<bool> offerFlags = new List<bool>();
         foreach (var item in list)
         {
+            OfferModel? offer = OfferLogic.GetActiveOfferForProduct(item.ProductID, offers, productOfferMap);
+            offerFlags.Add(offer != null);
+
             string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
             string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
-            options.Add($"ID: {item.ProductID} | {item.Name} | {item.Category}{popularityLabel} | {item.Price} EUR{ageLabel}  [→ details]");
+            string pricePart = offer != null
+                ? $"Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)"
+                : $"Price: {item.Price} EUR";
+            options.Add($"ID: {item.ProductID} | {item.Name} | {item.Category}{popularityLabel} | {pricePart}{ageLabel}  [→ details]");
         }
         options.Add("Back");
+        offerFlags.Add(false);
 
         MenuNavigation browseMenu = new MenuNavigation(options, "--- BROWSE PRODUCTS (Right arrow: details) ---");
+        browseMenu.OfferIndicators = offerFlags;
         browseMenu.OnRightArrow = idx =>
         {
             if (idx >= 0 && idx < list.Count)
@@ -202,34 +213,25 @@ static class Dashboard
     MenuHelpers.Announce("--- ALL PRODUCTS ---");
     MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
 
+    var productOfferMap = OfferLogic.GetProductToOfferMapping();
     List<string> options = new List<string>();
+    List<bool> offerFlags = new List<bool>();
     foreach (var item in products)
     {
-        OfferModel offer = null;
-        var productOfferMap = OfferLogic.GetProductToOfferMapping();
-        DateTime today = DateTime.Today;
+        OfferModel? offer = OfferLogic.GetActiveOfferForProduct(item.ProductID, offers, productOfferMap);
+        offerFlags.Add(offer != null);
 
-        if (productOfferMap.TryGetValue((int) item.ProductID, out int offerId))
-        {
-            offer = offers.FirstOrDefault(o => o.OfferID == offerId && 
-                                               today >= o.StartDate.Date && 
-                                               today <= o.EndDate.Date);
-        }
-
-        if (offer != null)
-        {
-            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
-            options.Add($"discount! Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)");
-        }
-        else
-        {
-            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
-            options.Add($"Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {item.Price} EUR");
-        }
+        string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+        string pricePart = offer != null
+            ? $"Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)"
+            : $"Price: {item.Price} EUR";
+        options.Add($"Name: {item.Name} | Category: {item.Category}{popularityLabel} | {pricePart}");
     }
     options.Add("Cancel");
+    offerFlags.Add(false);
 
     MenuNavigation menu = new MenuNavigation(options, "--- SELECT A PRODUCT TO ADD (←/→: qty, D: details) ---", true);
+    menu.OfferIndicators = offerFlags;
     menu.OnRightArrow = idx =>
     {
         if (idx >= 0 && idx < products.Count)
@@ -266,16 +268,7 @@ static class Dashboard
         return;
     }
 
-    OfferModel finalOffer = null;
-    var finalMap = OfferLogic.GetProductToOfferMapping();
-    DateTime currentDay = DateTime.Today;
-    if (finalMap.TryGetValue((int) selectedProduct.ProductID, out int finalOfferId))
-    {
-        finalOffer = offers.FirstOrDefault(o => o.OfferID == finalOfferId && 
-                                           currentDay >= o.StartDate.Date && 
-                                           currentDay <= o.EndDate.Date);
-    }
-
+    OfferModel? finalOffer = OfferLogic.GetActiveOfferForProduct(selectedProduct.ProductID, offers, productOfferMap);
     decimal finalPrice = finalOffer != null ? (decimal)finalOffer.DiscountPrice : selectedProduct.Price;
 
     var cartItem = new ShoppingCartItem(selectedProduct, quantity, finalPrice);
