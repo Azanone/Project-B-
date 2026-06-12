@@ -190,7 +190,7 @@ public class MenuNavigation
 
     private void DrawSelectedLine(string label, int index)
     {
-        if (requiresInput[index])
+        if (requiresInput != null && index < requiresInput.Count && requiresInput[index])
         {
             string displayValue = values[index];
             if (label == "Password")
@@ -233,7 +233,7 @@ public class MenuNavigation
 
     private void DrawUnselectedLine(string label, int index)
     {
-        if (requiresInput[index])
+        if (requiresInput != null && index < requiresInput.Count && requiresInput[index])
         {
             string displayValue = values[index];
             if (label == "Password")
@@ -382,7 +382,7 @@ public class MenuNavigation
     private void HandleBackspace()
     {
         if (is2D) return;
-        if (requiresInput[selectedIndex])
+        if (requiresInput != null && selectedIndex < requiresInput.Count && requiresInput[selectedIndex])
         {
             if (values[selectedIndex].Length > 0)
             {
@@ -395,7 +395,7 @@ public class MenuNavigation
     private void HandleCharacterInput(char inputChar)
     {
         if (is2D) return;
-        if (requiresInput[selectedIndex])
+        if (requiresInput != null && selectedIndex < requiresInput.Count && requiresInput[selectedIndex])
         {
             values[selectedIndex] = values[selectedIndex] + inputChar;
         }
