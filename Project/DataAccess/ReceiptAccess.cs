@@ -39,7 +39,7 @@ WHERE PURCHASE.UserID = @AccountID";
         return _connection.Query<ReceiptModel>(sql, new { AccountID = accountID }).ToList();
     }
 
-    public ReceiptModel GetLatestPurchaseByAccountID(int accountID)
+    public ReceiptModel? GetLatestPurchaseByAccountID(int accountID)
     {
         string sql = @"
             SELECT *
@@ -48,7 +48,7 @@ WHERE PURCHASE.UserID = @AccountID";
             ORDER BY PurchaseDate DESC
             LIMIT 1";
 
-        return _connection.QueryFirstOrDefault<ReceiptModel>(
+        return _connection.QueryFirstOrDefault<ReceiptModel?>(
             sql,
             new { AccountID = accountID }
         );

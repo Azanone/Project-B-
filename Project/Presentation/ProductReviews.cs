@@ -10,10 +10,13 @@ public static class ProductReviews
     {
         Console.Clear();
 
-        MenuHelpers.WriteColor("Choose a product [ID] to leave a review for", ConsoleColor.Red);
+        MenuHelpers.Warn("Choose a product [ID] to leave a review for");
 
-        var input = Console.ReadLine();
+        var input = MenuHelpers.Prompt("Enter product ID:");
 
-        ReviewLogic.AddReview(input);
+        if (!string.IsNullOrWhiteSpace(input))
+        {
+            ReviewLogic.AddReview(input);
+        }
     }
 }

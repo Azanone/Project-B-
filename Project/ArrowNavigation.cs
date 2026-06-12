@@ -3,7 +3,7 @@ public class MenuNavigation
     private List<List<string>> labels2D;
     private List<string> labels;
     private List<string> values;
-    private List<bool> requiresInput;
+    private List<bool>? requiresInput;
     private int currentquantities;
     private int selectedRow;
     private int selectedCol;
@@ -16,7 +16,7 @@ public class MenuNavigation
     {
         labels2D = menuLabels2D;
         is2D = true;
-        requiresInput = null;
+        requiresInput = new List<bool>();
         values = new List<string>();
         currentquantities = 0;
         Title = title;
@@ -48,7 +48,7 @@ public class MenuNavigation
     {
         labels = menuLabels;
         is2D = false;
-        requiresInput = null;
+        requiresInput = new List<bool>();
         values = new List<string>();
         
         int i = 0;
@@ -67,7 +67,7 @@ public class MenuNavigation
     {
         labels = menuLabels;
         is2D = false;
-        requiresInput = null;
+        requiresInput = new List<bool>();
         values = new List<string>();
         
         int i = 0;
