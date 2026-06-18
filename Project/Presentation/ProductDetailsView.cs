@@ -19,34 +19,20 @@ public static class ProductDetailsView
             return;
         }
 
-        MenuHelpers.Announce("--- SHOW PRODUCT DETAILS ---");
-        foreach (var p in products)
-        {
-            MenuHelpers.Confirm($"ID: {p.ProductID} | {p.Name} | {p.Brand} | {p.Category}");
-        }
+        List<string> options = products
+            .Select(p => $"{p.Name} | {p.Brand} | {p.Category}")
+            .ToList();
+        options.Add("Back");
 
-        string? raw = MenuHelpers.Prompt("\nEnter product ID (or leave empty to cancel):");
-        if (string.IsNullOrWhiteSpace(raw))
+        MenuNavigation menu = new MenuNavigation(options, "--- SHOW PRODUCT DETAILS ---");
+        int selection = menu.Start();
+
+        if (selection < 0 || selection >= products.Count)
         {
             return;
         }
 
-        if (!long.TryParse(raw.Trim(), out long id))
-        {
-            MenuHelpers.Error("Invalid product ID.");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        ProductModel? product = products.FirstOrDefault(p => p.ProductID == id);
-        if (product == null)
-        {
-            MenuHelpers.Warn("Product not found.");
-            MenuHelpers.Pause();
-            return;
-        }
-
-        DetailMenu(product);
+        DetailMenu(products[selection]);
     }
 
     public static void Show(ProductModel product)
@@ -162,10 +148,10 @@ public static class ProductDetailsView
             }
             else
             {
-                MenuHelpers.Confirm($"Average: {rating.Stars} {rating.Average:F1} ({rating.Count} review(s))\n");
+                MenuHelpers.Announce($"Average: {rating.Stars} {rating.Average:F1} ({rating.Count} review(s))\n");
                 foreach (ReviewModel r in _reviewLogic.GetReviews(product.ProductID))
                 {
-                    MenuHelpers.Confirm($"{_reviewLogic.BuildStars(r.Rating)} {r.Rating:F1}  -  {r.Review}");
+                    MenuHelpers.Line($"{r.Username ?? "Guest"}  {_reviewLogic.BuildStars(r.Rating)} {r.Rating:F1}  -  {r.Review}");
                 }
             }
 
@@ -194,23 +180,23 @@ public static class ProductDetailsView
     {
         Console.Clear();
 
-        Console.WriteLine(@"+-------------------------------------------+");
-        Console.WriteLine($"| {("INGREDIENTS"),-41} |");
-        Console.WriteLine(@"+-------------------------------------------+");
+        MenuHelpers.Line(@"+-------------------------------------------+");
+        MenuHelpers.Line($"| {("INGREDIENTS"),-41} |");
+        MenuHelpers.Line(@"+-------------------------------------------+");
         foreach (string line in WrapText(product.Ingredients ?? "(no ingredients listed)", 41))
         {
-            Console.WriteLine($"| {line,-41} |");
+            MenuHelpers.Line($"| {line,-41} |");
         }
-        Console.WriteLine(@"+-------------------------------------------+");
-        Console.WriteLine($"| {("NUTRITION FACTS (per 100g)"),-41} |");
-        Console.WriteLine(@"+-------------------------------------------+");
-        Console.WriteLine($"| {"Energy",-16}{product.Calories,7} kcal{"",13} |");
-        Console.WriteLine($"| {"Fats",-16}{product.Fats,7:F1} g{"",17} |");
-        Console.WriteLine($"| {"Carbohydrates",-16}{product.Carbs,7:F1} g{"",17} |");
-        Console.WriteLine($"| {"Fiber",-16}{product.Fiber,7:F1} g{"",17} |");
-        Console.WriteLine($"| {"Protein",-16}{product.Protein,7:F1} g{"",17} |");
-        Console.WriteLine($"| {"Salt",-16}{product.Salt,7:F2} g{"",17} |");
-        Console.WriteLine(@"+-------------------------------------------+");
+        MenuHelpers.Line(@"+-------------------------------------------+");
+        MenuHelpers.Line($"| {("NUTRITION FACTS (per 100g)"),-41} |");
+        MenuHelpers.Line(@"+-------------------------------------------+");
+        MenuHelpers.Line($"| {"Energy",-16}{product.Calories,7} kcal{"",13} |");
+        MenuHelpers.Line($"| {"Fats",-16}{product.Fats,7:F1} g{"",17} |");
+        MenuHelpers.Line($"| {"Carbohydrates",-16}{product.Carbs,7:F1} g{"",17} |");
+        MenuHelpers.Line($"| {"Fiber",-16}{product.Fiber,7:F1} g{"",17} |");
+        MenuHelpers.Line($"| {"Protein",-16}{product.Protein,7:F1} g{"",17} |");
+        MenuHelpers.Line($"| {"Salt",-16}{product.Salt,7:F2} g{"",17} |");
+        MenuHelpers.Line(@"+-------------------------------------------+");
 
         MenuHelpers.Pause();
     }
