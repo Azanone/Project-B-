@@ -22,7 +22,7 @@ public static class AdminMenu
             AccountModel? account = AccountsLogic.CurrentAccount;
             if (account == null)
             {
-                Console.WriteLine("Error: Not logged in as admin.");
+                MenuHelpers.Error("Error: Not logged in as admin.");
                 return;
             }
 
@@ -222,41 +222,41 @@ public static class AdminMenu
         List<ReceiptModel> receipts = _receiptLogic.GetPurchases();
         var grouped = from r in receipts group r by r.ReceiptID;
 
-        Console.WriteLine("--- ALL RECEIPTS ---\n");
+        MenuHelpers.Announce("--- ALL RECEIPTS ---\n");
 
         foreach (var group in grouped)
         {
             ReceiptModel first = group.First();
 
-            Console.WriteLine(@"  ___________________________________________");
-            Console.WriteLine(@" /                                           \");
-            Console.WriteLine(@"|   *************************************** |");
-            Console.WriteLine(@"\_  * BabylonMarkt                        * |");
-            Console.WriteLine(@"  | *************************************** |");
-            Console.WriteLine($"  |  Date: {first.CreatedAt:dd-MM-yyyy}                       |");
-            Console.WriteLine($"  |  Receipt No: #{first.ReceiptID,-23} |");
-            Console.WriteLine(@"  | --------------------------------------- |");
-            Console.WriteLine($"  |  {"ITEM",-27}{"PRICE",-11} |");
-            Console.WriteLine(@"  | ---------------------------------------  |");
-             
+            MenuHelpers.Line(@"  ___________________________________________");
+            MenuHelpers.Line(@" /                                           \");
+            MenuHelpers.Line(@"|   *************************************** |");
+            MenuHelpers.Line(@"\_  * BabylonMarkt                        * |");
+            MenuHelpers.Line(@"  | *************************************** |");
+            MenuHelpers.Line($"  |  Date: {first.CreatedAt:dd-MM-yyyy}                       |");
+            MenuHelpers.Line($"  |  Receipt No: #{first.ReceiptID,-23} |");
+            MenuHelpers.Line(@"  | --------------------------------------- |");
+            MenuHelpers.Line($"  |  {"ITEM",-27}{"PRICE",-11} |");
+            MenuHelpers.Line(@"  | ---------------------------------------  |");
+
             foreach (ReceiptModel item in group)
             {
                 string name = item.ProductName.Length > 25 ? item.ProductName.Substring(0, 25) : item.ProductName;
                 string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
                 decimal lineTotal = item.ProductPrice * item.Quantity;
-                Console.WriteLine($"  |  {name,-27}{qtyLabel + lineTotal + " EUR",-11}  |");
+                MenuHelpers.Line($"  |  {name,-27}{qtyLabel + lineTotal + " EUR",-11}  |");
             }
-             
-            Console.WriteLine(@"  | ---------------------------------------  |");
-            Console.WriteLine($"  |  {"SUBTOTAL:",-27}{first.TotalPrice + " EUR",-11}  |");
-            Console.WriteLine($"  |  {"TAX (VAT):",-27}{first.VAT + " EUR",-11}  |");
-            Console.WriteLine(@"  | ---------------------------------------  |");
-            Console.WriteLine($"  |  {"TOTAL:",-27}{first.TotalPrice + first.VAT + " EUR",-11}  |");
-            Console.WriteLine(@"  | ---------------------------------------  |");
-            Console.WriteLine(@"  |         THANK YOU FOR VISITING!           |");
-            Console.WriteLine(@"  | __________________________________________|___");
-            Console.WriteLine(@"  | /                                            /");
-            Console.WriteLine(@"  \_/___________________________________________/");
+
+            MenuHelpers.Line(@"  | ---------------------------------------  |");
+            MenuHelpers.Line($"  |  {"SUBTOTAL:",-27}{first.TotalPrice + " EUR",-11}  |");
+            MenuHelpers.Line($"  |  {"TAX (VAT):",-27}{first.VAT + " EUR",-11}  |");
+            MenuHelpers.Line(@"  | ---------------------------------------  |");
+            MenuHelpers.Line($"  |  {"TOTAL:",-27}{first.TotalPrice + first.VAT + " EUR",-11}  |");
+            MenuHelpers.Line(@"  | ---------------------------------------  |");
+            MenuHelpers.Line(@"  |         THANK YOU FOR VISITING!           |");
+            MenuHelpers.Line(@"  | __________________________________________|___");
+            MenuHelpers.Line(@"  | /                                            /");
+            MenuHelpers.Line(@"  \_/___________________________________________/");
         }
         MenuHelpers.Prompt("Press Enter to continue");
     }
@@ -266,9 +266,13 @@ public static class AdminMenu
         Console.Clear();
         var list = _productLogic.GetProducts();
         MenuHelpers.Announce("--- ALL PRODUCTS ---");
+        MenuHelpers.Line($"{"ID",-5}{"NAME",-26}{"CATEGORY",-20}{"PRICE",10}{"MIN AGE",10}");
+        MenuHelpers.Line(new string('-', 71));
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.ProductID}| Name: \n{item.Name}| Category: {item.Category}| Price: {item.Price} EUR| Min \nAge: {(item.MinAge > 0 ? item.MinAge.ToString() : "None")}");
+            string ageLabel = item.MinAge > 0 ? item.MinAge.ToString() : "None";
+            string name = item.Name.Length > 24 ? item.Name.Substring(0, 24) : item.Name;
+            MenuHelpers.Line($"{item.ProductID,-5}{name,-26}{item.Category,-20}{item.Price,7:0.00} EUR{ageLabel,10}");
         }
         MenuHelpers.Prompt("Press Enter to continue");
     }
@@ -280,7 +284,10 @@ public static class AdminMenu
         MenuHelpers.Announce("--- ALL OFFERS ---");
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.OfferID}| Description: \n{item.Description}| Begin-Date: {item.StartDate}| End-Date: \n{item.EndDate}| Price: {item.RegularPrice} EUR |Discount: \n{item.DiscountPercentage}%| Discount-price: {item.DiscountPrice} EUR ");
+            MenuHelpers.Line($"[ID {item.OfferID}] {item.Description}");
+            MenuHelpers.Line($"    Valid: {item.StartDate:dd-MM-yyyy} -> {item.EndDate:dd-MM-yyyy}");
+            MenuHelpers.Line($"    Price: {item.RegularPrice,7:0.00} EUR   Discount: {item.DiscountPercentage}%   Now: {item.DiscountPrice,7:0.00} EUR");
+            MenuHelpers.Line(new string('-', 60));
         }
         MenuHelpers.Prompt("Press Enter to continue");
     }
@@ -288,8 +295,8 @@ public static class AdminMenu
     private static void ShowLayout()
     {
         Console.Clear();
-        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗ 
- ║              ║                  ║                   ║ 
+        MenuHelpers.Line(@"╔══════════════╦══════════════════╦═══════════════════╗
+ ║              ║                  ║                   ║
  ║   BAKERY     ║    DAIRY         ║     FROZEN        ║ 
  ║              ║                  ║                   ║ 
  ╠══════════════╩══════════════════╣                   ║ 
@@ -314,9 +321,12 @@ public static class AdminMenu
         Console.Clear();
         var list = _purchaseLogic.GetPurchases();
         MenuHelpers.Announce("--- TRANSACTION HISTORY ---");
+        MenuHelpers.Line($"{"ID",-5}{"CUSTOMER",-22}{"DATE",-14}{"AMOUNT",12}");
+        MenuHelpers.Line(new string('-', 53));
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.PurchaseID}| Name: \n{item.UserName}| Date:-{item.PurchaseDate}| Amount:{item.TotalAmount}");
+            string name = item.UserName.Length > 20 ? item.UserName.Substring(0, 20) : item.UserName;
+            MenuHelpers.Line($"{item.PurchaseID,-5}{name,-22}{item.PurchaseDate,-14:dd-MM-yyyy}{item.TotalAmount,8:0.00} EUR");
         }
         MenuHelpers.Prompt("Press Enter to continue");
     }
@@ -376,10 +386,10 @@ public static class AdminMenu
             MenuHelpers.Announce("Available Categories for Reference:");
             foreach (var category in categories)
             {
-                Console.WriteLine($"  [{category.CategoryID}] {category.Name}");
+                MenuHelpers.Line($"  [{category.CategoryID}] {category.Name}");
             }
 
-            Console.WriteLine("\nUse UP/DOWN arrows to navigate fields, \ntype text directly, and press Enter on an action option.\n");
+            MenuHelpers.Line("\nUse UP/DOWN arrows to navigate fields, \ntype text directly, and press Enter on an action option.\n");
 
             int selection = menu.Start();
             List<string> values = menu.GetValues();
@@ -555,9 +565,9 @@ public static class AdminMenu
             foreach (var category in categories)
             {
                 string marker = category.CategoryID == existingProduct.CategoryID ? " (current)" : "";
-                Console.WriteLine($"  [{category.CategoryID}] {category.Name}{marker}");
+                MenuHelpers.Line($"  [{category.CategoryID}] {category.Name}{marker}");
             }
-            Console.WriteLine("\nModify any text field directly, then press Enter on 'Save Changes' to update.\n");
+            MenuHelpers.Line("\nModify any text field directly, then press Enter on 'Save Changes' to update.\n");
 
             int selection = menu.Start();
             List<string> values = menu.GetValues();
@@ -701,12 +711,14 @@ public static class AdminMenu
         }
 
         MenuHelpers.Announce("--- CURRENT USERS ---");
+        MenuHelpers.Line($"{"ID",-5}{"USERNAME",-16}{"NAME",-20}{"EMAIL",-28}{"ROLE",-8}");
+        MenuHelpers.Line(new string('-', 77));
         foreach (AccountModel user in users)
         {
-            MenuHelpers.Confirm($"ID: {user.Id} | Username: \n{user.Username} | Name: {user.FullName} | Email: {user.EmailAddress} | \nRole: {user.Role}");
+            MenuHelpers.Line($"{user.Id,-5}{user.Username,-16}{user.FullName,-20}{user.EmailAddress,-28}{user.Role,-8}");
         }
 
-        Console.WriteLine();
+        MenuHelpers.Line();
     }
 
     private static void UpdateUserRoleFlow()

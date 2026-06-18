@@ -1,6 +1,6 @@
 public static class DateSelection
 {
-    public static int monthMenu()
+    public static int monthMenu(string context = "")
     {
         List<List<string>> Months = new List<List<string>>
         {
@@ -18,7 +18,10 @@ public static class DateSelection
             new List<int> { 10, 11, 12 }
         };
 
-        MenuNavigation monthMenu = new MenuNavigation(Months, "Select the month you want to view");
+        string title = string.IsNullOrEmpty(context)
+            ? "Select the month you want to view"
+            : $"{context} - Select a month";
+        MenuNavigation monthMenu = new MenuNavigation(Months, title);
         int[] selectedMonth = monthMenu.Start2D();
         int month = MonthsNRS[selectedMonth[0]][selectedMonth[1]];
         return month;
