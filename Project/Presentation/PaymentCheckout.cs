@@ -18,7 +18,7 @@ public static class PaymentCheckout
         while (true)
         {
             Console.Clear();
-            string headerTitle = $"--- SELECT PAYMENT METHOD ---\nAmount due: {total} EUR";
+            string headerTitle = $"--- SELECT PAYMENT METHOD ---\nAmount due: {total:0.00} EUR";
             MenuNavigation menu = new MenuNavigation(options, headerTitle);
             int selection = menu.Start();
 
@@ -53,7 +53,6 @@ public static class PaymentCheckout
             }
 
             MenuHelpers.Confirm($"Payment via {method} accepted.");
-            MenuHelpers.Pause();
             return method;
         }
     }
@@ -114,7 +113,7 @@ public static class PaymentCheckout
             return false;
         }
 
-        MenuHelpers.Confirm($"Change due: {change} EUR");
+        MenuHelpers.Confirm($"Change due: {change:0.00} EUR");
         return true;
     }
 

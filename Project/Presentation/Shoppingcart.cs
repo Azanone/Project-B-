@@ -26,18 +26,19 @@ public class PurchaseShoppingCart
         for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
-            total += item.Product.Price * item.Quantity;
+            decimal unitPrice = shoppingCartLogic.GetEffectivePrice(item.Product);
+            total += unitPrice * item.Quantity;
 
             MenuHelpers.Line(
                 $"{i + 1}. {item.Product.Name} | " +
                 $"Category: {item.Product.Category} | " +
                 $"Brand: {item.Product.Brand} | " +
                 $"Qty: {item.Quantity} | " +
-                $"Price: {item.Product.Price} EUR"
+                $"Price: {unitPrice:0.00} EUR"
             );
         }
 
-        MenuHelpers.Announce($"Total: {total} EUR");
+        MenuHelpers.Announce($"Total: {total:0.00} EUR");
         MenuHelpers.Pause();
         return total;
     }
@@ -81,7 +82,7 @@ public class PurchaseShoppingCart
             return;
         }
         
-        decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
+        decimal total = cartItems.Sum(i => shoppingCartLogic.GetEffectivePrice(i.Product) * i.Quantity);
 
         string? paymentMethod = PaymentCheckout.Start(total);
         if (paymentMethod == null)
@@ -123,7 +124,7 @@ public class PurchaseShoppingCart
         {
             string name = item.Product.Name.Length > 25 ? item.Product.Name.Substring(0, 25) : item.Product.Name;
             string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
-            decimal lineTotal = item.Product.Price * item.Quantity;
+            decimal lineTotal = shoppingCartLogic.GetEffectivePrice(item.Product) * item.Quantity;
             MenuHelpers.Line($"  |  {name,-27}{qtyLabel + lineTotal.ToString("F2") + " EUR",-11}  |");
         }
 
