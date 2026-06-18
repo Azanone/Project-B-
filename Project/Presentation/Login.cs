@@ -24,26 +24,28 @@ static class Login
 (____╱╲_╱╲_╱(____╱(__╱  ╲____╱ ╲__╱ ╲_)__)  (____╱ (__) ╲__╱(__╲_)(____)
 
 Welcome to the login page");
-        form.Start();
-        List<string> results = form.GetValues();
-
-        string identifier = results[0];
-        string password = results[1];
-
-        AccountModel? account = accountsLogic.CheckLogin(identifier, password);
-        if (account != null)
+        while (true)
         {
-            if (string.Equals(account.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+            form.Start();
+            List<string> results = form.GetValues();
+
+            string identifier = results[0];
+            string password = results[1];
+
+            AccountModel? account = accountsLogic.CheckLogin(identifier, password);
+            if (account != null)
             {
-                AdminMenu.Start();
+                if (string.Equals(account.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    AdminMenu.Start();
+                }
+                else
+                {
+                    Dashboard.Start();
+                }
+                return;
             }
-            else
-            {
-                Dashboard.Start();
-            }
-        }
-        else
-        {
+
             if (accountsLogic.IdentifierExists(identifier))
             {
                 MenuHelpers.Warn("Wrong password");
@@ -52,9 +54,9 @@ Welcome to the login page");
             {
                 MenuHelpers.Warn("Wrong email address or username");
             }
-            
+
+            results[1] = "";
             System.Threading.Thread.Sleep(1500);
-            Login.Start();
         }
     }
 }
