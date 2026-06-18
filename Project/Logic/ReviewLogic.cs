@@ -3,35 +3,6 @@ using Project.DataAccess;
 public class ReviewLogic
 {
     public readonly ReviewAccess reviewAccess = new();
-    public readonly ProductLogic productLogic = new();
-
-    public ProductModel? GetProductById(string inputId)
-    {
-        if (!int.TryParse(inputId, out int parsedId))
-        {
-            MenuHelpers.Warn("Product not found.");
-            return null;
-        }
-
-        var product = productLogic.GetProducts().FirstOrDefault(p => p.ProductID == parsedId);
-        if (product == null)
-        {
-            MenuHelpers.Warn("Product not found.");
-        }
-
-        return product;
-    }
-
-    public void AddReview(string productId)
-    {
-        var product = GetProductById(productId);
-        if (product == null)
-        {
-            return;
-        }
-
-        AddReview(product);
-    }
 
     public void AddReview(ProductModel product)
     {
@@ -56,7 +27,8 @@ public class ReviewLogic
             }
         } while (rating < 0 || rating > 5);
 
-        reviewAccess.AddReview((int)product.ProductID, review, rating);
+        int userId = (int)(AccountsLogic.CurrentAccount?.Id ?? -1);
+        reviewAccess.AddReview((int)product.ProductID, review, rating, userId);
         MenuHelpers.Confirm("Review added!");
     }
 
@@ -68,7 +40,7 @@ public class ReviewLogic
         foreach (var group in grouped)
         {
             double avg = group.Average(p => p.Rating);
-            Console.WriteLine($"{group.Key}: {BuildStars(avg)} | {avg:F1}");
+            MenuHelpers.Line($"{group.Key}: {BuildStars(avg)} | {avg:F1}");
         }
 
         return "all";
