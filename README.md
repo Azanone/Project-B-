@@ -76,3 +76,17 @@ The application reads from `Project/DataSources/project.db`. The database file i
 - The project uses a layered structure with presentation, logic, and data access separated.
 - Admin functionality includes managing products, users, stock, and financial views.
 - Customer functionality includes browsing products, shopping cart actions, wishlist, reviews, and checkout.
+
+## Accounts
+
+You can log in with the username **or** the email address.
+
+| Type | Username | Email | Password |
+|------|----------|-------|----------|
+| Admin | `admin` | `admin@test.com` | `admin` |
+| Customer (full address, best for checkout) | `carol` | `carol@test.com` | `password123` |
+| Customer (no address) | `bob` | `bob@test.com` | `password123` |
+
+You can also choose **Continue as guest** from the main menu to shop without an account.
+
+Note: these seeded accounts have their passwords set directly in the database, not created through the in-app registration flow.
