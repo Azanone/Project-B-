@@ -41,19 +41,30 @@ public static class DatabaseMigration
 
     private static void EnsureReviewTable(SqliteConnection connection)
     {
-        if (TableExists(connection, "REVIEW"))
+        if (!TableExists(connection, "REVIEW"))
         {
+            connection.Execute(@"
+                CREATE TABLE REVIEW (
+                    ReviewID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ProductID INTEGER NOT NULL,
+                    Review TEXT NOT NULL,
+                    Rating REAL NOT NULL,
+                    UserID INTEGER,
+                    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+                )");
             return;
         }
 
-        connection.Execute(@"
-            CREATE TABLE REVIEW (
-                ReviewID INTEGER PRIMARY KEY AUTOINCREMENT,
-                ProductID INTEGER NOT NULL,
-                Review TEXT NOT NULL,
-                Rating REAL NOT NULL,
-                FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
-            )");
+        HashSet<string> columns = connection
+            .Query<(int cid, string name, string type, int notnull, string? dflt_value, int pk)>(
+                "PRAGMA table_info(REVIEW)")
+            .Select(column => column.name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (!columns.Contains("UserID"))
+        {
+            connection.Execute("ALTER TABLE REVIEW ADD COLUMN UserID INTEGER");
+        }
     }
 
     private static bool TableExists(SqliteConnection connection, string tableName)
