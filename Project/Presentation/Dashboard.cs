@@ -62,7 +62,7 @@ static class Dashboard
         MenuHelpers.Announce("--- ALL OFFERS ---");
         foreach (var item in list)
         {
-            MenuHelpers.Confirm($"ID: {item.OfferID} | Description: {item.Description} | Begin: {item.StartDate} | End: {item.EndDate} | Price: {item.RegularPrice} EUR | Discount: {item.DiscountPercentage}% | Discount-price: {item.DiscountPrice} EUR");
+            MenuHelpers.Line($"{item.Description} | Valid: {item.StartDate:dd-MM-yyyy} -> {item.EndDate:dd-MM-yyyy} | Price: {item.RegularPrice} EUR | Discount: {item.DiscountPercentage}% | Now: {item.DiscountPrice} EUR");
         }
         WaitForContinue();
     }
@@ -97,7 +97,6 @@ static class Dashboard
                     break;
                 case 3:
                     ProductReviews.Start();
-                    MenuHelpers.Pause();
                     break;
                 case 4:
                     return;
@@ -107,58 +106,68 @@ static class Dashboard
 
     private static void ShowProducts()
     {
-        Console.Clear();
-        var categoryFilter = PromptProductCategoryFilter();
-        if (categoryFilter.Cancelled)
+        while (true)
         {
-            return;
-        }
-
-        var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
-
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
-
-        if (list == null || list.Count == 0)
-        {
-            MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
-            WaitForContinue();
-            return;
-        }
-
-        var offers = OfferLogic.GetOffers();
-        var productOfferMap = OfferLogic.GetProductToOfferMapping();
-        List<string> options = new List<string>();
-        List<bool> offerFlags = new List<bool>();
-        foreach (var item in list)
-        {
-            OfferModel? offer = OfferLogic.GetActiveOfferForProduct(item.ProductID, offers, productOfferMap);
-            offerFlags.Add(offer != null);
-
-            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
-            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
-            string pricePart = offer != null
-                ? $"Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)"
-                : $"Price: {item.Price} EUR";
-            options.Add($"ID: {item.ProductID} | {item.Name} | {item.Category}{popularityLabel} | {pricePart}{ageLabel}  [→ details]");
-        }
-        options.Add("Back");
-        offerFlags.Add(false);
-
-        MenuNavigation browseMenu = new MenuNavigation(options, "--- BROWSE PRODUCTS (Right arrow: details) ---");
-        browseMenu.OfferIndicators = offerFlags;
-        browseMenu.OnRightArrow = idx =>
-        {
-            if (idx >= 0 && idx < list.Count)
+            Console.Clear();
+            var categoryFilter = PromptProductCategoryFilter();
+            if (categoryFilter.Cancelled)
             {
-                ProductDetailsView.Show(list[idx]);
+                return;
             }
-        };
-        int selection = browseMenu.Start();
 
-        if (selection >= 0 && selection < list.Count)
-        {
-            ProductDetailsView.Show(list[selection]);
+            while (true)
+            {
+                Console.Clear();
+                var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
+
+                MenuHelpers.Announce("--- ALL PRODUCTS ---");
+                MenuHelpers.Line($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
+
+                if (list == null || list.Count == 0)
+                {
+                    MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
+                    WaitForContinue();
+                    break;
+                }
+
+                var offers = OfferLogic.GetOffers();
+                var productOfferMap = OfferLogic.GetProductToOfferMapping();
+                List<string> options = new List<string>();
+                List<bool> offerFlags = new List<bool>();
+                foreach (var item in list)
+                {
+                    OfferModel? offer = OfferLogic.GetActiveOfferForProduct(item.ProductID, offers, productOfferMap);
+                    offerFlags.Add(offer != null);
+
+                    string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+                    string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+                    string pricePart = offer != null
+                        ? $"Price: {offer.DiscountPrice} EUR (Old Price: {offer.RegularPrice} EUR)"
+                        : $"Price: {item.Price} EUR";
+                    options.Add($"{item.Name} | {item.Category}{popularityLabel} | {pricePart}{ageLabel}  [→ details]");
+                }
+                options.Add("Back to categories");
+                offerFlags.Add(false);
+
+                MenuNavigation browseMenu = new MenuNavigation(options, "--- BROWSE PRODUCTS (Right arrow: details) ---");
+                browseMenu.OfferIndicators = offerFlags;
+                browseMenu.OnRightArrow = idx =>
+                {
+                    if (idx >= 0 && idx < list.Count)
+                    {
+                        ProductDetailsView.Show(list[idx]);
+                    }
+                };
+                int selection = browseMenu.Start();
+
+                if (selection >= 0 && selection < list.Count)
+                {
+                    ProductDetailsView.Show(list[selection]);
+                    continue;
+                }
+
+                break;
+            }
         }
     }
 
@@ -211,7 +220,7 @@ static class Dashboard
     }
 
     MenuHelpers.Announce("--- ALL PRODUCTS ---");
-    MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
+    MenuHelpers.Line($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
 
     var productOfferMap = OfferLogic.GetProductToOfferMapping();
     List<string> options = new List<string>();
@@ -300,11 +309,11 @@ static class Dashboard
                 decimal lineTotal = (decimal)item.Product.Price * item.Quantity;
                 total += lineTotal;
 
-                MenuHelpers.Confirm($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
+                MenuHelpers.Line($"{i + 1}. {item.Product.Name} | Category: {item.Product.Category} | Brand: {item.Product.Brand} | Qty: {item.Quantity} | Price: {item.Product.Price} EUR (Total: {lineTotal} EUR)");
             }
 
             MenuHelpers.Announce($"Total (preview): {total} EUR");
-            Console.WriteLine();
+            MenuHelpers.Line();
 
             List<string> options = new List<string>
             {
@@ -398,7 +407,7 @@ static class Dashboard
     private static void ShowLayout()
     {
         Console.Clear();
-        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
+        MenuHelpers.Line(@"╔══════════════╦══════════════════╦═══════════════════╗
 ║              ║                  ║                   ║
 ║   BAKERY     ║    DAIRY         ║     FROZEN        ║
 ║              ║                  ║                   ║
@@ -449,18 +458,18 @@ static class Dashboard
         foreach (var group in grouped)
         {
             var first = group.First();
-            MenuHelpers.Confirm("----------------------------------------");
+            MenuHelpers.Line("----------------------------------------");
             MenuHelpers.Announce($"  Purchase #{group.Key}  |  {first.CreatedAt:dd-MM-yyyy}");
-            MenuHelpers.Confirm("----------------------------------------");
+            MenuHelpers.Line("----------------------------------------");
             foreach (var item in group)
             {
                 string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
                 decimal lineTotal = item.ProductPrice * item.Quantity;
-                MenuHelpers.Confirm($"  {item.ProductName,-22} {qtyLabel}{lineTotal:F2}");
+                MenuHelpers.Line($"  {item.ProductName,-22} {qtyLabel}{lineTotal:F2}");
             }
-            MenuHelpers.Confirm("----------------------------------------");
-            MenuHelpers.Confirm($"  Total:                    {first.TotalPrice:F2}");
-            Console.WriteLine();
+            MenuHelpers.Line("----------------------------------------");
+            MenuHelpers.Line($"  Total:                    {first.TotalPrice:F2}");
+            MenuHelpers.Line();
         }
 
         WaitForContinue();

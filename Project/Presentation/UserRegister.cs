@@ -77,33 +77,48 @@ static class UserRegister
                 continue;
             }
 
-            string verificationCode = AL.GenerateVerificationCode();
-
-            try
+            List<string> verifyOptions = new List<string>
             {
-                AL.SendVerificationEmail(email, verificationCode);
+                "Verify my email now (recommended)",
+                "Skip email verification for now"
+            };
+            MenuNavigation verifyMenu = new MenuNavigation(verifyOptions, "Do you want to verify your email?");
+            int verifyChoice = verifyMenu.Start();
+
+            if (verifyChoice == 0)
+            {
+                string verificationCode = AL.GenerateVerificationCode();
+
+                try
+                {
+                    AL.SendVerificationEmail(email, verificationCode);
+                }
+                catch (Exception ex)
+                {
+                    MenuHelpers.Error(ex.Message);
+                    MenuHelpers.Prompt("Press Enter to try again");
+                    continue;
+                }
+
+                MenuHelpers.Confirm("A verification code has been sent to your email.");
+                string enteredCode = MenuHelpers.Prompt("Enter the 6-digit verification code") ?? string.Empty;
+
+                if (!string.Equals(enteredCode.Trim(), verificationCode, StringComparison.Ordinal))
+                {
+                    MenuHelpers.Error("Email verification failed. Incorrect code.");
+                    MenuHelpers.Prompt("Press Enter to try again");
+                    continue;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                MenuHelpers.Error(ex.Message);
-                MenuHelpers.Prompt("Press Enter to try again");
-                continue;
-            }
-
-            MenuHelpers.Confirm("A verification code has been sent to your email.");
-            string enteredCode = MenuHelpers.Prompt("Enter the 6-digit verification code") ?? string.Empty;
-
-            if (!string.Equals(enteredCode.Trim(), verificationCode, StringComparison.Ordinal))
-            {
-                MenuHelpers.Error("Email verification failed. Incorrect code.");
-                MenuHelpers.Prompt("Press Enter to try again");
-                continue;
+                MenuHelpers.Warn("Skipping email verification. You can verify your email later.");
             }
 
             AL.Register(username, email, password, phoneNumber, bDate);
             MenuHelpers.Confirm($"Successfully registered as {username}");
             System.Threading.Thread.Sleep(1000);
-            Menu.Start();
+            Dashboard.Start();
             return;
         }
     }

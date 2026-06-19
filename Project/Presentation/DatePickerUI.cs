@@ -3,13 +3,17 @@ using System;
 public static class DatePicker
 {
 
-    public static DateTime PickDate()
+    public static DateTime PickDate(string label = "")
     {
-        int month = DateSelection.monthMenu();
+        int month = DateSelection.monthMenu(label);
+
+        string dayTitle = string.IsNullOrEmpty(label)
+            ? DateSelection.Months[month - 1]
+            : $"{label} - {DateSelection.Months[month - 1].Trim()} (pick a day)";
 
         MenuNavigation dayMenu = new(
             DateSelection.DaysInSelectedMonth(month),
-            DateSelection.Months[month - 1]);
+            dayTitle);
 
         DateTime date = DateSelection.GetDateFromCoordinate(dayMenu.Start2D(), 2026, month);
 

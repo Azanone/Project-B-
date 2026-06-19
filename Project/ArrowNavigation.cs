@@ -219,7 +219,9 @@ public class MenuNavigation
                     }
                     else
                     {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
                         Console.Write($"   {label}   ");
+                        Console.ResetColor();
                     }
                     c = c + 1;
                 }
@@ -282,7 +284,9 @@ public class MenuNavigation
                 displayValue = new string('*', values[index].Length);
             }
 
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"  {label}: {displayValue}");
+            Console.ResetColor();
         }
         else
         {
@@ -293,10 +297,7 @@ public class MenuNavigation
     private void WriteMenuLine(string label, int index, bool selected, bool blinkVisible)
     {
         string indent = selected ? "   " : "  ";
-        if (selected)
-        {
-            Console.ForegroundColor = ConsoleColor.Blue;
-        }
+        Console.ForegroundColor = selected ? ConsoleColor.Blue : ConsoleColor.DarkGray;
 
         Console.Write(indent + label);
         AppendOfferBadge(index, blinkVisible, selected);

@@ -4,7 +4,16 @@ namespace Project.Logic;
 public class ShoppingCartLogic
 {
     private readonly ShoppingCartAccess _cartAccess = new();
- 
+    private readonly OfferLogic _offerLogic = new();
+
+    public decimal GetEffectivePrice(ProductModel product)
+    {
+        var offers = _offerLogic.GetOffers();
+        var map = _offerLogic.GetProductToOfferMapping();
+        var offer = _offerLogic.GetActiveOfferForProduct(product.ProductID, offers, map);
+        return offer != null ? offer.DiscountPrice : product.Price;
+    }
+
     private int GetCurrentUserId()
 {
     if (AccountsLogic.CurrentAccount == null)
@@ -121,7 +130,7 @@ public class ShoppingCartLogic
         decimal totalAmount = 0;
         foreach (var item in cartItems)
         {
-            totalAmount += item.Product.Price * item.Quantity;
+            totalAmount += GetEffectivePrice(item.Product) * item.Quantity;
         }
         return totalAmount;
     }
@@ -146,7 +155,7 @@ public class ShoppingCartLogic
                 foreach (var item in cartItems)//loop maakt PurchaseItems
                 {
                     int prodId = item.ProductId.HasValue ? item.ProductId.Value : (int)item.Product.ProductID;
-                    _cartAccess.CreatePurchaseItem(purchaseId, prodId, item.Quantity, item.Product.Price, transaction);
+                    _cartAccess.CreatePurchaseItem(purchaseId, prodId, item.Quantity, GetEffectivePrice(item.Product), transaction);
                 }
  
                 _cartAccess.CreateReceipt(purchaseId,transaction);

@@ -85,7 +85,6 @@ public class ShoppingCartAccess
         (@UserID, @PurchaseDate, @TotalAmount, @Vat);
  
         SELECT last_insert_rowid();";
-        System.Console.WriteLine("Create Purcahse");
         return _connection.QuerySingle<int>(sql,new
         {
                 UserID = userId,
@@ -102,7 +101,6 @@ public class ShoppingCartAccess
         (PurchaseID, ProductID, Quantity, PriceAtPurchase)
         VALUES
         (@PurchaseID, @ProductID, @Quantity, @PriceAtPurchase)";
-        System.Console.WriteLine("Create PurcahseItem");
         _connection.Execute(sql,new
         {
                 PurchaseID = purchaseId,
@@ -119,9 +117,6 @@ public class ShoppingCartAccess
         (PurchaseID, CreatedAt)
         VALUES
         (@PurchaseID, @CreatedAt)";
-        System.Console.WriteLine("Create Receipt");
-        MenuHelpers.Pause();
- 
         _connection.Execute(sql,new{PurchaseID = purchaseId,CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")},transaction);
     }
     public void ClearCart(int userId,SqliteTransaction transaction)

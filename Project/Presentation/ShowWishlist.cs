@@ -13,7 +13,7 @@ public static class ShowWishlist
         AccountModel? account = AccountsLogic.CurrentAccount;
         if (account == null)
         {
-            Console.WriteLine("Error: Not logged in.");
+            MenuHelpers.Error("Error: Not logged in.");
             return;
         }
         WishlistLogic WLlogic = new WishlistLogic(account.Id);
@@ -47,7 +47,7 @@ public static class ShowWishlist
                     MenuHelpers.Announce("--- YOUR WISHLIST ITEMS ---");
                     foreach (var p in wishlist)
                     {
-                        MenuHelpers.Confirm($"Name: {p.Name} | Category: {p.Category} | Price: {p.Price} EUR");
+                        MenuHelpers.Line($"Name: {p.Name} | Category: {p.Category} | Price: {p.Price} EUR");
                     }
                 }
                 MenuHelpers.Pause();

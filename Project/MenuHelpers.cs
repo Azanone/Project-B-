@@ -24,22 +24,22 @@ public static class MenuHelpers
         Console.WriteLine(input);
         Console.ResetColor();
     }
-    public static void GOLD(string input)
+    public static void Line(string input = "")
     {
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine(input);
         Console.ResetColor();
     }
     public static string? Prompt(string input)
     {
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine(input);
         Console.ResetColor();
         return Console.ReadLine();
      }
     public static string PromptSecret(string input)
     {
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine(input);
         Console.ResetColor();
 
@@ -78,7 +78,7 @@ public static class MenuHelpers
     }
     public static int PromptInt(string strin)
     {
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine(strin);
         string? input = Console.ReadLine();
         Console.ResetColor();

@@ -26,18 +26,19 @@ public class PurchaseShoppingCart
         for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
-            total += item.Product.Price * item.Quantity;
+            decimal unitPrice = shoppingCartLogic.GetEffectivePrice(item.Product);
+            total += unitPrice * item.Quantity;
 
-            MenuHelpers.Confirm(
+            MenuHelpers.Line(
                 $"{i + 1}. {item.Product.Name} | " +
                 $"Category: {item.Product.Category} | " +
                 $"Brand: {item.Product.Brand} | " +
                 $"Qty: {item.Quantity} | " +
-                $"Price: {item.Product.Price} EUR"
+                $"Price: {unitPrice:0.00} EUR"
             );
         }
 
-        MenuHelpers.Announce($"Total: {total} EUR");
+        MenuHelpers.Announce($"Total: {total:0.00} EUR");
         MenuHelpers.Pause();
         return total;
     }
@@ -81,7 +82,7 @@ public class PurchaseShoppingCart
             return;
         }
         
-        decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
+        decimal total = cartItems.Sum(i => shoppingCartLogic.GetEffectivePrice(i.Product) * i.Quantity);
 
         string? paymentMethod = PaymentCheckout.Start(total);
         if (paymentMethod == null)
@@ -108,35 +109,35 @@ public class PurchaseShoppingCart
         decimal vat = subtotal * 0.21m;
 
         Console.Clear();
-        Console.WriteLine(@"  ___________________________________________");
-        Console.WriteLine(@" /                                           \");
-        Console.WriteLine(@"|   *************************************** |");
-        Console.WriteLine(@"\_  * BabylonMarkt                        * |");
-        Console.WriteLine(@"  | *************************************** |");
-        Console.WriteLine($"  |  Date: {DateTime.Now:dd-MM-yyyy}                       |");
-        Console.WriteLine($"  |  Paid with: {paymentMethod,-25}   |");
-        Console.WriteLine(@"  | --------------------------------------- |");
-        Console.WriteLine($"  |  {"ITEM",-27}{"PRICE",-11} |");
-        Console.WriteLine(@"  | ---------------------------------------  |");
+        MenuHelpers.Line(@"  ___________________________________________");
+        MenuHelpers.Line(@" /                                           \");
+        MenuHelpers.Line(@"|   *************************************** |");
+        MenuHelpers.Line(@"\_  * BabylonMarkt                        * |");
+        MenuHelpers.Line(@"  | *************************************** |");
+        MenuHelpers.Line($"  |  Date: {DateTime.Now:dd-MM-yyyy}                       |");
+        MenuHelpers.Line($"  |  Paid with: {paymentMethod,-25}   |");
+        MenuHelpers.Line(@"  | --------------------------------------- |");
+        MenuHelpers.Line($"  |  {"ITEM",-27}{"PRICE",-11} |");
+        MenuHelpers.Line(@"  | ---------------------------------------  |");
 
         foreach (ShoppingCartItem item in items)
         {
             string name = item.Product.Name.Length > 25 ? item.Product.Name.Substring(0, 25) : item.Product.Name;
             string qtyLabel = item.Quantity > 1 ? $"x{item.Quantity} " : "";
-            decimal lineTotal = item.Product.Price * item.Quantity;
-            Console.WriteLine($"  |  {name,-27}{qtyLabel + lineTotal.ToString("F2") + " EUR",-11}  |");
+            decimal lineTotal = shoppingCartLogic.GetEffectivePrice(item.Product) * item.Quantity;
+            MenuHelpers.Line($"  |  {name,-27}{qtyLabel + lineTotal.ToString("F2") + " EUR",-11}  |");
         }
 
-        Console.WriteLine(@"  | ---------------------------------------  |");
-        Console.WriteLine($"  |  {"SUBTOTAL:",-27}{subtotal.ToString("F2") + " EUR",-11}  |");
-        Console.WriteLine($"  |  {"TAX (VAT):",-27}{vat.ToString("F2") + " EUR",-11}  |");
-        Console.WriteLine(@"  | ---------------------------------------  |");
-        Console.WriteLine($"  |  {"TOTAL:",-27}{(subtotal + vat).ToString("F2") + " EUR",-11}  |");
-        Console.WriteLine(@"  | ---------------------------------------  |");
-        Console.WriteLine(@"  |         THANK YOU FOR VISITING!           |");
-        Console.WriteLine(@"  | __________________________________________|___");
-        Console.WriteLine(@"  | /                                            /");
-        Console.WriteLine(@"  \_/___________________________________________/");
+        MenuHelpers.Line(@"  | ---------------------------------------  |");
+        MenuHelpers.Line($"  |  {"SUBTOTAL:",-27}{subtotal.ToString("F2") + " EUR",-11}  |");
+        MenuHelpers.Line($"  |  {"TAX (VAT):",-27}{vat.ToString("F2") + " EUR",-11}  |");
+        MenuHelpers.Line(@"  | ---------------------------------------  |");
+        MenuHelpers.Line($"  |  {"TOTAL:",-27}{(subtotal + vat).ToString("F2") + " EUR",-11}  |");
+        MenuHelpers.Line(@"  | ---------------------------------------  |");
+        MenuHelpers.Line(@"  |         THANK YOU FOR VISITING!           |");
+        MenuHelpers.Line(@"  | __________________________________________|___");
+        MenuHelpers.Line(@"  | /                                            /");
+        MenuHelpers.Line(@"  \_/___________________________________________/");
 
         MenuHelpers.Pause();
     }

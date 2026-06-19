@@ -16,10 +16,10 @@ static class DashboardGuest
 
             MenuHelpers.Announce("Welcome " + account?.FullName);
 
-            MenuHelpers.Confirm("Enter 1 to see all products");
-            MenuHelpers.Confirm("Enter 2 to see all offers");
-            MenuHelpers.Confirm("Enter 3 to see store layout");
-            MenuHelpers.Confirm("Enter 4 to logout");
+            MenuHelpers.Line("Enter 1 to see all products");
+            MenuHelpers.Line("Enter 2 to see all offers");
+            MenuHelpers.Line("Enter 3 to see store layout");
+            MenuHelpers.Line("Enter 4 to logout");
 
             string input = MenuHelpers.Prompt("Choose an option") ?? string.Empty;
 
@@ -45,36 +45,39 @@ static class DashboardGuest
 
     private static void ShowProducts()
     {
-        Console.Clear();
-        var categoryFilter = PromptProductCategoryFilter();
-        if (categoryFilter.Cancelled)
+        while (true)
         {
-            return;
-        }
+            Console.Clear();
+            var categoryFilter = PromptProductCategoryFilter();
+            if (categoryFilter.Cancelled)
+            {
+                return;
+            }
 
-        var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
+            var list = ProductLogic.GetProductsByPopularity(categoryFilter.CategoryId);
 
-        MenuHelpers.Announce("--- ALL PRODUCTS ---");
-        MenuHelpers.Confirm($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
+            MenuHelpers.Announce("--- ALL PRODUCTS ---");
+            MenuHelpers.Line($"Active sort: Popularity (most purchased first) | Active filter: {categoryFilter.Label}");
 
-        if (list == null || list.Count == 0)
-        {
-            MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
+            if (list == null || list.Count == 0)
+            {
+                MenuHelpers.Warn($"No products available for {categoryFilter.Label}.");
+                WaitForContinue();
+                continue;
+            }
+
+            foreach (var item in list)
+            {
+                string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
+                string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
+
+                MenuHelpers.Line(
+                    $"{item.Name} | Category: {item.Category}{popularityLabel} | Price: {item.Price} EUR{ageLabel}"
+                );
+            }
+
             WaitForContinue();
-            return;
         }
-
-        foreach (var item in list)
-        {
-            string ageLabel = item.MinAge > 0 ? $" | Age: {item.MinAge}+" : "";
-            string popularityLabel = item.PurchaseCount > 0 ? " | Best Seller" : string.Empty;
-
-            MenuHelpers.Confirm(
-                $"ID: {item.ProductID} | Name: {item.Name} | Category: {item.Category}{popularityLabel} | Price: {item.Price} EUR{ageLabel}"
-            );
-        }
-
-        WaitForContinue();
     }
 
     private static (bool Cancelled, long? CategoryId, string Label) PromptProductCategoryFilter()
@@ -122,8 +125,8 @@ static class DashboardGuest
 
         foreach (var item in list)
         {
-            MenuHelpers.Confirm(
-                $"ID: {item.OfferID} | {item.Description} | Discount: {item.DiscountPercentage}% | Price: {item.DiscountPrice} EUR"
+            MenuHelpers.Line(
+                $"{item.Description} | Discount: {item.DiscountPercentage}% | Price: {item.DiscountPrice} EUR"
             );
         }
 
@@ -133,7 +136,7 @@ static class DashboardGuest
     private static void ShowLayout()
     {
         Console.Clear();
-        MenuHelpers.Confirm(@"╔══════════════╦══════════════════╦═══════════════════╗
+        MenuHelpers.Line(@"╔══════════════╦══════════════════╦═══════════════════╗
 ║              ║                  ║                   ║
 ║   BAKERY     ║     DAIRY        ║     FROZEN        ║
 ║              ║                  ║                   ║
