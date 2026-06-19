@@ -17,132 +17,125 @@ public static class ShowWishlist
             return;
         }
         WishlistLogic WLlogic = new WishlistLogic(account.Id);
-        
-        Console.Clear();
 
-        List<string> options = new List<string>
+        while (true)
         {
-            "View Wishlist",
-            "Add product",
-            "Remove product",
-            "Clear wishlist",
-            "Transfer wishlist to cart",
-            "Return to main menu"
-        };
+            Console.Clear();
 
-        MenuNavigation menu = new MenuNavigation(options, "--- Wishlist Options ---");
-        int selection = menu.Start();
+            List<string> options = new List<string>
+            {
+                "View Wishlist",
+                "Add product",
+                "Remove product",
+                "Clear wishlist",
+                "Transfer wishlist to cart",
+                "Return to main menu"
+            };
 
-        switch (selection)
-        {
-            case 0:
-                Console.Clear();
-                List<ProductModel> wishlist = WLlogic.GetWishlist();
-                if (!wishlist.Any())
-                {
-                    MenuHelpers.Warn("Your wishlist is currently empty.");
-                }
-                else
-                {
-                    MenuHelpers.Announce("--- YOUR WISHLIST ITEMS ---");
-                    foreach (var p in wishlist)
+            MenuNavigation menu = new MenuNavigation(options, "--- Wishlist Options ---");
+            int selection = menu.Start();
+
+            switch (selection)
+            {
+                case 0:
+                    Console.Clear();
+                    List<ProductModel> wishlist = WLlogic.GetWishlist();
+                    if (!wishlist.Any())
                     {
-                        MenuHelpers.Line($"Name: {p.Name} | Category: {p.Category} | Price: {p.Price} EUR");
+                        MenuHelpers.Warn("Your wishlist is currently empty.");
                     }
-                }
-                MenuHelpers.Pause();
-                Start();
-                break;
-
-            case 1:
-                Console.Clear();
-                var availableProducts = ProductLogic.GetProductsByPopularity();
-                if (availableProducts == null || !availableProducts.Any())
-                {
-                    MenuHelpers.Warn("No products available to add.");
+                    else
+                    {
+                        MenuHelpers.Announce("--- YOUR WISHLIST ITEMS ---");
+                        foreach (var p in wishlist)
+                        {
+                            MenuHelpers.Line($"Name: {p.Name} | Category: {p.Category} | Price: {p.Price} EUR");
+                        }
+                    }
                     MenuHelpers.Pause();
-                    Start();
-                    return;
-                }
+                    break;
 
-                List<string> addOptions = new List<string>();
-                foreach (var p in availableProducts)
-                {
-                    addOptions.Add($"{p.Name} ({p.Category}) - {p.Price} EUR");
-                }
-                addOptions.Add("Cancel and go back");
+                case 1:
+                    Console.Clear();
+                    var availableProducts = ProductLogic.GetProductsByPopularity();
+                    if (availableProducts == null || !availableProducts.Any())
+                    {
+                        MenuHelpers.Warn("No products available to add.");
+                        MenuHelpers.Pause();
+                        break;
+                    }
 
-                MenuNavigation addMenu = new MenuNavigation(addOptions, "--- SELECT A PRODUCT TO ADD TO WISHLIST ---");
-                int addSelection = addMenu.Start();
+                    List<string> addOptions = new List<string>();
+                    foreach (var p in availableProducts)
+                    {
+                        addOptions.Add($"{p.Name} ({p.Category}) - {p.Price} EUR");
+                    }
+                    addOptions.Add("Cancel and go back");
 
-                if (addSelection == addOptions.Count - 1)
-                {
-                    Start();
-                    return;
-                }
+                    MenuNavigation addMenu = new MenuNavigation(addOptions, "--- SELECT A PRODUCT TO ADD TO WISHLIST ---");
+                    int addSelection = addMenu.Start();
 
-                ProductModel selectedToAdd = availableProducts[addSelection];
-                bool success = WLlogic.AddProduct((int)selectedToAdd.ProductID);
+                    if (addSelection == addOptions.Count - 1)
+                    {
+                        break;
+                    }
 
-                if (success)
-                    MenuHelpers.Confirm($"{selectedToAdd.Name} added to wishlist!");
-                else
-                    MenuHelpers.Error("Product already exists in your wishlist.");
+                    ProductModel selectedToAdd = availableProducts[addSelection];
+                    bool success = WLlogic.AddProduct((int)selectedToAdd.ProductID);
 
-                MenuHelpers.Pause();
-                Start();
-                break;
+                    if (success)
+                        MenuHelpers.Confirm($"{selectedToAdd.Name} added to wishlist!");
+                    else
+                        MenuHelpers.Error("Product already exists in your wishlist.");
 
-            case 2:
-                Console.Clear();
-                List<ProductModel> currentWishlist = WLlogic.GetWishlist();
-                if (!currentWishlist.Any())
-                {
-                    MenuHelpers.Warn("No products in wishlist to remove.");
                     MenuHelpers.Pause();
-                    Start();
+                    break;
+
+                case 2:
+                    Console.Clear();
+                    List<ProductModel> currentWishlist = WLlogic.GetWishlist();
+                    if (!currentWishlist.Any())
+                    {
+                        MenuHelpers.Warn("No products in wishlist to remove.");
+                        MenuHelpers.Pause();
+                        break;
+                    }
+
+                    List<string> removeOptions = new List<string>();
+                    foreach (var p in currentWishlist)
+                    {
+                        removeOptions.Add($"{p.Name} - {p.Price} EUR");
+                    }
+                    removeOptions.Add("Cancel and go back");
+
+                    MenuNavigation removeMenu = new MenuNavigation(removeOptions, "--- SELECT A PRODUCT TO REMOVE FROM WISHLIST ---");
+                    int removeSelection = removeMenu.Start();
+
+                    if (removeSelection == removeOptions.Count - 1)
+                    {
+                        break;
+                    }
+
+                    ProductModel selectedToRemove = currentWishlist[removeSelection];
+                    MenuHelpers.Confirm(WLlogic.RemoveProduct((int)selectedToRemove.ProductID));
+                    MenuHelpers.Pause();
+                    break;
+
+                case 3:
+                    WLlogic.ClearWishlist();
+                    MenuHelpers.Confirm("Wishlist cleared.");
+                    MenuHelpers.Pause();
+                    break;
+
+                case 4:
+                    WLlogic.TransferToCart();
+                    MenuHelpers.Confirm("Items moved to cart.");
+                    MenuHelpers.Pause();
+                    break;
+
+                case 5:
                     return;
-                }
-
-                List<string> removeOptions = new List<string>();
-                foreach (var p in currentWishlist)
-                {
-                    removeOptions.Add($"{p.Name} - {p.Price} EUR");
-                }
-                removeOptions.Add("Cancel and go back");
-
-                MenuNavigation removeMenu = new MenuNavigation(removeOptions, "--- SELECT A PRODUCT TO REMOVE FROM WISHLIST ---");
-                int removeSelection = removeMenu.Start();
-
-                if (removeSelection == removeOptions.Count - 1)
-                {
-                    Start();
-                    return;
-                }
-
-                ProductModel selectedToRemove = currentWishlist[removeSelection];
-                MenuHelpers.Confirm(WLlogic.RemoveProduct((int)selectedToRemove.ProductID));
-                MenuHelpers.Pause();
-                Start();
-                break;
-
-            case 3:
-                WLlogic.ClearWishlist();
-                MenuHelpers.Confirm("Wishlist cleared.");
-                MenuHelpers.Pause();
-                Start();
-                break;
-
-            case 4:
-                WLlogic.TransferToCart();
-                MenuHelpers.Confirm("Items moved to cart.");
-                MenuHelpers.Pause();
-                Start();
-                break;
-
-            case 5:
-                Dashboard.Start();
-                break;
+            }
         }
     }
 }
