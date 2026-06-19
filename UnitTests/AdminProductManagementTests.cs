@@ -6,8 +6,9 @@ public sealed class AdminProductManagementTests
     private readonly AdminLogic _logic = new();
     private readonly ProductAccess _access = new();
 
-    [TestMethod]
-    public void AddProductCreatesProductInDatabase()
+    [DataTestMethod]
+    [DataRow("admin_test", "Test Brand", "Water, Salt", "12.50", "5", "18", "100", "1.2", "5.0", "0.5", "2.0", "0.3")]
+    public void AddProductCreatesProductInDatabase(string namePrefix, string brand, string ingredients, string price, string stock, string minAge, string calories, string fats, string carbs, string fiber, string protein, string salt)
     {
         List<CategoryModel> categories = _logic.GetCategories();
         if (categories.Count == 0)
@@ -16,18 +17,7 @@ public sealed class AdminProductManagementTests
         }
 
         CategoryModel category = categories[0];
-        string uniqueName = $"admin_test_{Guid.NewGuid():N}";
-        string brand = "Test Brand";
-        string ingredients = "Water, Salt";
-        const string price = "12.50";
-        const string stock = "5";
-        const string minAge = "18";
-        const string calories = "100";
-        const string fats = "1.2";
-        const string carbs = "5.0";
-        const string fiber = "0.5";
-        const string protein = "2.0";
-        const string salt = "0.3";
+        string uniqueName = $"{namePrefix}_{Guid.NewGuid():N}";
 
         ProductModel? createdProduct = null;
 

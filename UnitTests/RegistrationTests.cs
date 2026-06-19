@@ -6,19 +6,18 @@ public sealed class RegistrationTests
     private readonly AccountsLogic _logic = new();
     private readonly AccountsAccess _access = new();
 
-    [TestMethod]
-    public void RegisterCreatesAccountInDatabase()
+    [DataTestMethod]
+    [DataRow("reg_test", "register123", "0612345678", "01-01-1990")]
+    public void RegisterCreatesAccountInDatabase(string usernamePrefix, string password, string phoneNumber, string birthdate)
     {
-        string username = $"reg_test_{Guid.NewGuid():N}";
+        string username = $"{usernamePrefix}_{Guid.NewGuid():N}";
         string email = $"{username}@example.com";
-        const string password = "register123";
-        const string phoneNumber = "0612345678";
 
         AccountModel? storedByUsername = null;
 
         try
         {
-            _logic.Register(username, email, password, phoneNumber, "01-01-1990");
+            _logic.Register(username, email, password, phoneNumber, birthdate);
 
             storedByUsername = _access.GetByIdentifier(username);
             AccountModel? storedByEmail = _access.GetByIdentifier(email);
@@ -50,18 +49,18 @@ public sealed class RegistrationTests
         }
     }
 
-    [TestMethod]
-    public void RegisterThenLoginWithUsernameAndEmailSucceeds()
+    [DataTestMethod]
+    [DataRow("reg_login", "register123", "0612345678", "01-01-1990")]
+    public void RegisterThenLoginWithUsernameAndEmailSucceeds(string usernamePrefix, string password, string phoneNumber, string birthdate)
     {
-        string username = $"reg_login_{Guid.NewGuid():N}";
+        string username = $"{usernamePrefix}_{Guid.NewGuid():N}";
         string email = $"{username}@example.com";
-        const string password = "register123";
 
         AccountModel? stored = null;
 
         try
         {
-            _logic.Register(username, email, password, "0612345678", "01-01-1990");
+            _logic.Register(username, email, password, phoneNumber, birthdate);
 
             AccountModel? byUsername = _logic.CheckLogin(username, password);
             AccountModel? byEmail = _logic.CheckLogin(email, password);

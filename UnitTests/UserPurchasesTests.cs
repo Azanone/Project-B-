@@ -5,24 +5,14 @@ public sealed class UserPurchasesTests
 {
     private readonly ReceiptLogic _receiptLogic = new();
 
-    [TestMethod]
-    public void ShowPurchaseHistory_NoTransactions_DisplaysNoTransactionsFoundMessage()
+    [DataTestMethod]
+    [DataRow(9999, 0)]
+    public void ShowPurchaseHistory_NoTransactions_DisplaysNoTransactionsFoundMessage(int accountId, int expectedCount)
     {
-        // Arrange
-        AccountModel account = new AccountModel
-        {
-            Id = 9999,
-            FullName = "Test User",
-            Password = "password",
-            Role = "User"
-        };
+        List<ReceiptModel> purchases = _receiptLogic.GetPurchasesByAccountID(accountId);
 
-        // Act
-        List<ReceiptModel> purchases = _receiptLogic.GetPurchasesByAccountID((int)account.Id);
-
-        // Assert
         Assert.IsNotNull(purchases);
-        Assert.AreEqual(0, purchases.Count);
+        Assert.AreEqual(expectedCount, purchases.Count);
     }
 
     [DataTestMethod]
