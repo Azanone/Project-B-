@@ -332,7 +332,7 @@ static class Dashboard
             }
             else if (selection == 1)
             {
-                ShoppingCart.GetAllItems().Clear();
+                ShoppingCart.ClearCurrentCart();
                 MenuHelpers.Confirm("Shopping cart cleared");
                 WaitForContinue();
                 break;
