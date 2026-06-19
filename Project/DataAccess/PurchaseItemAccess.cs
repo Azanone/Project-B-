@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 using Dapper;
 public class PurchaseItemAccess
 {
-    private SqliteConnection _connection = new SqliteConnection($"Data Source=DataSources/project.db");
+    private SqliteConnection _connection = DBconnection._c;
     public List<PurchaseItemModel> GetDateRange(DateTime startDate, DateTime endDate)
     {
         string sql = @"SELECT PURCHASE_ITEM.PurchaseItemID, PURCHASE_ITEM.PurchaseID, PURCHASE_ITEM.ProductID, PURCHASE_ITEM.Quantity, PURCHASE_ITEM.PriceAtPurchase, PRODUCT.Name AS ProductName, PURCHASE.PurchaseDate, PRODUCT.Price AS ProductPrice, (PURCHASE_ITEM.Quantity * PURCHASE_ITEM.PriceAtPurchase) AS TotalRevenue 
